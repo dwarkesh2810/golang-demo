@@ -52,3 +52,7 @@ type ResetUserPasswordOtp struct {
 	Otp      string `json:"otp"`
 	NewPass  string `json:"new_password"`
 }
+
+type SearchRequest struct {
+	Search string `json:"search"`
+}

@@ -274,7 +274,7 @@ func (c *UserController) DeleteUser() {
 // SendOtp ...
 // @Title forgot password
 // @Desciption forgot password
-// @Param body body models.SendOtpData true "forgot password this is send otp on mobile and email"
+// @Param body body dto.SendOtpData true "forgot password this is send otp on mobile and email"
 // @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
@@ -340,4 +340,33 @@ func (c *UserController) VerifyOtpResetpassword() {
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, uppass, "Password Reset successFully", "")
+}
+
+// SearchUser ...
+// @Title Search User
+// @Desciption SearchUser
+// @Param body body dto.SearchRequest true "otp verification for email"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} string
+// @Failure 403
+// @router /secure/search [post]
+func (c *UserController) SearchUser() {
+	var bodyData dto.SearchRequest
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	user, err := models.SearchUser(bodyData.Search)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	var output []dto.UserDetailsResponse
+	for _, user := range user {
+		userDetails := dto.UserDetailsResponse{Id: uint(user.UserId), FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId, CreatedDate: helpers.GetFormatedDate(user.CreatedDate, "dd-mm-yyyy")}
+		output = append(output, userDetails)
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, "data found Successfully", "")
 }
