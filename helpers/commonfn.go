@@ -127,8 +127,32 @@ IF PASS TIME THAN IT RETURNS FORMAT:-  HH:MM:SS AM/PM
 */
 
 func FormatDateTime(inputDateTime string, formatType ...string) (map[string]string, error) {
-	inputLayout := "2006-01-02 15:04:05.999999-07:00"
-	parsedTime, _ := time.Parse(inputLayout, inputDateTime)
+	inputLayouts := []string{
+		"2006-01-02 15:04:05.999999999 -0700 MST",
+		"2006-01-02 15:04:05.999999-07",
+		"2006-01-02 15:04:05 -07:00",
+		"2006-01-02 15:04:05.999999999 -0700 MST",
+		"2006-01-02 15:04:05.999999999 -0700 MST",
+		"2006-01-02 15:04:05.999999-07",
+		"2006-01-02 15:04:05 -07:00",
+		"2006-01-02 15:04:05.999999999 -0700 MST m=+0",
+		"2006-01-02 15:04:05.999999999 -0700 MST m=+0.000000001",
+		"2006-01-02 15:04:05.999999999 -0700 MST m=+0.000000001",
+	}
+
+	var parsedTime time.Time
+	var err error
+
+	for _, layout := range inputLayouts {
+		parsedTime, err = time.Parse(layout, inputDateTime)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
 
 	dateLayoutDefault := "02-01-2006"
 	dateLayoutISO := "2006-01-02"
