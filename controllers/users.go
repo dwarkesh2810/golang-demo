@@ -70,12 +70,12 @@ func (c *UserController) Login() {
 // @Title Insert New User
 // @Desciption new users
 // @Param lang query string false "use en-US or hi-IN"
-// @Param body body models.NewUserRequest true "Insert New User"
+// @Param body body dto.NewUserRequest true "Insert New User"
 // @Success 201 {object} models.Users
 // @Failure 403
 // @router /register [post]
 func (c *UserController) RegisterNewUser() {
-	_ = c.Ctx.Input.GetData("Lang").(string)
+	_ = c.Ctx.Input.GetData("lang")
 	var bodyData dto.NewUserRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
@@ -100,8 +100,7 @@ func (c *UserController) RegisterNewUser() {
 // @Title Get All
 // @Description get Users
 // @Param lang query string false "use en-US or hi-IN"
-// @Param page query int false "For pagination"
-// @Param limit query int false "per page user"
+// @Param body body dto.HomeSeetingSearch false "Insert New User"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.Users
 // @Failure 403
@@ -143,14 +142,13 @@ func (c *UserController) GetAllUsers() {
 // VerifyEmailOTP ...
 // @Title verify otp for email
 // @Desciption otp verification for eamil
-// @Param body body models.VerifyEmailOTPRequest true "otp verification for email"
+// @Param body body dto.VerifyEmailOTPRequest true "otp verification for email"
 // @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
 // @router /secure/verify_email_otp [post]
 func (c *UserController) VerifyEmailOTP() {
-	// lang := c.Ctx.Input.GetData("Lang").(string)
 	var bodyData dto.VerifyEmailOTPRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
@@ -184,7 +182,6 @@ func (c *UserController) VerifyEmailOTP() {
 // @Failure 403
 // @router /secure/update [put]
 func (c *UserController) UpdateUser() {
-	// lang := c.Ctx.Input.GetData("Lang").(string)
 	var bodyData dto.UpdateUserRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
@@ -214,14 +211,13 @@ func (c *UserController) UpdateUser() {
 // ResetPassword ...
 // @Title Reset password
 // @Desciption Reset password
-// @Param body body models.ResetUserPassword true "reset password"
+// @Param body body dto.ResetUserPassword true "reset password"
 // @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} models.Users
 // @Failure 403
 // @router /secure/reset_pass [post]
 func (c *UserController) ResetPassword() {
-	// lang := c.Ctx.Input.GetData("Lang").(string)
 	claims := helpers.GetTokenClaims(c.Ctx)
 	id := claims["User_id"].(float64)
 	output, err := models.GetUserDetails(id)
@@ -244,7 +240,7 @@ func (c *UserController) ResetPassword() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "New Password and confirm password not match")
 		return
 	}
-	uppass, err := models.ResetPassword(bodyData.NewPass, id)
+	uppass, err := models.ResetPassword(bodyData.NewPass, int(id))
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
 		return
@@ -261,7 +257,6 @@ func (c *UserController) ResetPassword() {
 // @Failure 403
 // @router /secure/delete/:id([0-9]+) [delete]
 func (c *UserController) DeleteUser() {
-	// lang := c.Ctx.Input.GetData("Lang").(string)
 	idString := c.Ctx.Input.Params()
 	id, err := strconv.Atoi(idString["1"])
 	if err != nil {
@@ -274,4 +269,75 @@ func (c *UserController) DeleteUser() {
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, "User Remove successFully", "")
+}
+
+// SendOtp ...
+// @Title forgot password
+// @Desciption forgot password
+// @Param body body models.SendOtpData true "forgot password this is send otp on mobile and email"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} string
+// @Failure 403
+// @router /secure/forgot_pass [post]
+func (c *UserController) ForgotPassword() {
+	var bodyData dto.SendOtpData
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	output, err := models.GetUserByEmail(bodyData.Username)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	res, err := models.VerifyEmail(output.Email, output.FirstName)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, "Otp send on register email", "")
+}
+
+// VerifyOtpResetpassword ...
+// @Title verify otp
+// @Desciption otp verification for forgot password
+// @Param body body dto.ResetUserPasswordOtp true "otp verification for forgot password"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} string
+// @Failure 403
+// @router /secure/reset_pass_otp [post]
+func (c *UserController) VerifyOtpResetpassword() {
+	var bodyData dto.ResetUserPasswordOtp
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	output, err := models.GetUserByEmail(bodyData.Username)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	if data.OtpCode != bodyData.Otp {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Please Enter valid OTP")
+	}
+	err = models.UpdateIsVerified(data.UserId)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	uppass, err := models.ResetPassword(bodyData.NewPass, output.UserId)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, uppass, "Password Reset successFully", "")
 }

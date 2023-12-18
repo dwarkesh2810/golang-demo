@@ -42,3 +42,13 @@ type VerifyEmailOTPRequest struct {
 	Username string `json:"username"`
 	Otp      string `json:"otp"`
 }
+
+type SendOtpData struct {
+	Username string `json:"username"`
+}
+
+type ResetUserPasswordOtp struct {
+	Username string `json:"username"`
+	Otp      string `json:"otp"`
+	NewPass  string `json:"new_password"`
+}

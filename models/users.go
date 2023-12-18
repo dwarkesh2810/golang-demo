@@ -109,13 +109,13 @@ func UpdateUser(Data dto.UpdateUserRequest) (interface{}, error) {
 	return "DATA_UPDATED", nil
 }
 
-func ResetPassword(Password string, id float64) (interface{}, error) {
+func ResetPassword(Password string, id int) (interface{}, error) {
 	pass, err := helpers.HashData(Password)
 	if err != nil {
 		return nil, err
 	}
 	o := orm.NewOrm()
-	var user = Users{UserId: int(id), Password: pass}
+	var user = Users{UserId: id, Password: pass}
 	num, err := o.Update(&user, "password")
 	if err != nil {
 		return num, errors.New("DATABASE_ERROR")
