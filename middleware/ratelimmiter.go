@@ -1,7 +1,17 @@
 package middleware
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
 	"sync"
+	"time"
+
+	"github.com/beego/beego/v2/server/web/context"
+	"github.com/dwarkesh2810/golang-demo/conf"
+	"github.com/dwarkesh2810/golang-demo/helpers"
 )
 
 var (
@@ -16,59 +26,67 @@ type RateLimmiterResponse struct {
 	Message string `json:"message"`
 }
 
-// func RateLimiter(ctx *context.Context) {
-// 	// Get IP address of the client
-// 	ip := ctx.Input.IP()
+func RateLimiter(ctx *context.Context) {
+	// Get IP address of the client
+	ip := ctx.Input.IP()
+	limit, err := strconv.Atoi(conf.ConfigMaps["RATELIMITER"])
+	if err != nil {
+		log.Print(err)
+	}
+	blockTime, err := strconv.Atoi(conf.ConfigMaps["BLOCKTIME"])
 
-// 	// Limit requests from an IP address
-// 	mutex.Lock()
-// 	defer mutex.Unlock()
+	if err != nil {
+		log.Print(err)
+	}
 
-// 	if timeOut[ip] == 0 {
-// 		timeOut[ip] = time.Now().Add(60 * time.Second).Unix()
-// 	}
+	// Limit requests from an IP address
+	mutex.Lock()
+	defer mutex.Unlock()
 
-// 	if timeOut[ip] < time.Now().Unix() {
-// 		timeOut[ip] = 0
-// 		accessCount[ip] = 0
-// 		blocked[ip] = false
-// 		unBlocked[ip] = 0
-// 	}
+	if timeOut[ip] == 0 {
+		timeOut[ip] = time.Now().Add(60 * time.Second).Unix()
+	}
 
-// 	accessCount[ip]++
-// 	if accessCount[ip] > conf.EnvConfig.RateLimiter {
-// 		blocked[ip] = true
-// 		if blocked[ip] && unBlocked[ip] > 0 {
-// 			if unBlocked[ip] < time.Now().Unix() {
-// 				accessCount[ip] = 0
-// 				blocked[ip] = false
-// 				unBlocked[ip] = 0
-// 				return
-// 			}
-// 		}
+	if timeOut[ip] < time.Now().Unix() {
+		timeOut[ip] = 0
+		accessCount[ip] = 0
+		blocked[ip] = false
+		unBlocked[ip] = 0
+	}
 
-// 		if blocked[ip] && unBlocked[ip] > 0 {
-// 			unBlocked[ip] = unBlocked[ip] + conf.EnvConfig.BlockTime
-// 			timeOut[ip] = unBlocked[ip]
-// 		} else {
-// 			log.Print(conf.EnvConfig.BlockTime)
-// 			unBlocked[ip] = int64(time.Now().Add(time.Duration(conf.EnvConfig.BlockTime) * time.Second).Unix())
-// 			timeOut[ip] = unBlocked[ip]
-// 		}
+	accessCount[ip]++
+	if accessCount[ip] > limit {
+		blocked[ip] = true
+		if blocked[ip] && unBlocked[ip] > 0 {
+			if unBlocked[ip] < time.Now().Unix() {
+				accessCount[ip] = 0
+				blocked[ip] = false
+				unBlocked[ip] = 0
+				return
+			}
+		}
 
-// 		remainingSeconds := unBlocked[ip] - time.Now().Unix()
+		if blocked[ip] && unBlocked[ip] > 0 {
+			unBlocked[ip] = unBlocked[ip] + int64(blockTime)
+			timeOut[ip] = unBlocked[ip]
+		} else {
+			unBlocked[ip] = int64(time.Now().Add(time.Duration(int64(blockTime)) * time.Second).Unix())
+			timeOut[ip] = unBlocked[ip]
+		}
 
-// 		day, hr, min, sec := helpers.SecondsToDayHourMinAndSeconds(int(remainingSeconds))
+		remainingSeconds := unBlocked[ip] - time.Now().Unix()
 
-// 		message := fmt.Sprintf("Too many request, Please try again after %d days %d hours %d min %d.", day, hr, min, sec)
+		day, hr, min, sec := helpers.SecondsToDayHourMinAndSeconds(int(remainingSeconds))
 
-// 		resp := &RateLimmiterResponse{
-// 			Message: message,
-// 		}
-// 		data, _ := json.Marshal(resp)
-// 		ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
-// 		ctx.ResponseWriter.WriteHeader(http.StatusTooManyRequests)
-// 		ctx.ResponseWriter.Write(data)
-// 		return
-// 	}
-// }
+		message := fmt.Sprintf("Too many request, Please try again after %d days %d hours %d min %d.", day, hr, min, sec)
+
+		resp := &RateLimmiterResponse{
+			Message: message,
+		}
+		data, _ := json.Marshal(resp)
+		ctx.Output.Header("Content-Type", "application/json; charset=utf-8")
+		ctx.ResponseWriter.WriteHeader(http.StatusTooManyRequests)
+		ctx.ResponseWriter.Write(data)
+		return
+	}
+}

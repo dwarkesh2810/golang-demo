@@ -826,3 +826,26 @@ func TransformToKeyValuePairs(data interface{}) ([]map[string]interface{}, error
 
 	return result, nil
 }
+
+func LanguageTranslate(c beego.Controller, key string) string {
+	lang := c.Ctx.Input.GetData("lang").(string)
+	language := strings.ToLower(lang)
+	switch language {
+	case "en-us":
+		lang = "en-US"
+	case "hi-in":
+		lang = "hi-IN"
+	case "zh-cn":
+		lang = "zh-CN"
+	}
+	return i18n.Tr(lang, key)
+}
+
+func CheckIfExists(elemet string, data []string) bool {
+	for i := 0; i < len(data); i++ {
+		if strings.EqualFold(elemet, data[i]) {
+			return true
+		}
+	}
+	return false
+}
