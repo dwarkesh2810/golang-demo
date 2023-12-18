@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+	beego.InsertFilter("*", beego.BeforeRouter, middleware.LanguageMiddlware)
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/user",
 			beego.NSInclude(&controllers.UserController{}),
@@ -21,8 +22,20 @@ func init() {
 			beego.NSRouter("/login", &controllers.UserController{}, "post:Login"),
 			beego.NSNamespace("/secure",
 				beego.NSBefore(middleware.JWTMiddleware),
-				beego.NSRouter("/Users", &controllers.UserController{}, "post:GetAllUser"),
+				// beego.NSRouter("/Users", &controllers.UserController{}, "post:GetAllUser"),
 			),
+		),
+		beego.NSNamespace("/homepage",
+			beego.NSBefore(middleware.JWTMiddleware),
+			beego.NSInclude(&controllers.HomeSettingController{}),
+			beego.NSRouter("/register_settings", &controllers.HomeSettingController{}, "post:RegisterSettings"),
+			beego.NSRouter("/update_settings", &controllers.HomeSettingController{}, "post:UpdateSettings"),
+			beego.NSRouter("/fetch_settings", &controllers.HomeSettingController{}, "post:FetchSettings"),
+			beego.NSRouter("/filter_hpst", &controllers.HomeSettingController{}, "post:FiltersFetchSettings"),
+			beego.NSRouter("/export", &controllers.HomeSettingController{}, "post:ExportFile"),
+			beego.NSRouter("/delete_settings", &controllers.HomeSettingController{}, "post:DeleteSetting"),
+			beego.NSRouter("/import", &controllers.HomeSettingController{}, "post:ImportFile"),
+			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
 		),
 	)
 	beego.AddNamespace(ns)

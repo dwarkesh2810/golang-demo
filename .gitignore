@@ -11,9 +11,7 @@ app.env
 car_demo
 logs/
 logs
-output.csv
-output.pdf
-output.xlsx
+
 
 # docker-compose.yaml
 # Dockerfile

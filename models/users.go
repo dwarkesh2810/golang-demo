@@ -75,7 +75,7 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 	return "OTP_SENT", nil
 }
 func VerifyEmail(email string, name string) (string, error) {
-	OTP := helpers.GenerateOtp()
+	OTP := helpers.GenerateUniqueCodeString(4)
 	subject := "Verify your email"
 	body := `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
 	<div style="margin:50px auto;width:70%;padding:20px 0">

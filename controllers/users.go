@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -28,7 +29,7 @@ var jwtKey = []byte(key)
 // @Failure 403
 // @router /login [post]
 func (c *UserController) Login() {
-	_ = c.Ctx.Input.GetData("Lang").(string)
+	_ = c.Ctx.Input.GetData("lang")
 	var user dto.UserLoginRequest
 	json.Unmarshal(c.Ctx.Input.RequestBody, &user)
 	HashPassWord, err := models.GetUserByEmail(user.Username)
@@ -92,4 +93,38 @@ func (c *UserController) RegisterNewUser() {
 	}
 	go models.VerifyEmail(output.Email, output.FirstName)
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, "user Register Successfullty", "")
+}
+
+func (u *HomeSettingController) GetAllUsers() {
+	var search dto.HomeSeetingSearch
+	if err := u.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+
+	tableName := "users"
+	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
+	FROM user as u
+	ORDER BY u.user_id
+	LIMIT ? OFFSET ?
+	
+`
+	result, pagination_data, _ := models.FetchSettingPaginations(search.OpenPage, search.PageSize, tableName, query)
+	if pagination_data["pageOpen_error"] == 1 {
+		current := pagination_data["current_page"]
+		last := pagination_data["last_page"]
+		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		return
+	}
+
+	if result != nil {
+		section_message := "found"
+		section := "home_page_setting_success_message_section"
+		message := helpers.TranslateMessage(u.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		return
+	}
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
 }

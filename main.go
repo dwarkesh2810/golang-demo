@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+
+	"github.com/dwarkesh2810/golang-demo/controllers"
 	"github.com/dwarkesh2810/golang-demo/models"
 	_ "github.com/dwarkesh2810/golang-demo/routers"
 
@@ -10,10 +13,15 @@ import (
 )
 
 func init() {
+
 	orm.RegisterDriver("postgres", orm.DRPostgres)
-	orm.RegisterDataBase("default", "postgres", "user=root password=1234 dbname=golang_demo sslmode=disable")
+	orm.RegisterDataBase("default", "postgres", "user=root password=1234 dbname=golang_demo host=192.168.1.176 sslmode=disable")
 	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.LanguageLable), new(models.LanguageLableLang))
 	// orm.RunSyncdb("default", false, true)
+	languageLablesFunc := controllers.LangLableController{}
+	languageLablesFunc.FetchAllAndWriteInINIFiles()
+	log.Print("heloo=============================================")
+
 }
 
 func main() {
