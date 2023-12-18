@@ -36,7 +36,6 @@ func GetConfigMap() error {
 	if err != nil {
 		return err
 	}
-
 	ConfigMaps = a
 	return nil
 }

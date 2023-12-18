@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -65,7 +66,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 func UpadteOtpForEmail(id int, otp string) (string, error) {
 	o := orm.NewOrm()
 	var user = Users{UserId: id, OtpCode: otp, Isverified: 0}
-	num, err := o.Update(&user, "otp", "verified")
+	num, err := o.Update(&user, "otp_code", "isverified")
 	if err != nil {
 		return "num", errors.New("DATABASE_ERROR")
 	}
@@ -150,7 +151,7 @@ func GetEmailOTP(username string, otp string) (Users, error) {
 func UpdateIsVerified(id int) error {
 	o := orm.NewOrm()
 	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
-	num, err := o.Update(&user, "verified", "updated_date")
+	num, err := o.Update(&user, "isverified", "updated_date")
 	if err != nil {
 		return errors.New("DATABASE_ERROR")
 	}
@@ -196,6 +197,7 @@ func VerifyEmail(email string, name string) (string, error) {
 	o := orm.NewOrm()
 	sendemail := EmailLogs{}
 	_, err := helpers.SendMailOTp(email, name, subject, body)
+	fmt.Println(err.Error())
 	if err != nil {
 		sendemail = EmailLogs{
 			To:      email,
@@ -208,6 +210,7 @@ func VerifyEmail(email string, name string) (string, error) {
 		if err != nil {
 			return "", errors.New("DATABASE_ERROR")
 		}
+		return "failed to send otp",nil
 	}
 	sendemail = EmailLogs{
 		To:      email,
