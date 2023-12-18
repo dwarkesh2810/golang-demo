@@ -9,7 +9,6 @@ require (
 	github.com/beego/i18n v0.0.0-20161101132742-e9308947f407
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ini/ini v1.67.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/lib/pq v1.10.5
 	github.com/smartystreets/goconvey v1.6.4

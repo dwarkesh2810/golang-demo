@@ -52,5 +52,4 @@ func (u *LangLableController) FetchAllAndWriteInINIFiles() {
 	}
 	res, _ := helpers.ConvertToMapSlice(ormParams)
 	helpers.CreateINIFiles(res)
-	log.Print("+++++++++++++++++++++++++++++++++++++++")
 }
