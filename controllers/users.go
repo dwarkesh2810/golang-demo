@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -95,17 +96,27 @@ func (c *UserController) RegisterNewUser() {
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, "user Register Successfullty", "")
 }
 
-func (u *HomeSettingController) GetAllUsers() {
+// GetAll ...
+// @Title Get All
+// @Description get Users
+// @Param lang query string false "use en-US or hi-IN"
+// @Param page query int false "For pagination"
+// @Param limit query int false "per page user"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 200 {object} models.Users
+// @Failure 403
+// @router /secure/users/ [get]
+func (c *UserController) GetAllUsers() {
 	var search dto.HomeSeetingSearch
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
 	tableName := "users"
 	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
-	FROM user as u
+	FROM users as u
 	ORDER BY u.user_id
 	LIMIT ? OFFSET ?
 	
@@ -115,16 +126,152 @@ func (u *HomeSettingController) GetAllUsers() {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		return
 	}
 
 	if result != nil {
-		section_message := "found"
-		section := "home_page_setting_success_message_section"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		section_message := ""
+		section := ""
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+}
+
+// VerifyEmailOTP ...
+// @Title verify otp for email
+// @Desciption otp verification for eamil
+// @Param body body models.VerifyEmailOTPRequest true "otp verification for email"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} string
+// @Failure 403
+// @router /secure/verify_email_otp [post]
+func (c *UserController) VerifyEmailOTP() {
+	// lang := c.Ctx.Input.GetData("Lang").(string)
+	var bodyData dto.VerifyEmailOTPRequest
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	if data.OtpCode != bodyData.Otp {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Please Enter valid OTP")
+		return
+	}
+	err = models.UpdateIsVerified(data.UserId)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "Verified", "user verified Successfullty", "")
+}
+
+// UpdateUser .
+// @Title update User
+// @Desciption update users
+// @Param body body models.UpdateUserRequest true "update New User"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} models.Users
+// @Failure 403
+// @router /secure/update [put]
+func (c *UserController) UpdateUser() {
+	// lang := c.Ctx.Input.GetData("Lang").(string)
+	var bodyData dto.UpdateUserRequest
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	data, err := models.GetUserDetails(bodyData.Id)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	if bodyData.Email != data.Email {
+		res, _ := models.GetUserByEmail(bodyData.Email)
+		if res.Email == bodyData.Email {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Email Already exist")
+			return
+		}
+	}
+	output, err := models.UpdateUser(bodyData)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, "Updated successfully", "")
+}
+
+// ResetPassword ...
+// @Title Reset password
+// @Desciption Reset password
+// @Param body body models.ResetUserPassword true "reset password"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 201 {object} models.Users
+// @Failure 403
+// @router /secure/reset_pass [post]
+func (c *UserController) ResetPassword() {
+	// lang := c.Ctx.Input.GetData("Lang").(string)
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
+	output, err := models.GetUserDetails(id)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	var bodyData dto.ResetUserPassword
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	err = helpers.VerifyHashedData(output.Password, bodyData.CurrentPass)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	if bodyData.ConfirmPass != bodyData.NewPass {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "New Password and confirm password not match")
+		return
+	}
+	uppass, err := models.ResetPassword(bodyData.NewPass, id)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, uppass, "Password Reset successFully", "")
+}
+
+// @Title delete user
+// @Description delete user
+// @Param id path int true "user id to delete recode"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 200 {string} string
+// @Failure 403
+// @router /secure/delete/:id([0-9]+) [delete]
+func (c *UserController) DeleteUser() {
+	// lang := c.Ctx.Input.GetData("Lang").(string)
+	idString := c.Ctx.Input.Params()
+	id, err := strconv.Atoi(idString["1"])
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	data, err := models.DeleteUser(id)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, "User Remove successFully", "")
 }

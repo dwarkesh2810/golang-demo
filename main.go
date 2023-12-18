@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/dwarkesh2810/golang-demo/controllers"
 	"github.com/dwarkesh2810/golang-demo/models"
 	_ "github.com/dwarkesh2810/golang-demo/routers"
@@ -20,7 +18,6 @@ func init() {
 	// orm.RunSyncdb("default", false, true)
 	languageLablesFunc := controllers.LangLableController{}
 	languageLablesFunc.FetchAllAndWriteInINIFiles()
-	log.Print("heloo=============================================")
 
 }
 

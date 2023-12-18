@@ -74,6 +74,92 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 	}
 	return "OTP_SENT", nil
 }
+func GetUserDetails(id interface{}) (Users, error) {
+	o := orm.NewOrm()
+	// orm.Debug = true
+	var user Users
+	num, err := o.QueryTable(new(Users)).Filter("id", id).All(&user, "first_name", "last_name", "email", "phone_number")
+	if err != nil {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	return user, nil
+}
+func UpdateUser(Data dto.UpdateUserRequest) (interface{}, error) {
+	var user = Users{
+		UserId:      Data.Id,
+		FirstName:   Data.FirstName,
+		LastName:    Data.LastName,
+		CountryId:   Data.Country,
+		Email:       Data.Email,
+		Role:        Data.Role,
+		UpdatedDate: time.Now(),
+		PhoneNumber: Data.PhoneNumber,
+	}
+	o := orm.NewOrm()
+	num, err := o.Update(&user, "id", "first_name", "last_name", "country", "email", "role", "updated_date", "phone_number")
+	if err != nil {
+		return nil, errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	return "DATA_UPDATED", nil
+}
+
+func ResetPassword(Password string, id float64) (interface{}, error) {
+	pass, err := helpers.HashData(Password)
+	if err != nil {
+		return nil, err
+	}
+	o := orm.NewOrm()
+	var user = Users{UserId: int(id), Password: pass}
+	num, err := o.Update(&user, "password")
+	if err != nil {
+		return num, errors.New("DATABASE_ERROR")
+	}
+	return "PASSWORD_RESET", nil
+}
+func DeleteUser(id int) (string, error) {
+	o := orm.NewOrm()
+	var user = Users{UserId: id}
+	num, err := o.Delete(&user)
+	if err != nil {
+		return "", errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return "", errors.New("DATABASE_ERROR")
+	}
+	return "Data_Delete", nil
+}
+func GetEmailOTP(username string, otp string) (Users, error) {
+	o := orm.NewOrm()
+	var user Users
+	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("otp", otp).All(&user)
+	if err != nil {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	return user, nil
+}
+
+func UpdateIsVerified(id int) error {
+	o := orm.NewOrm()
+	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
+	num, err := o.Update(&user, "verified", "updated_date")
+	if err != nil {
+		return errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return errors.New("DATABASE_ERROR")
+	}
+	return nil
+}
+
 func VerifyEmail(email string, name string) (string, error) {
 	OTP := helpers.GenerateUniqueCodeString(4)
 	subject := "Verify your email"
