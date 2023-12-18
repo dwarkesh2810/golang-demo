@@ -64,7 +64,7 @@ func (c *UserController) Login() {
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, "Login successfully", "")
 }
 
-// PostRegisterNewUser ...
+// RegisterNewUser ...
 // @Title Insert New User
 // @Desciption new users
 // @Param lang query string false "use en-US or hi-IN"
@@ -72,7 +72,7 @@ func (c *UserController) Login() {
 // @Success 201 {object} models.Users
 // @Failure 403
 // @router /register [post]
-func (c *UserController) PostRegisterNewUser() {
+func (c *UserController) RegisterNewUser() {
 	_ = c.Ctx.Input.GetData("Lang").(string)
 	var bodyData dto.NewUserRequest
 	if err := c.ParseForm(&bodyData); err != nil {
