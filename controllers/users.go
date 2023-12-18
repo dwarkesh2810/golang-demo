@@ -63,3 +63,33 @@ func (c *UserController) Login() {
 	data := map[string]interface{}{"User_Data": token.Claims, "Tokan": tokenString}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, "Login successfully", "")
 }
+
+// PostRegisterNewUser ...
+// @Title Insert New User
+// @Desciption new users
+// @Param lang query string false "use en-US or hi-IN"
+// @Param body body models.NewUserRequest true "Insert New User"
+// @Success 201 {object} models.Users
+// @Failure 403
+// @router /register [post]
+func (c *UserController) PostRegisterNewUser() {
+	_ = c.Ctx.Input.GetData("Lang").(string)
+	var bodyData dto.NewUserRequest
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+	data, _ := models.GetUserByEmail(bodyData.Email)
+	if data.Email == bodyData.Email {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "email already exist")
+		return
+	}
+	output, err := models.InsertNewUser(bodyData)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		return
+	}
+	go models.VerifyEmail(output.Email, output.FirstName)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, "user Register Successfullty", "")
+}
