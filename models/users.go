@@ -160,6 +160,19 @@ func UpdateIsVerified(id int) error {
 	return nil
 }
 
+func SearchUser(search string) ([]Users, error) {
+	o := orm.NewOrm()
+	var user []Users
+	// orm.Debug = true
+	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&user)
+	if err != nil {
+		return nil, errors.New("DATABASE_ERROR")
+	}
+	if num == 0 {
+		return nil, errors.New("DATABASE_ERROR")
+	}
+	return user, nil
+}
 func VerifyEmail(email string, name string) (string, error) {
 	OTP := helpers.GenerateUniqueCodeString(4)
 	subject := "Verify your email"

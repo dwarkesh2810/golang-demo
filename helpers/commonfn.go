@@ -128,10 +128,7 @@ IF PASS TIME THAN IT RETURNS FORMAT:-  HH:MM:SS AM/PM
 
 func FormatDateTime(inputDateTime string, formatType ...string) (map[string]string, error) {
 	inputLayout := "2006-01-02 15:04:05.999999-07:00"
-	parsedTime, err := time.Parse(inputLayout, inputDateTime)
-	if err != nil {
-		return nil, err
-	}
+	parsedTime, _ := time.Parse(inputLayout, inputDateTime)
 
 	dateLayoutDefault := "02-01-2006"
 	dateLayoutISO := "2006-01-02"
@@ -175,6 +172,35 @@ func FormatDateTime(inputDateTime string, formatType ...string) (map[string]stri
 	}
 
 	return result, nil
+}
+
+func GetFormatedDate(date time.Time, formate string) string {
+	var formatedDate string
+	switch formate {
+	case "dd-mm-yy":
+		inputTime := date
+		day, month, year := inputTime.Day(), inputTime.Month(), inputTime.Year()%100
+		formatedDate = fmt.Sprintf("%02d-%02d-%d", day, month, year)
+	case "dd-mm-yyyy":
+		inputTime := date
+		day, month, year := inputTime.Day(), inputTime.Month(), inputTime.Year()
+		formatedDate = fmt.Sprintf("%02d-%02d-%d", day, month, year)
+	case "yyyy-mm-dd":
+		inputTime := date
+		day, month, year := inputTime.Day(), inputTime.Month(), inputTime.Year()
+		formatedDate = fmt.Sprintf("%02d-%02d-%d", year, month, day)
+	case "mm-dd-yyyy":
+		inputTime := date
+		day, month, year := inputTime.Day(), inputTime.Month(), inputTime.Year()
+		formatedDate = fmt.Sprintf("%02d-%02d-%d", year, month, day)
+	case "dd-mm":
+		inputTime := date
+		day, month := inputTime.Day(), inputTime.Month()
+		formatedDate = fmt.Sprintf("%02d-%02d", day, month)
+	default:
+		formatedDate = "not formated"
+	}
+	return formatedDate
 }
 
 /*END FORMATE DATE TIME FUNCTION*/
