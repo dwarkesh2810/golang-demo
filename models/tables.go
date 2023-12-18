@@ -64,3 +64,12 @@ type LanguageLable struct {
 	LangId        int
 	Section       string
 }
+
+type EmailLogs struct {
+	Id      uint   `orm:"pk;auto;column(LogId)"`
+	To      string `orm:"column(emailTo)"`
+	Name    string `orm:"column(name)"`
+	Subject string
+	Body    string
+	Status  string
+}
