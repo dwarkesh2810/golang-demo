@@ -119,7 +119,7 @@ func (c *UserController) RegisterNewUser() {
 // @Title Get All
 // @Description get Users
 // @Param lang query string false "use en-US or hi-IN"
-// @Param body body dto.HomeSeetingSearch false "Insert New User"
+// @Param body body dto.PaginationReq false "Insert New User"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.Users
 // @Failure 403
