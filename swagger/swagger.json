@@ -28,7 +28,7 @@
                         "description": "get perticuler car",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.GetcarRequest"
+                            "$ref": "#/definitions/dto.GetcarRequest"
                         }
                     },
                     {
@@ -1139,10 +1139,6 @@
                     "type": "string"
                 }
             }
-        },
-        "models.GetcarRequest": {
-            "title": "GetcarRequest",
-            "type": "object"
         },
         "models.HomePagesSettingTable": {
             "title": "HomePagesSettingTable",

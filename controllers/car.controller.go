@@ -253,7 +253,7 @@ func (c *CarController) GetAllCars() {
 // GetSingleCar ...
 // @Title get car
 // @Desciption Get all car
-// @Param body body models.GetcarRequest true "get perticuler car"
+// @Param body body dto.GetcarRequest true "get perticuler car"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
