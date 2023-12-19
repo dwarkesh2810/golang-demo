@@ -7,5 +7,6 @@ import (
 
 func LanguageMiddlware(c *context.Context) {
 
-	helpers.GetLanguageFromMultipleSources(c)
+	lang := helpers.GetLanguageFromMultipleSources(c)
+	helpers.SetLanguage(c, lang)
 }

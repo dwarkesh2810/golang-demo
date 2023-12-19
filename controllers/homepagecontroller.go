@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"strings"
 
@@ -40,7 +39,7 @@ func (u *HomeSettingController) RegisterSettings() {
 	var filePath string
 
 	if err := u.ParseForm(&settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -69,14 +68,13 @@ func (u *HomeSettingController) RegisterSettings() {
 
 		filePath, err = helpers.UploadFile(file, fileHeader, uploadDir)
 		if err != nil {
-
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, err.Error())
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "upload"))
 			return
 		}
 	}
 
 	tokenData := helpers.GetTokenClaims(u.Ctx)
-	log.Print(tokenData, "=================")
+	// log.Print(tokenData, "=================")
 	userID := tokenData["User_id"]
 	result, _ := models.RegisterSetting(settings, userID.(float64), filePath)
 	if result != 0 {
@@ -88,7 +86,7 @@ func (u *HomeSettingController) RegisterSettings() {
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Try Again")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
 
 // UpdateSettings
@@ -112,7 +110,7 @@ func (u *HomeSettingController) UpdateSettings() {
 	var filePath string
 
 	if err := u.ParseForm(&settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -137,13 +135,13 @@ func (u *HomeSettingController) UpdateSettings() {
 	if data_types == "LOGO" || data_types == "BANNER" {
 		file, fileHeader, err := u.GetFile("setting_data")
 		if err != nil {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "File Getting Error")
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "filenotfound"))
 			return
 		}
 
 		filePath, err = helpers.UploadFile(file, fileHeader, uploadDir)
 		if err != nil {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "File Uploading Error")
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "upload"))
 			return
 		}
 	}
@@ -157,7 +155,7 @@ func (u *HomeSettingController) UpdateSettings() {
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Try Again")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
 
 // FetchSettings
@@ -172,7 +170,7 @@ func (u *HomeSettingController) UpdateSettings() {
 func (u *HomeSettingController) FetchSettings() {
 	var search dto.HomeSeetingSearch
 	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
@@ -202,7 +200,7 @@ func (u *HomeSettingController) FetchSettings() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
 
 func (u *HomeSettingController) DeleteSetting() {
@@ -219,7 +217,7 @@ func (u *HomeSettingController) DeleteSetting() {
 
 	var home_settings dto.HomeSeetingDelete
 	if err := u.ParseForm(&home_settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 	json.Unmarshal(u.Ctx.Input.RequestBody, &home_settings)
@@ -229,7 +227,7 @@ func (u *HomeSettingController) DeleteSetting() {
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Try Again")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
 
 // ExportFile
@@ -249,7 +247,7 @@ func (c *HomeSettingController) ExportFile() {
 	// }
 	var fileTypes dto.FileType
 	if err := c.ParseForm(&fileTypes); err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -258,7 +256,7 @@ func (c *HomeSettingController) ExportFile() {
 	create_file_type := strings.ToUpper(fileTypes.FileType)
 
 	if create_file_type == "" {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "FILE TYPE SHOULD NOT BE EMPTY")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "type"))
 		return
 	}
 
@@ -269,14 +267,14 @@ func (c *HomeSettingController) ExportFile() {
 
 		res_result, _ := helpers.CreateFile(res_s, header, "", "apps", create_file_type)
 		if res_result == "" {
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "File Not Create ! Try Again")
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 			return
 		}
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res_result, "successfully Created file ", "")
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res_result, helpers.TranslateMessage(c.Ctx, "success", "filecreate"), "")
 		return
 	}
 
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "IT ONLY CONVERT WITHIN [PDF CSV,XLSX] FILE FORMAT")
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 }
 
 // ImportFile
@@ -302,8 +300,8 @@ func (c *HomeSettingController) ImportFile() {
 	uploadDir := "uploads/FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
-		fmt.Println("Error uploading file:", err)
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Error uploading file")
+		// fmt.Println("Error uploading file:", err)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 		return
 	}
 	defer helpers.RemoveFileByPath(filePath)
@@ -314,37 +312,37 @@ func (c *HomeSettingController) ImportFile() {
 	case strings.HasSuffix(filePath, ".xlsx"):
 		allRows, err = helpers.ReadXLSXFile(filePath)
 		if err != nil {
-			fmt.Println("Error reading XLSX file:", err)
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Error reading XLSX file")
+			// fmt.Println("Error reading XLSX file:", err)
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
 			return
 		}
 		result, update_id, _ := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 35, filePath, allRows)
 		if (len(result) > 0 && len(update_id) == 0) || (len(result) > 0 && len(update_id) > 0) || (len(result) == 0 && len(update_id) > 0) {
-			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "File Imported Successfully", "")
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "sucess", "upload"), "")
 			return
 		}
 
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "File Not Imported Please Try Again")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 
 	case strings.HasSuffix(filePath, ".csv"):
 
 		allRows, err = helpers.ReadCSVFile(filePath)
 
 		if err != nil {
-			fmt.Println("Error reading CSV file:", err)
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Error reading CSV file")
+			// fmt.Println("Error reading CSV file:", err)
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
 			return
 		}
 
 		result, update_id, _ := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
 		if result != nil || update_id != nil {
-			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "File Imported Successfully", "")
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
 			return
 		}
 
 	default:
-		fmt.Println("Unsupported file format")
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Unsupported file format")
+		// fmt.Println("Unsupported file format")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 		return
 	}
 }
@@ -353,7 +351,7 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 
 	var search dto.HomeSeetingSearchFilter
 	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -375,5 +373,5 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
