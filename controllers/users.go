@@ -353,7 +353,7 @@ func (c *UserController) ForgotPassword() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
-	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, helpers.TranslateMessage(c.Ctx, "success", "otpsent"), "")
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "success", res), helpers.TranslateMessage(c.Ctx, "success", "otpsent"), "")
 }
 
 // VerifyOtpResetpassword ...

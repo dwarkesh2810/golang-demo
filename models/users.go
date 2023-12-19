@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -73,7 +72,7 @@ func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
 	// orm.Debug = true
 	var user Users
-	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number")
+	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number","password")
 	if err != nil {
 		return user, err
 	}
@@ -188,7 +187,7 @@ func VerifyEmail(email string, name string) (string, error) {
 	o := orm.NewOrm()
 	sendemail := EmailLogs{}
 	_, err := helpers.SendMailOTp(email, name, subject, body)
-	fmt.Println(err.Error())
+	// fmt.Println(err.Error())
 	if err != nil {
 		sendemail = EmailLogs{
 			To:      email,
