@@ -14,7 +14,7 @@ type ResponseSuccess struct {
 
 type ResponseFailed struct {
 	ResStatus int    `json:"status"`
-	Message   string `json:"message"`
+	Message   interface{} `json:"message"`
 }
 
 type PaginationRes struct {
@@ -27,7 +27,7 @@ type PaginationRes struct {
 	TotalRecords   int `json:"total_records"`
 }
 
-func ApiFailedResponse(w http.ResponseWriter, message string) {
+func ApiFailedResponse(w http.ResponseWriter, message interface{}) {
 	response := ResponseFailed{
 		Message:   message,
 		ResStatus: 0,

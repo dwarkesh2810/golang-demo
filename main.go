@@ -13,7 +13,6 @@ import (
 
 func init() {
 
-	conf.LoadConfig()
 	conf.GetConfigMap()
 
 	orm.RegisterDriver(conf.ConfigMaps["dbdriver"], orm.DRPostgres)

@@ -12,6 +12,7 @@ car_demo
 logs/
 logs
 
+golang-demo
 
 # docker-compose.yaml
 # Dockerfile
