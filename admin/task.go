@@ -1,6 +1,5 @@
 package admin
 
-
 // The first 6 parts are:
 //       second: 0-59
 //       minute: 0-59
@@ -38,7 +37,14 @@ package admin
 //	0 0 * * * *                           run at :00 of every hour
 //	0 2 8-20/3 * * *                      run at 8:02, 11:02, 14:02, 17:02 and 20:02
 //	0 30 5 1,15 * *                       run at 5:30 of 1st and 15th of every month
-import "github.com/beego/beego/v2/task"
+import (
+	"context"
+
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/task"
+	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/models"
+)
 
 func CreateTask(taskName, schedule string, f task.TaskFunc) {
 	tasks := task.NewTask(taskName, schedule, f)
@@ -46,3 +52,24 @@ func CreateTask(taskName, schedule string, f task.TaskFunc) {
 	task.StartTask()
 }
 
+
+func SendPendingEmail(c context.Context) error {
+	o := orm.NewOrm()
+	// orm.Debug = true
+	var emails []models.EmailLogs
+	_, err := o.QueryTable(new(models.EmailLogs)).Filter("status", "pending").All(&emails, "LogId", "emailTo", "name", "subject", "body")
+	if err != nil {
+		return err
+	}
+	for _, email := range emails {
+		sent, _ := helpers.SendMailOTp(email.To, email.Name, email.Subject, email.Body)
+		if sent {
+			var UpdateEmail = models.EmailLogs{Id: email.Id, Status: "success"}
+			_, err := o.Update(&UpdateEmail, "status")
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

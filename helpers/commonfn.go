@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/dto"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -58,9 +59,10 @@ func VerifyHashedData(hashedString string, dataString string) error {
 	return nil
 }
 
+// >>>>>>>>>>>>>Function to send mail <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
 func SendMailOTp(userEmail string, name string, subject string, body string) (bool, error) {
-	from, _ := beego.AppConfig.String("EMAIL")
-	password, _ := beego.AppConfig.String("PASSWORD")
+	from := conf.ConfigMaps["email"]
+	password := conf.ConfigMaps["password"]
 	// from, _ := config.String("EMAIL")
 	// password, _ := config.String("PASSWORD")
 	to := []string{
@@ -846,6 +848,8 @@ func TransformToKeyValuePairs(data interface{}) ([]map[string]interface{}, error
 	return result, nil
 }
 
+/*FOR TRANSLATE IN LANGUAGE WHICH IS ALREADY SET IN CONTEXT/COOKIE/HEADER*/
+
 func LanguageTranslate(c beego.Controller, key string) string {
 	lang := c.Ctx.Input.GetData("lang").(string)
 	language := strings.ToLower(lang)
@@ -860,6 +864,7 @@ func LanguageTranslate(c beego.Controller, key string) string {
 	return i18n.Tr(lang, key)
 }
 
+/*FOR CHECKING ELEMENT IN SLICE*/
 func CheckIfExists(elemet string, data []string) bool {
 	for i := 0; i < len(data); i++ {
 		if strings.EqualFold(elemet, data[i]) {
@@ -869,6 +874,7 @@ func CheckIfExists(elemet string, data []string) bool {
 	return false
 }
 
+/*Function for checck car typy is valid or not*/
 func NewCarType(input string) (dto.CarType, error) {
 	switch input {
 	case "sedan", "hatchback", "SUV":

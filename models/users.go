@@ -14,12 +14,9 @@ func GetUserByEmail(username string) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
 	// orm.Debug = true
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).All(&user)
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).All(&user)
 	if err != nil {
 		return user, err
-	}
-	if num == 0 {
-		return user, errors.New("LOGIN_ERROR")
 	}
 	return user, nil
 }
@@ -27,12 +24,9 @@ func GetUserByEmail(username string) (Users, error) {
 func LoginUser(username string, pass string) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("password", pass).All(&user)
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("password", pass).All(&user)
 	if err != nil {
 		return user, err
-	}
-	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
 	}
 	return user, nil
 }
@@ -73,7 +67,7 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 	if num == 0 {
 		return "user", errors.New("DATABASE_ERROR")
 	}
-	return "OTP_SENT", nil
+	return "otpsent", nil
 }
 func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
@@ -88,7 +82,7 @@ func GetUserDetails(id interface{}) (Users, error) {
 	}
 	return user, nil
 }
-func UpdateUser(Data dto.UpdateUserRequest) (interface{}, error) {
+func UpdateUser(Data dto.UpdateUserRequest) (Users, error) {
 	var user = Users{
 		UserId:      Data.Id,
 		FirstName:   Data.FirstName,
@@ -100,14 +94,14 @@ func UpdateUser(Data dto.UpdateUserRequest) (interface{}, error) {
 		PhoneNumber: Data.PhoneNumber,
 	}
 	o := orm.NewOrm()
-	num, err := o.Update(&user, "user_id", "first_name", "last_name", "country", "email", "role", "updated_date", "phone_number")
+	num, err := o.Update(&user, "user_id", "first_name", "last_name", "country_id", "email", "role", "updated_date", "phone_number")
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
 	}
-	return "DATA_UPDATED", nil
+	return user, nil
 }
 
 func ResetPassword(Password string, id int) (interface{}, error) {
@@ -138,12 +132,9 @@ func DeleteUser(id int) (string, error) {
 func GetEmailOTP(username string, otp string) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("otp", otp).All(&user)
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("otp_code", otp).All(&user)
 	if err != nil {
 		return user, err
-	}
-	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
 	}
 	return user, nil
 }
