@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
+	"github.com/dwarkesh2810/golang-demo/validations"
 )
 
 type CarController struct {
@@ -35,6 +37,13 @@ func (c *CarController) AddNewCar() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&cars); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+
 	file, fileheader, err := c.GetFile("file")
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
@@ -81,6 +90,13 @@ func (c *CarController) UpdateCar() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&cars); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+
 	data, err := models.GetSingleCar(cars.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
@@ -156,6 +172,13 @@ func (c *CarController) DeleteCar() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &car)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&car); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+
 	res, err := models.GetSingleCar(car.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
@@ -177,18 +200,25 @@ func (c *CarController) DeleteCar() {
 // GetAllCars ...
 // @Title get cars
 // @Desciption Get all car
-// @Param body body dto.ValidationReq false "Insert New User"
+// @Param body body dto.PaginationReq false "Insert New User"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
-// @router /cars [get]
+// @router /cars [post]
 func (c *CarController) GetAllCars() {
-	var search dto.ValidationReq
+	var search dto.PaginationReq
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&search); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+
 	tableName := "car"
 	query := `SELECT c.car_name , c.modified_by, c.model, c.car_type
 	FROM car as c
@@ -228,6 +258,13 @@ func (c *CarController) GetSingleCar() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&bodyData); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+
 	Data, err := models.GetSingleCar(bodyData.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
