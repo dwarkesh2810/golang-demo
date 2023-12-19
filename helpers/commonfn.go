@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/dwarkesh2810/golang-demo/dto"
 
 	beego "github.com/beego/beego/v2/server/web"
 
@@ -355,7 +356,7 @@ func SetLanguage(ctx *context.Context, lang string) {
 
 	err := i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 	}
 	ctx.SetCookie("lang", lang, 24*60*60, "/") // cookie to expire in 24 hours
 
@@ -872,4 +873,13 @@ func CheckIfExists(elemet string, data []string) bool {
 		}
 	}
 	return false
+}
+
+func NewCarType(input string) (dto.CarType, error) {
+	switch input {
+	case "sedan", "hatchback", "SUV":
+		return dto.CarType(input), nil
+	default:
+		return "", errors.New("INVALID_CAR")
+	}
 }

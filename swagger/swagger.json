@@ -1,0 +1,1136 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "beego Test API",
+        "description": "beego has a very cool tools to autogenerate documents for your API\n",
+        "version": "1.0.0",
+        "termsOfService": "http://beego.me/",
+        "contact": {
+            "email": "astaxie@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/car/": {
+            "post": {
+                "tags": [
+                    "car"
+                ],
+                "operationId": "CarController.get car",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "get perticuler car",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GetcarRequest"
+                        }
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/car/cars": {
+            "get": {
+                "tags": [
+                    "car"
+                ],
+                "operationId": "CarController.get cars",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Insert New User",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ValidationReq"
+                        }
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/car/create": {
+            "post": {
+                "tags": [
+                    "car"
+                ],
+                "operationId": "CarController.new car",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "car_name",
+                        "description": "Car name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "modified_by",
+                        "description": "modified by",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "model",
+                        "description": "Car Model",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "type",
+                        "description": "accepted type 'sedan','SUV','hatchback'",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "file",
+                        "description": "File to be uploaded",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/car/delete": {
+            "delete": {
+                "tags": [
+                    "car"
+                ],
+                "operationId": "CarController.remove car",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "delete car",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GetcarRequest"
+                        }
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/car/update": {
+            "put": {
+                "tags": [
+                    "car"
+                ],
+                "operationId": "CarController.update car",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "car_id",
+                        "description": "Car name",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "car_name",
+                        "description": "Car name",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "modified_by",
+                        "description": "modified by",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "model",
+                        "description": "Car Model",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "type",
+                        "description": "accepted type 'sedan','SUV','hatchback'",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "file",
+                        "description": "File to be uploaded",
+                        "type": "file"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/homepage/export": {
+            "post": {
+                "tags": [
+                    "homepage"
+                ],
+                "description": "In this function after login user  can Export File in Home page settings\n\u003cbr\u003e",
+                "operationId": "HomeSettingController.After Login User Can Export File in Home Page settings",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "file_type",
+                        "description": "Here only select file within [XLSX,CSV,PDF]",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "limit",
+                        "description": "How Much you want to export data Ex.10",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/homepage/fetch_settings": {
+            "post": {
+                "tags": [
+                    "homepage"
+                ],
+                "description": "In this function after login user  can Fetch Data Home page settings\n\u003cbr\u003e",
+                "operationId": "HomeSettingController.After Login User Can Fetch Data Home Page settings",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/homepage/import": {
+            "post": {
+                "tags": [
+                    "homepage"
+                ],
+                "description": "In this function after login user  can Import File in Home page settings\n\u003cbr\u003e",
+                "operationId": "HomeSettingController.After Login User Can Import File in Home Page settings",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "import_type",
+                        "description": "Here only select file within [XLSX,CSV]",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/homepage/register_settings": {
+            "post": {
+                "tags": [
+                    "homepage"
+                ],
+                "description": "In this function after login can register Home page settings\n\u003cbr\u003e",
+                "operationId": "HomeSettingController.After Login User Can Register Home Page settings",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "setting_data",
+                        "description": "body for file",
+                        "type": "file"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "data_type",
+                        "description": "body for file",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "section",
+                        "description": "body for file",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/homepage/update_settings": {
+            "post": {
+                "tags": [
+                    "homepage"
+                ],
+                "description": "In this function after login user  can update Home page settings\n\u003cbr\u003e",
+                "operationId": "HomeSettingController.After Login User Can Update Home Page settings",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "setting_data",
+                        "description": "body for file",
+                        "type": "file"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "data_type",
+                        "description": "body for file",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "section",
+                        "description": "body for file",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "setting_id",
+                        "description": "body for file",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.login User",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "login User",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UserLoginRequest"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Accept-Languages",
+                        "description": "Bearer YourAccessToken",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/register": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.Insert New User",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Insert New User",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.NewUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Users"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "user"
+                ],
+                "description": "delete user\n\u003cbr\u003e",
+                "operationId": "UserController.delete user",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "user id to delete recode",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{string} string"
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/forgot_pass": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.forgot password",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "forgot password this is send otp on mobile and email",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SendOtpData"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/reset_pass": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.Reset password",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "reset password",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetUserPassword"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Users"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/reset_pass_otp": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.verify otp",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "otp verification for forgot password",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetUserPasswordOtp"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/search": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.Search User",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "otp verification for email",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SearchRequest"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/update": {
+            "put": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.update User",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "update New User",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserRequest"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Users"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/users/": {
+            "get": {
+                "tags": [
+                    "user"
+                ],
+                "description": "get Users\n\u003cbr\u003e",
+                "operationId": "UserController.Get All",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Insert New User",
+                        "schema": {
+                            "$ref": "#/definitions/dto.HomeSeetingSearch"
+                        }
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Users"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/secure/verify_email_otp": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.verify otp for email",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "otp verification for email",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VerifyEmailOTPRequest"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US or hi-IN",
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.GetcarRequest": {
+            "title": "GetcarRequest",
+            "type": "object",
+            "properties": {
+                "car_id": {
+                    "type": "integer",
+                    "format": "int32"
+                }
+            }
+        },
+        "dto.HomeSeetingSearch": {
+            "title": "HomeSeetingSearch",
+            "type": "object",
+            "properties": {
+                "lang_key": {
+                    "type": "string"
+                },
+                "open_page": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "page_size": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "setting_id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "dto.NewUserRequest": {
+            "title": "NewUserRequest",
+            "type": "object",
+            "properties": {
+                "country_id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ResetUserPassword": {
+            "title": "ResetUserPassword",
+            "type": "object",
+            "properties": {
+                "confirm_password": {
+                    "type": "string"
+                },
+                "current_password": {
+                    "type": "string"
+                },
+                "new_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ResetUserPasswordOtp": {
+            "title": "ResetUserPasswordOtp",
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SearchRequest": {
+            "title": "SearchRequest",
+            "type": "object",
+            "properties": {
+                "search": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SendOtpData": {
+            "title": "SendOtpData",
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ValidationReq": {
+            "title": "ValidationReq",
+            "type": "object",
+            "properties": {
+                "open_page": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "page_size": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "dto.VerifyEmailOTPRequest": {
+            "title": "VerifyEmailOTPRequest",
+            "type": "object",
+            "properties": {
+                "otp": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GetcarRequest": {
+            "title": "GetcarRequest",
+            "type": "object"
+        },
+        "models.HomePagesSettingTable": {
+            "title": "HomePagesSettingTable",
+            "type": "object",
+            "properties": {
+                "CreatedBy": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "CreatedDate": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "DataType": {
+                    "type": "string"
+                },
+                "PageSettingId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Section": {
+                    "type": "string"
+                },
+                "SettingData": {
+                    "type": "string"
+                },
+                "UniqueCode": {
+                    "type": "string"
+                },
+                "UpdatedBy": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "UpdatedDate": {
+                    "type": "string",
+                    "format": "datetime"
+                }
+            }
+        },
+        "models.UpdateUserRequest": {
+            "title": "UpdateUserRequest",
+            "type": "object"
+        },
+        "models.UserLoginRequest": {
+            "title": "UserLoginRequest",
+            "type": "object"
+        },
+        "models.Users": {
+            "title": "Users",
+            "type": "object",
+            "properties": {
+                "CountryId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "CreatedDate": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "FirstName": {
+                    "type": "string"
+                },
+                "Isverified": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "LastName": {
+                    "type": "string"
+                },
+                "OtpCode": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "PhoneNumber": {
+                    "type": "string"
+                },
+                "Role": {
+                    "type": "string"
+                },
+                "UpdatedDate": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "UserId": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "object": {
+            "title": "object",
+            "type": "object"
+        }
+    }
+}

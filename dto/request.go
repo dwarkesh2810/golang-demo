@@ -1,6 +1,8 @@
 package dto
 
-import "github.com/dgrijalva/jwt-go"
+import (
+	"github.com/dgrijalva/jwt-go"
+)
 
 type UserLoginRequest struct {
 	Username string `json:"username"`
@@ -104,4 +106,38 @@ type FileType struct {
 	FileType    string `json:"file_type" form:"file_type" valid:"Required; ValidType"`
 	Limit       int    `json:"limit" form:"limit"`
 	SratingFrom int    `json:"starting_from" form:"starting_from"`
+}
+
+type ValidationReq struct {
+	PageSize int `json:"page_size" form:"page_size"`
+	OpenPage int `json:"open_page" form:"open_page"`
+}
+
+type CarType string
+
+const (
+	Sedan     CarType = "sedan"
+	Hatchback CarType = "hatchback"
+	SUV       CarType = "SUV"
+)
+
+type GetNewCarRequest struct {
+	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	CarImage   string  `json:"car_imag" form:"file"`
+	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	Type       CarType `json:"type" form:"type"`
+}
+
+type UpdateCarRequest struct {
+	Id         uint    `json:"car_id" form:"car_id"`
+	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	CarImage   string  `json:"car_imag" form:"file"`
+	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	Type       CarType `json:"type" form:"type"`
+}
+
+type GetcarRequest struct {
+	Id uint `json:"car_id"`
 }
