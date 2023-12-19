@@ -21,7 +21,6 @@ func init() {
 			beego.NSInclude(&controllers.UserController{}),
 			beego.NSRouter("/register", &controllers.UserController{}, "Post:RegisterNewUser"),
 			beego.NSRouter("/login", &controllers.UserController{}, "post:Login"),
-			beego.NSRouter("/hello", &controllers.UserController{}, "get:Hello"),
 			beego.NSNamespace("/secure",
 				beego.NSBefore(middleware.JWTMiddleware),
 				beego.NSRouter("/users", &controllers.UserController{}, "post:GetAllUsers"),

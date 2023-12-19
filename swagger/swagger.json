@@ -53,7 +53,7 @@
             }
         },
         "/car/cars": {
-            "get": {
+            "post": {
                 "tags": [
                     "car"
                 ],
@@ -64,7 +64,7 @@
                         "name": "body",
                         "description": "Insert New User",
                         "schema": {
-                            "$ref": "#/definitions/dto.ValidationReq"
+                            "$ref": "#/definitions/dto.PaginationReq"
                         }
                     },
                     {
@@ -490,7 +490,7 @@
                         "description": "login User",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UserLoginRequest"
+                            "$ref": "#/definitions/dto.UserLoginRequest"
                         }
                     },
                     {
@@ -780,7 +780,7 @@
                         "description": "update New User",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateUserRequest"
+                            "$ref": "#/definitions/dto.UpdateUserRequest"
                         }
                     },
                     {
@@ -811,7 +811,7 @@
             }
         },
         "/user/secure/users/": {
-            "get": {
+            "post": {
                 "tags": [
                     "user"
                 ],
@@ -829,7 +829,7 @@
                         "name": "body",
                         "description": "Insert New User",
                         "schema": {
-                            "$ref": "#/definitions/dto.HomeSeetingSearch"
+                            "$ref": "#/definitions/dto.PaginationReq"
                         }
                     },
                     {
@@ -908,27 +908,6 @@
                 }
             }
         },
-        "dto.HomeSeetingSearch": {
-            "title": "HomeSeetingSearch",
-            "type": "object",
-            "properties": {
-                "lang_key": {
-                    "type": "string"
-                },
-                "open_page": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "page_size": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "setting_id": {
-                    "type": "integer",
-                    "format": "int64"
-                }
-            }
-        },
         "dto.NewUserRequest": {
             "title": "NewUserRequest",
             "type": "object",
@@ -954,6 +933,20 @@
                 },
                 "role": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.PaginationReq": {
+            "title": "PaginationReq",
+            "type": "object",
+            "properties": {
+                "open_page": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "page_size": {
+                    "type": "integer",
+                    "format": "int64"
                 }
             }
         },
@@ -1005,17 +998,44 @@
                 }
             }
         },
-        "dto.ValidationReq": {
-            "title": "ValidationReq",
+        "dto.UpdateUserRequest": {
+            "title": "UpdateUserRequest",
             "type": "object",
             "properties": {
-                "open_page": {
+                "country_id": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "page_size": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "integer",
                     "format": "int64"
+                }
+            }
+        },
+        "dto.UserLoginRequest": {
+            "title": "UserLoginRequest",
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -1072,14 +1092,6 @@
                     "format": "datetime"
                 }
             }
-        },
-        "models.UpdateUserRequest": {
-            "title": "UpdateUserRequest",
-            "type": "object"
-        },
-        "models.UserLoginRequest": {
-            "title": "UserLoginRequest",
-            "type": "object"
         },
         "models.Users": {
             "title": "Users",
