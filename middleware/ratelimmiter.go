@@ -29,11 +29,13 @@ type RateLimmiterResponse struct {
 func RateLimiter(ctx *context.Context) {
 	// Get IP address of the client
 	ip := ctx.Input.IP()
-	limit, err := strconv.Atoi(conf.ConfigMaps["RATELIMITER"])
+	log.Print("11111111111111111111111111111111111111111111111111", conf.ConfigMaps)
+
+	limit, err := strconv.Atoi(conf.ConfigMaps["ratelimiter"])
 	if err != nil {
 		log.Print(err)
 	}
-	blockTime, err := strconv.Atoi(conf.ConfigMaps["BLOCKTIME"])
+	blockTime, err := strconv.Atoi(conf.ConfigMaps["blocktime"])
 
 	if err != nil {
 		log.Print(err)
