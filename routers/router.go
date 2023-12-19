@@ -30,6 +30,7 @@ func init() {
 				beego.NSRouter("/forgot_pass", &controllers.UserController{}, "post:ForgotPassword"),
 				beego.NSRouter("/reset_pass_otp", &controllers.UserController{}, "post:VerifyOtpResetpassword"),
 				beego.NSRouter("/search", &controllers.UserController{}, "post:SearchUser"),
+				beego.NSRouter("/verify_email_otp", &controllers.UserController{}, "post:VerifyEmailOTP"),
 			),
 		),
 		beego.NSNamespace("/homepage",
