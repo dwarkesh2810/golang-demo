@@ -29,12 +29,9 @@ func InsertNewCar(data dto.GetNewCarRequest) (Car, error) {
 func GetSingleCar(id uint) (Car, error) {
 	o := orm.NewOrm()
 	var car Car
-	num, err := o.QueryTable(new(Car)).Filter("id", id).All(&car)
+	_, err := o.QueryTable(new(Car)).Filter("id", id).All(&car)
 	if err != nil {
 		return car, err
-	}
-	if num == 0 {
-		return car, errors.New("DATABASE_ERROR")
 	}
 	return car, nil
 }
