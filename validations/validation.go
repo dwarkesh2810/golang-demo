@@ -94,12 +94,12 @@ func RequiredFileType(v *validation.Validation, obj interface{}, key string) {
 	}
 }
 
-func Valid(object interface{}) []*validation.Error {
+func Valid(c beego.Controller, object interface{}) {
 	valid := validation.Validation{}
 	isValid, _ := valid.Valid(object)
 
 	if !isValid {
-		return valid.Errors
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, ValidationErrorResponse(c, valid.Errors))
+		return
 	}
-	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -19,6 +20,7 @@ type UserController struct {
 
 var key, _ = beego.AppConfig.String("JWT_SEC_KEY")
 var jwtKey = []byte(key)
+var valid = validation.Validation{}
 
 // Login ...
 // @Title login User
@@ -30,20 +32,23 @@ var jwtKey = []byte(key)
 // @Failure 403
 // @router /login [post]
 func (c *UserController) Login() {
-	_ = c.Ctx.Input.GetData("lang")
-	var user dto.UserLoginRequest
-	json.Unmarshal(c.Ctx.Input.RequestBody, &user)
-	HashPassWord, err := models.GetUserByEmail(user.Username)
+	var userReq dto.UserLoginRequest
+	err := json.Unmarshal(c.Ctx.Input.RequestBody, &userReq)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.LanguageTranslate(c.Controller, "error.parsing"))
+		return
+	}
+	dbUser, err := models.GetUserByEmail(userReq.Username)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.LanguageTranslate(c.Controller, "error.db"))
+		return
+	}
+	err = helpers.VerifyHashedData(dbUser.Password, userReq.Password)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
 		return
 	}
-	err = helpers.VerifyHashedData(HashPassWord.Password, user.Password)
-	if err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
-		return
-	}
-	userData, err := models.LoginUser(user.Username, HashPassWord.Password)
+	userData, err := models.LoginUser(userReq.Username, dbUser.Password)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
 		return
@@ -75,8 +80,8 @@ func (c *UserController) Login() {
 // @Failure 403
 // @router /register [post]
 func (c *UserController) RegisterNewUser() {
-	_ = c.Ctx.Input.GetData("lang")
-	var bodyData dto.NewUserRequest
+	// _ = c.Ctx.Input.GetData("lang")
+	bodyData := dto.NewUserRequest{}
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
 		return
