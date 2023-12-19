@@ -331,7 +331,6 @@ func Init() {
 
 	})
 }
-
 func GetLanguageFromMultipleSources(ctx *context.Context) string {
 	if lang := ctx.Input.Query("lang"); lang != "" && isValidLanguage(lang) {
 		return lang
@@ -344,25 +343,22 @@ func GetLanguageFromMultipleSources(ctx *context.Context) string {
 	}
 	return "en-US"
 }
-
 func isValidLanguage(lang string) bool {
 	lang = strings.ToUpper(lang)
 	allowedLanguages := map[string]bool{"En-US": true, "EN-GB": true, "HI-IN": true}
 	return allowedLanguages[lang]
 }
-
 func SetLanguage(ctx *context.Context, lang string) {
 	ctx.Input.SetData("lang", lang)
 
 	err := i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
 	if err != nil {
-		// log.Print(err)
+		log.Print(err)
 	}
 	ctx.SetCookie("lang", lang, 24*60*60, "/") // cookie to expire in 24 hours
 
 	defaultLang = lang
 }
-
 func Translate(ctx *context.Context, key string) string {
 	langKey := GetLanguageFromMultipleSources(ctx)
 	langTrans := strings.Split(langKey, "-")
@@ -374,7 +370,6 @@ func Translate(ctx *context.Context, key string) string {
 	SetLanguage(ctx, langKey)
 	return i18n.Tr(defaultLang, key)
 }
-
 func TranslateMessage(ctx *context.Context, section, sectionMessage string) string {
 
 	translationKey := fmt.Sprintf("%s.%s", section, sectionMessage)
@@ -419,8 +414,7 @@ func CreateINIFiles(data []map[string]string) error {
 
 	return nil
 }
-
-func FormateCSVDate(value interface{}) string {
+func formateCSVDate(value interface{}) string {
 	switch v := value.(type) {
 	case time.Time:
 		return v.Format("2006-01-02 15:04:05") // Format the time value as needed
@@ -436,7 +430,7 @@ func formatValue(value interface{}) interface{} {
 		return v
 	}
 }
-func SumSliceElements(slice []float64) float64 {
+func sumSliceElements(slice []float64) float64 {
 	var total float64
 	for _, value := range slice {
 		total += value
@@ -514,7 +508,7 @@ func CreateFile(data []map[string]interface{}, headers []string, folderPath, fil
 			var row []string
 			for _, key := range headers {
 				if value, ok := rowData[key]; ok {
-					row = append(row, FormateCSVDate(value))
+					row = append(row, formateCSVDate(value))
 				} else {
 					row = append(row, "") // Handle missing data
 				}
@@ -540,7 +534,7 @@ func CreateFile(data []map[string]interface{}, headers []string, folderPath, fil
 			colWidths[colNum] = pdf.GetStringWidth(header) + 6
 		}
 
-		scaleFactor := totalWidth / SumSliceElements(colWidths)
+		scaleFactor := totalWidth / sumSliceElements(colWidths)
 		for colNum := range colWidths {
 			colWidths[colNum] *= scaleFactor
 		}
@@ -882,4 +876,112 @@ func NewCarType(input string) (dto.CarType, error) {
 	default:
 		return "", errors.New("INVALID_CAR")
 	}
+}
+
+/*FILTER DATA ACCORDING TO QUERY AND GIVE FILTER DATA COUNTS*/
+func FilterData(currentPage, pageSize int, query, tableName, search string, searchFields []string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
+	db := orm.NewOrm()
+	if currentPage <= 0 {
+		currentPage = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	offset := (currentPage - 1) * pageSize
+
+	var homeResponse []orm.Params
+	search = strings.ToLower(search)
+
+	interfaceSearchFields := generateSearchParameters(searchFields, search, applyPosition)
+
+	if len(interfaceSearchFields) == 0 {
+		return nil, nil, 0, nil
+	}
+
+	_, err := db.Raw(query, append(interfaceSearchFields, pageSize, offset)...).Values(&homeResponse)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+
+	var totalMatchData int
+
+	if search != "" {
+		err = db.Raw(countQuery, interfaceSearchFields...).QueryRow(&totalMatchData)
+		if err != nil {
+			return nil, nil, 0, err
+		}
+	}
+
+	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName)
+	if paginationErr != nil {
+		return nil, paginationData, 0, paginationErr
+	}
+
+	return homeResponse, paginationData, totalMatchData, nil
+}
+
+func generateSearchParameters(fields []string, search string, applyPostion string) []interface{} {
+	var parameters []interface{}
+	applyPostion = strings.ToUpper(applyPostion)
+	for _, field := range fields {
+
+		if applyPostion == "" {
+			parameters = append(parameters, "%"+search+"%")
+		} else if applyPostion == "START" {
+			parameters = append(parameters, search+"%")
+		} else {
+			parameters = append(parameters, "%"+search)
+			log.Print(field)
+		}
+	}
+
+	return parameters
+}
+
+/*END FILTER DATA FUNCTION*/
+
+/*RETURN RECORDS WITH PAGINATION*/
+func FetchDataWithPaginations(current_page, pageSize int, tableName, query string) ([]orm.Params, map[string]interface{}, error) {
+	db := orm.NewOrm()
+	if current_page <= 0 {
+		current_page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	offset := (current_page - 1) * pageSize
+
+	var homeResponse []orm.Params
+	_, err := db.Raw(query, pageSize, offset).Values(&homeResponse)
+
+	if err != nil {
+		return nil, nil, err
+	}
+	pagination_data, pagination_err := Pagination(current_page, pageSize, tableName)
+	if pagination_err != nil {
+		return nil, pagination_data, nil
+	}
+	pagination_data["matchCount"] = 0
+	return homeResponse, pagination_data, nil
+}
+
+/*CONVERT STRUCT TO MAP*/
+func ConvertStructToMap(data interface{}) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+
+	val := reflect.ValueOf(data)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("input is not a struct or a pointer to struct")
+	}
+	typ := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldName := typ.Field(i).Name
+		result[fieldName] = field.Interface()
+	}
+
+	return result, nil
 }

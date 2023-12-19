@@ -6,6 +6,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
+	"github.com/dwarkesh2810/golang-demo/helpers"
 )
 
 func InsertNewCar(data dto.GetNewCarRequest) (Car, error) {
@@ -71,4 +72,17 @@ func DeleteCar(id uint) (interface{}, error) {
 		return nil, errors.New("NOT_FOUND")
 	}
 	return car, nil
+}
+
+func FetchCars(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
+	tableName := "car"
+	query := `SELECT c.car_name , c.modified_by, c.model, c.car_type
+	FROM car as c
+	ORDER BY c.id
+	LIMIT ? OFFSET ?`
+	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)
+	if errs != nil {
+		return nil, nil, errs
+	}
+	return result_data, pagination, nil
 }
