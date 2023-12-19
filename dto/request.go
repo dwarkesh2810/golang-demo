@@ -108,7 +108,7 @@ type FileType struct {
 	SratingFrom int    `json:"starting_from" form:"starting_from"`
 }
 
-type ValidationReq struct {
+type PaginationReq struct {
 	PageSize int `json:"page_size" form:"page_size"`
 	OpenPage int `json:"open_page" form:"open_page"`
 }

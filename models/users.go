@@ -16,7 +16,7 @@ func GetUserByEmail(username string) (Users, error) {
 	// orm.Debug = true
 	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).All(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("LOGIN_ERROR")
@@ -29,7 +29,7 @@ func LoginUser(username string, pass string) (Users, error) {
 	var user Users
 	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("password", pass).All(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -56,7 +56,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 	}
 	num, err := o.Insert(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -68,7 +68,7 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 	var user = Users{UserId: id, OtpCode: otp, Isverified: 0}
 	num, err := o.Update(&user, "otp_code", "isverified")
 	if err != nil {
-		return "num", errors.New("DATABASE_ERROR")
+		return "num", err
 	}
 	if num == 0 {
 		return "user", errors.New("DATABASE_ERROR")
@@ -79,9 +79,9 @@ func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
 	// orm.Debug = true
 	var user Users
-	num, err := o.QueryTable(new(Users)).Filter("id", id).All(&user, "first_name", "last_name", "email", "phone_number")
+	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number")
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -100,9 +100,9 @@ func UpdateUser(Data dto.UpdateUserRequest) (interface{}, error) {
 		PhoneNumber: Data.PhoneNumber,
 	}
 	o := orm.NewOrm()
-	num, err := o.Update(&user, "id", "first_name", "last_name", "country", "email", "role", "updated_date", "phone_number")
+	num, err := o.Update(&user, "user_id", "first_name", "last_name", "country", "email", "role", "updated_date", "phone_number")
 	if err != nil {
-		return nil, errors.New("DATABASE_ERROR")
+		return nil, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -128,7 +128,7 @@ func DeleteUser(id int) (string, error) {
 	var user = Users{UserId: id}
 	num, err := o.Delete(&user)
 	if err != nil {
-		return "", errors.New("DATABASE_ERROR")
+		return "", err
 	}
 	if num == 0 {
 		return "", errors.New("DATABASE_ERROR")
@@ -140,7 +140,7 @@ func GetEmailOTP(username string, otp string) (Users, error) {
 	var user Users
 	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("otp", otp).All(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -153,7 +153,7 @@ func UpdateIsVerified(id int) error {
 	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
 	num, err := o.Update(&user, "isverified", "updated_date")
 	if err != nil {
-		return errors.New("DATABASE_ERROR")
+		return err
 	}
 	if num == 0 {
 		return errors.New("DATABASE_ERROR")
@@ -167,7 +167,7 @@ func SearchUser(search string) ([]Users, error) {
 	// orm.Debug = true
 	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&user)
 	if err != nil {
-		return nil, errors.New("DATABASE_ERROR")
+		return nil, err
 	}
 	if num == 0 {
 		return nil, errors.New("DATABASE_ERROR")
@@ -208,9 +208,9 @@ func VerifyEmail(email string, name string) (string, error) {
 		}
 		_, err := o.Insert(&sendemail)
 		if err != nil {
-			return "", errors.New("DATABASE_ERROR")
+			return "", err
 		}
-		return "failed to send otp",nil
+		return "failed to send otp", nil
 	}
 	sendemail = EmailLogs{
 		To:      email,
@@ -228,7 +228,7 @@ func VerifyEmail(email string, name string) (string, error) {
 		return "", err
 	}
 	if err != nil {
-		return "", errors.New("DATABASE_ERROR")
+		return "", err
 	}
 	res, err := UpadteOtpForEmail(output.UserId, OTP)
 	if err != nil {

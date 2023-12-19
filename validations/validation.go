@@ -2,6 +2,7 @@ package validations
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 
@@ -39,18 +40,20 @@ func ValidationErrorResponse(c beego.Controller, err []*validation.Error) []stri
 		var errResponse string
 		switch Tags[i] {
 		case "Min", "Max", "Range", "MinSize", "MaxSize", "Length", "Match", "NotMatch":
-			errResponse = fmt.Sprintf("%s : "+helpers.LanguageTranslate(c, "validation."+Tags[i]), err[i].Field, err[i].LimitValue)
+			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", Tags[i]), err[i].Field, err[i].LimitValue)
 
 		case "Required", "Alpha", "Numeric", "AlphaNumeric", "Email", "IP", "AlphaDash":
-			errResponse = fmt.Sprintf("%s : "+helpers.LanguageTranslate(c, "validation."+Tags[i]), err[i].Field)
+			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", Tags[i]), err[i].Field)
 
 		default:
 			fields := err[i].Key
 			keys := strings.Split(fields, ".")
-			errResponse = fmt.Sprintf("%s : "+helpers.LanguageTranslate(c, "validation."+keys[1]), keys[0])
+			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", keys[1]), keys[0])
 		}
 		errs = append(errs, errResponse)
 	}
+
+	log.Print(errs)
 	return errs
 }
 
@@ -94,12 +97,3 @@ func RequiredFileType(v *validation.Validation, obj interface{}, key string) {
 	}
 }
 
-func Valid(c beego.Controller, object interface{}) {
-	valid := validation.Validation{}
-	isValid, _ := valid.Valid(object)
-
-	if !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, ValidationErrorResponse(c, valid.Errors))
-		return
-	}
-}

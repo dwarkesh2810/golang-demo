@@ -6,9 +6,11 @@ import (
 
 	"strings"
 
+	"github.com/beego/beego/v2/core/validation"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
+	"github.com/dwarkesh2810/golang-demo/validations"
 	_ "github.com/lib/pq"
 
 	beego "github.com/beego/beego/v2/server/web"
@@ -44,6 +46,12 @@ func (u *HomeSettingController) RegisterSettings() {
 	}
 
 	json.Unmarshal(u.Ctx.Input.RequestBody, &settings)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&settings); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
 
 	data_types := strings.ToUpper(settings.DataType)
 	// uploadDir := os.Getenv("uploadHomePageImages")
@@ -119,6 +127,13 @@ func (u *HomeSettingController) UpdateSettings() {
 	message := helpers.TranslateMessage(u.Ctx, section, section_message)
 
 	json.Unmarshal(u.Ctx.Input.RequestBody, &settings)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&settings); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
+
 	data_types := strings.ToUpper(settings.DataType)
 
 	// uploadDir := os.Getenv("uploadHomePageImages")
@@ -175,6 +190,12 @@ func (u *HomeSettingController) FetchSettings() {
 	}
 	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
 
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&search); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
+
 	tableName := "home_pages_setting_table"
 	query := `
 	SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
@@ -221,6 +242,13 @@ func (u *HomeSettingController) DeleteSetting() {
 		return
 	}
 	json.Unmarshal(u.Ctx.Input.RequestBody, &home_settings)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&home_settings); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
+
 	result := models.HomePageSettingExistsDelete(home_settings)
 	if result != 0 {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, "", message, "")
@@ -252,6 +280,12 @@ func (c *HomeSettingController) ExportFile() {
 	}
 
 	json.Unmarshal(c.Ctx.Input.RequestBody, &fileTypes)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&fileTypes); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
 
 	create_file_type := strings.ToUpper(fileTypes.FileType)
 
@@ -356,6 +390,12 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 	}
 
 	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&search); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
 
 	result, pagination_data, _ := models.FilterFetchSettingPagination(search.OpenPage, search.PageSize, search.SearchParam)
 	if pagination_data["pageOpen_error"] == 1 {
