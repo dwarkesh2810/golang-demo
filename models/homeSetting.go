@@ -376,110 +376,51 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 	return insertIDs, updateIDs, nil
 }
 
-func FetchSettingPaginations(current_page, pageSize int, tableName, query string) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-	if current_page <= 0 {
-		current_page = 1
+func FetchSettingPaginations(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
+	tableName := "home_pages_setting_table"
+	query := `
+	SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
+	concat(umt.first_name,' ',umt.last_name) as created_by
+	FROM home_pages_setting_table as hpst
+	LEFT JOIN users as umt ON umt.user_id = hpst.created_by
+	ORDER BY hpst.created_date DESC
+	LIMIT ? OFFSET ?
+`
+	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)
+	if errs != nil {
+		return nil, nil, errs
 	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	offset := (current_page - 1) * pageSize
-
-	var homeResponse []orm.Params
-	_, err := db.Raw(query, pageSize, offset).Values(&homeResponse)
-
-	if err != nil {
-		return nil, nil, err
-	}
-	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, tableName)
-	if pagination_err != nil {
-		return nil, pagination_data, nil
-	}
-	return homeResponse, pagination_data, nil
+	return result_data, pagination, nil
 }
 
-func FilterFetchSettingPagination(current_page, pageSize int, search string) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-	if current_page <= 0 {
-		current_page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-
-	offset := (current_page - 1) * pageSize
-
-	var homeResponse []orm.Params
+func FilterFetchSettingPagination(currentPage, pageSize int, search string) ([]orm.Params, map[string]interface{}, error) {
+	tableName := "home_pages_setting_table"
 	query := `
-		SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
-		concat(umt.first_name,' ',umt.last_name) as created_by  
-		FROM home_pages_setting_table as hpst
-		LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by
-		WHERE hpst.setting_data LIKE ? OR hpst.section LIKE ? OR hpst.data_type LIKE ?
-		ORDER BY hpst.created_date DESC
-		LIMIT ? OFFSET ?
-	`
-	_, err := db.Raw(query, "%"+search+"%", "%"+search+"%", "%"+search+"%", pageSize, offset).Values(&homeResponse)
+        SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
+        concat(umt.first_name,' ',umt.last_name) as created_by  
+        FROM home_pages_setting_table as hpst
+        LEFT JOIN users as umt ON umt.user_id = hpst.created_by
+        WHERE LOWER(hpst.setting_data) LIKE LOWER(?) OR LOWER(hpst.section) LIKE LOWER(?) OR LOWER(hpst.data_type) LIKE LOWER(?)
+        ORDER BY hpst.created_date DESC
+        LIMIT ? OFFSET ?
+    `
+	countQuery := `
+        SELECT COUNT(*) as count
+        FROM home_pages_setting_table as hpst
+        LEFT JOIN users as umt ON umt.user_id = hpst.created_by
+        WHERE LOWER(hpst.setting_data) LIKE LOWER(?) OR LOWER(hpst.section) LIKE LOWER(?) OR LOWER(hpst.data_type) LIKE LOWER(?)
+    `
+	searchFields := []string{"hpst.setting_data", "hpst.section", "hpst.data_type"}
+	applyPosition := "start"
 
-	if err != nil {
-		return nil, nil, err
+	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, search, searchFields, applyPosition, countQuery)
+	if errs != nil {
+		return nil, nil, errs
 	}
 
-	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, "home_pages_setting_table")
-	if pagination_err != nil {
-		return nil, pagination_data, nil
+	pagination["matchCount"] = 0
+	if count > 0 {
+		pagination["matchCount"] = count
 	}
-	return homeResponse, pagination_data, nil
-}
-
-func FiltersFetchSettingPagination(current_page, pageSize int, search string) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-
-	if current_page <= 0 {
-		current_page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-
-	offset := (current_page - 1) * pageSize
-
-	var homeResponse []orm.Params
-	query := `
-		SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
-		concat(umt.first_name,' ',umt.last_name) as created_by  
-		FROM home_pages_setting_table as hpst
-		LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by
-	`
-	if search != "" {
-		query += `
-			WHERE hpst.setting_data LIKE ? OR hpst.section LIKE ? OR hpst.data_type LIKE ?
-		`
-	}
-
-	query += `
-		ORDER BY hpst.created_date DESC
-		LIMIT ? OFFSET ?
-	`
-
-	var params []interface{}
-	params = append(params, pageSize, offset)
-
-	if search != "" {
-		params = append(params, `%`+search+`%`, `%`+search+`%`, `%`+search+`%`)
-
-	}
-
-	_, err := db.Raw(query, params...).Values(&homeResponse)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, "home_pages_setting_table")
-	if pagination_err != nil {
-		return nil, pagination_data, nil
-	}
-	return homeResponse, pagination_data, nil
+	return filterResult, pagination, nil
 }

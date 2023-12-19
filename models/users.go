@@ -236,3 +236,17 @@ func VerifyEmail(email string, name string) (string, error) {
 	}
 	return res, nil
 }
+
+func FetchUsers(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
+	tableName := "users"
+	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
+	FROM users as u
+	ORDER BY u.user_id
+	LIMIT ? OFFSET ?
+`
+	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)
+	if errs != nil {
+		return nil, nil, errs
+	}
+	return result_data, pagination, nil
+}

@@ -169,6 +169,35 @@ paths:
             type: string
         "403":
           description: ""
+  /homepage/delete_settings:
+    post:
+      tags:
+      - homepage
+      description: |-
+        delete Setting From Database by setting_id
+        <br>
+      operationId: HomeSettingController.DeleteSetting
+      parameters:
+      - in: formData
+        name: setting_id
+        description: User can delete setting after login by setting_id
+        required: true
+        type: integer
+        format: int64
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
+      - in: header
+        name: Authorization
+        description: Bearer YourAccessToken
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} string'
+        "403":
+          description: ""
   /homepage/export:
     post:
       tags:
@@ -223,6 +252,43 @@ paths:
           10 records
         type: integer
         format: int64
+      - in: header
+        name: Authorization
+        description: Bearer YourAccessToken
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.HomePagesSettingTable'
+        "403":
+          description: ""
+  /homepage/filter_hpst:
+    post:
+      tags:
+      - homepage
+      description: |-
+        In this function after login user  can FilterData with pagination and Check Count Of Match Data from  Home page settings
+        <br>
+      operationId: HomeSettingController.After Login User Can Filter Data Home Page
+        settings
+      parameters:
+      - in: formData
+        name: open_page
+        description: if you want to open specific page than give page number
+        type: integer
+        format: int64
+      - in: formData
+        name: page_size
+        description: how much data you want to show at a time default it will give
+          10 records
+        type: integer
+        format: int64
+      - in: formData
+        name: search_string
+        description: it filter in database and give match count records with pagination
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken

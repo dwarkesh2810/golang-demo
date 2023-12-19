@@ -196,16 +196,8 @@ func (u *HomeSettingController) FetchSettings() {
 		return
 	}
 
-	tableName := "home_pages_setting_table"
-	query := `
-	SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
-	concat(umt.first_name,' ',umt.last_name) as created_by
-	FROM home_pages_setting_table as hpst
-	LEFT JOIN users as umt ON umt.user_id = hpst.created_by
-	ORDER BY hpst.created_date DESC
-	LIMIT ? OFFSET ?
-`
-	result, pagination_data, _ := models.FetchSettingPaginations(search.OpenPage, search.PageSize, tableName, query)
+	result, pagination_data, _ := models.FetchSettingPaginations(search.OpenPage, search.PageSize)
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -218,12 +210,21 @@ func (u *HomeSettingController) FetchSettings() {
 		section_message := "found"
 		section := "home_page_setting_success_message_section"
 		message := helpers.TranslateMessage(u.Ctx, section, section_message)
+
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
 	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
 }
 
+// @Title DeleteSetting
+// @Description delete Setting From Database by setting_id
+// @Param setting_id formData int true "User can delete setting after login by setting_id"
+// @Param lang query string false "use en-US or hi-IN"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 200 {string} string
+// @Failure 403
+// @router /delete_settings [post]
 func (u *HomeSettingController) DeleteSetting() {
 
 	// logedIN := u.GetSession("user_login")
@@ -334,7 +335,7 @@ func (c *HomeSettingController) ImportFile() {
 	uploadDir := "uploads/FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
-		// fmt.Println("Error uploading file:", err)
+
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 		return
 	}
@@ -346,7 +347,7 @@ func (c *HomeSettingController) ImportFile() {
 	case strings.HasSuffix(filePath, ".xlsx"):
 		allRows, err = helpers.ReadXLSXFile(filePath)
 		if err != nil {
-			// fmt.Println("Error reading XLSX file:", err)
+
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
 			return
 		}
@@ -363,7 +364,7 @@ func (c *HomeSettingController) ImportFile() {
 		allRows, err = helpers.ReadCSVFile(filePath)
 
 		if err != nil {
-			// fmt.Println("Error reading CSV file:", err)
+
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
 			return
 		}
@@ -375,12 +376,22 @@ func (c *HomeSettingController) ImportFile() {
 		}
 
 	default:
-		// fmt.Println("Unsupported file format")
+
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 		return
 	}
 }
 
+// FiltersFetchSettings
+// @Title After Login User Can Filter Data Home Page settings
+// @Description In this function after login user  can FilterData with pagination and Check Count Of Match Data from  Home page settings
+// @Param open_page formData int false "if you want to open specific page than give page number"
+// @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
+// @Param search_string formData string false "it filter in database and give match count records with pagination"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 200 {object} models.HomePagesSettingTable
+// @Failure 403
+// @router /filter_hpst [post]
 func (u *HomeSettingController) FiltersFetchSettings() {
 
 	var search dto.HomeSeetingSearchFilter

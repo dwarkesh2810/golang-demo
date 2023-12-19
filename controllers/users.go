@@ -138,14 +138,7 @@ func (c *UserController) GetAllUsers() {
 		return
 	}
 
-	tableName := "users"
-	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
-	FROM users as u
-	ORDER BY u.user_id
-	LIMIT ? OFFSET ?
-	
-`
-	result, pagination_data, _ := models.FetchSettingPaginations(search.OpenPage, search.PageSize, tableName, query)
+	result, pagination_data, _ := models.FetchUsers(search.OpenPage, search.PageSize)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]

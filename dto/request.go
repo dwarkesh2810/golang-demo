@@ -88,7 +88,7 @@ type HomeSeetingDelete struct {
 }
 
 type HomeSeetingSearch struct {
-	SettingId int    `json:"setting_id" form:"setting_id" valid:"Required"`
+	SettingId int    `json:"setting_id" form:"setting_id"`
 	LangKey   string `json:"lang_key" form:"lang_key"`
 	PageSize  int    `json:"page_size" form:"page_size"`
 	OpenPage  int    `json:"open_page" form:"open_page"`
