@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dwarkesh2810/golang-demo/admin"
 	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/controllers"
 	"github.com/dwarkesh2810/golang-demo/models"
@@ -24,6 +25,8 @@ func init() {
 	languageLablesFunc.FetchAllAndWriteInINIFiles()
 
 	validations.Init()
+
+	admin.CreateTask("EmailLog", "0 */5 * * * *", admin.SendPendingEmail)
 }
 
 func main() {

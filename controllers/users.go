@@ -50,6 +50,10 @@ func (c *UserController) Login() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+	if dbUser.Email == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		return
+	}
 	err = helpers.VerifyHashedData(dbUser.Password, userReq.Password)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "credential"))
@@ -61,7 +65,7 @@ func (c *UserController) Login() {
 		return
 	}
 	if userData.Email == "" && userData.FirstName == "" {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "credential"))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
 		return
 	}
 	expirationTime := time.Now().Add(1 * time.Hour)
@@ -154,7 +158,7 @@ func (c *UserController) GetAllUsers() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 }
 
 // VerifyEmailOTP ...
@@ -229,13 +233,19 @@ func (c *UserController) UpdateUser() {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "userexist"))
 			return
 		}
+		if data.Email == "" {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
+			return
+		}
 	}
-	output, err := models.UpdateUser(bodyData)
+	user, err := models.UpdateUser(bodyData)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
-	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
+
+	userDetails := dto.UserDetailsResponse{Id: uint(user.UserId), FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, userDetails, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
 }
 
 // ResetPassword ...
@@ -334,6 +344,10 @@ func (c *UserController) ForgotPassword() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+	if output.Email == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		return
+	}
 	res, err := models.VerifyEmail(output.Email, output.FirstName)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
@@ -367,6 +381,10 @@ func (c *UserController) VerifyOtpResetpassword() {
 	output, err := models.GetUserByEmail(bodyData.Username)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		return
+	}
+	if output.Email == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
 		return
 	}
 	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
@@ -415,6 +433,10 @@ func (c *UserController) SearchUser() {
 	user, err := models.SearchUser(bodyData.Search)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		return
+	}
+	if len(user) == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 		return
 	}
 	var output []dto.UserDetailsResponse
