@@ -102,6 +102,12 @@ func (c *CarController) UpdateCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+
+	if data.CarName == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		return
+	}
+
 	file, fileheader, err := c.GetFile("file")
 	if err != nil {
 		if cars.CarName == "" {
@@ -184,6 +190,12 @@ func (c *CarController) DeleteCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+
+	if res.CarName == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		return
+	}
+
 	data, err := models.DeleteCar(car.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
