@@ -37,7 +37,7 @@ paths:
         "403":
           description: ""
   /car/cars:
-    get:
+    post:
       tags:
       - car
       operationId: CarController.get cars
@@ -46,7 +46,7 @@ paths:
         name: body
         description: Insert New User
         schema:
-          $ref: '#/definitions/dto.ValidationReq'
+          $ref: '#/definitions/dto.PaginationReq'
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -344,7 +344,7 @@ paths:
         description: login User
         required: true
         schema:
-          $ref: '#/definitions/models.UserLoginRequest'
+          $ref: '#/definitions/dto.UserLoginRequest'
       - in: query
         name: lang
         description: use en-US or hi-IN
@@ -535,7 +535,7 @@ paths:
         description: update New User
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateUserRequest'
+          $ref: '#/definitions/dto.UpdateUserRequest'
       - in: query
         name: lang
         description: use en-US or hi-IN
@@ -553,7 +553,7 @@ paths:
         "403":
           description: ""
   /user/secure/users/:
-    get:
+    post:
       tags:
       - user
       description: |-
@@ -569,7 +569,7 @@ paths:
         name: body
         description: Insert New User
         schema:
-          $ref: '#/definitions/dto.HomeSeetingSearch'
+          $ref: '#/definitions/dto.PaginationReq'
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -618,21 +618,6 @@ definitions:
       car_id:
         type: integer
         format: int32
-  dto.HomeSeetingSearch:
-    title: HomeSeetingSearch
-    type: object
-    properties:
-      lang_key:
-        type: string
-      open_page:
-        type: integer
-        format: int64
-      page_size:
-        type: integer
-        format: int64
-      setting_id:
-        type: integer
-        format: int64
   dto.NewUserRequest:
     title: NewUserRequest
     type: object
@@ -652,6 +637,16 @@ definitions:
         type: string
       role:
         type: string
+  dto.PaginationReq:
+    title: PaginationReq
+    type: object
+    properties:
+      open_page:
+        type: integer
+        format: int64
+      page_size:
+        type: integer
+        format: int64
   dto.ResetUserPassword:
     title: ResetUserPassword
     type: object
@@ -684,16 +679,34 @@ definitions:
     properties:
       username:
         type: string
-  dto.ValidationReq:
-    title: ValidationReq
+  dto.UpdateUserRequest:
+    title: UpdateUserRequest
     type: object
     properties:
-      open_page:
+      country_id:
         type: integer
         format: int64
-      page_size:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      role:
+        type: string
+      user_id:
         type: integer
         format: int64
+  dto.UserLoginRequest:
+    title: UserLoginRequest
+    type: object
+    properties:
+      password:
+        type: string
+      username:
+        type: string
   dto.VerifyEmailOTPRequest:
     title: VerifyEmailOTPRequest
     type: object
@@ -732,12 +745,6 @@ definitions:
       UpdatedDate:
         type: string
         format: datetime
-  models.UpdateUserRequest:
-    title: UpdateUserRequest
-    type: object
-  models.UserLoginRequest:
-    title: UserLoginRequest
-    type: object
   models.Users:
     title: Users
     type: object
