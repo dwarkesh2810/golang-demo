@@ -94,7 +94,7 @@ func (c *UserController) RegisterNewUser() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
-	
+
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
