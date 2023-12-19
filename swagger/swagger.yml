@@ -23,7 +23,7 @@ paths:
         description: get perticuler car
         required: true
         schema:
-          $ref: '#/definitions/models.GetcarRequest'
+          $ref: '#/definitions/dto.GetcarRequest'
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -781,9 +781,6 @@ definitions:
         type: string
       username:
         type: string
-  models.GetcarRequest:
-    title: GetcarRequest
-    type: object
   models.HomePagesSettingTable:
     title: HomePagesSettingTable
     type: object
