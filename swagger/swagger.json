@@ -596,6 +596,42 @@
                 }
             }
         },
+        "/user/list_countries": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "description": "In this function after login user  can Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "CountryController.After Login User Can Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/user/login": {
             "post": {
                 "tags": [
