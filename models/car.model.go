@@ -35,7 +35,7 @@ func GetSingleCar(id uint) (Car, error) {
 	return car, nil
 }
 
-func UpdateCar(data dto.UpdateCarRequest) (interface{}, error) {
+func UpdateCar(data dto.UpdateCarRequest) (Car, error) {
 	o := orm.NewOrm()
 	var car = Car{
 		Id:         data.Id,
@@ -49,10 +49,10 @@ func UpdateCar(data dto.UpdateCarRequest) (interface{}, error) {
 
 	num, err := o.Update(&car, "id", "car_name", "modified_by", "model", "car_type", "car_image", "updated_at")
 	if err != nil {
-		return num, err
+		return car, err
 	}
 	if num == 0 {
-		return nil, errors.New("NOT_FOUND")
+		return car, errors.New("NOT_FOUND")
 	}
 	return car, nil
 }

@@ -125,7 +125,7 @@ func DeleteUser(id int) (string, error) {
 	if num == 0 {
 		return "", errors.New("DATABASE_ERROR")
 	}
-	return "Data_Delete", nil
+	return "User deleted success", nil
 }
 func GetEmailOTP(username string, otp string) (Users, error) {
 	o := orm.NewOrm()
