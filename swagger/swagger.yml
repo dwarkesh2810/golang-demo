@@ -286,8 +286,26 @@ paths:
         type: integer
         format: int64
       - in: formData
-        name: search_string
-        description: it filter in database and give match count records with pagination
+        name: setting_data
+        description: it filter in database and give match
+        type: string
+      - in: formData
+        name: data_type
+        description: it filter in database and give match
+        type: string
+      - in: formData
+        name: unique_code
+        description: it filter in database and give match
+        type: string
+      - in: formData
+        name: section
+        description: it filter in database and give match
+        type: string
+      - in: formData
+        name: apply_position
+        description: if you apply_position pass start than it will match record with
+          starting of a string or if you  apply_position not pass it will search in
+          perticular/allcolumns  all string
         type: string
       - in: header
         name: Authorization
@@ -342,8 +360,12 @@ paths:
         description: body for file
         type: file
       - in: formData
-        name: data_type
+        name: setting_data
         description: body for file
+        type: string
+      - in: formData
+        name: data_type
+        description: body for html text or other
         type: string
       - in: formData
         name: section
