@@ -56,7 +56,7 @@ func TestNewUser(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["status"] == 0 {
 			t.Fatalf("Error in register new user")
 		}
 		t.Log(w.Body)
@@ -86,7 +86,7 @@ func TestVerifyUserEmail(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Error in register new user")
 		}
 		t.Log(w.Body)
@@ -114,7 +114,7 @@ func TestGetusers(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Data Not found")
 		}
 		t.Log(w.Body)
@@ -140,7 +140,7 @@ func TestUpdateUser(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Some Error in update in user")
 		}
 		t.Log(w.Body)
@@ -208,7 +208,7 @@ func TestSerchUser(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Some Error in update in user")
 		}
 		t.Log(w.Body)

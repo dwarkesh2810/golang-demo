@@ -31,7 +31,7 @@ func TestGetCars(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Error in get car")
 		}
 		t.Log(w.Body)
@@ -56,7 +56,7 @@ func TestGetCars(t *testing.T) {
 			t.Fatalf(err.Error())
 			return
 		}
-		if len(resultMap) == 0 {
+		if resultMap["ResStatus"] == 0 {
 			t.Fatalf("Error in get car")
 		}
 		t.Log(w.Body)
@@ -107,7 +107,7 @@ func TestRemoveCar(t *testing.T) {
 		return
 	}
 	w := RunControllerRoute(endPoint, r, &car_ctrl, tokan, "post:DeleteCar")
-	if w.Code != http.StatusOK {
+	if w.Code != http.StatusOK {	
 		t.Fatalf("Expected status code %d but got %d", http.StatusOK, w.Code)
 	}
 	var resultMap map[string]interface{}
@@ -116,7 +116,7 @@ func TestRemoveCar(t *testing.T) {
 		t.Fatalf(err.Error())
 		return
 	}
-	if len(resultMap) == 0 {
+	if resultMap["ResStatus"] == 0 {
 		t.Fatalf("Some Error in Delete car")
 	}
 	t.Log(w.Body)

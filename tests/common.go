@@ -39,7 +39,7 @@ func RunControllerRoute(endPoint string, r *http.Request, ctrl beego.ControllerI
 	return w
 }
 
-func TruncateTable(tableName string) {
+func TruncateTable(tableName string, column string) {
 	o := orm.NewOrm()
 	_, err := o.Raw("TRUNCATE TABLE " + tableName).Exec()
 
@@ -47,7 +47,7 @@ func TruncateTable(tableName string) {
 		fmt.Println("Failed to truncate table:", err)
 		return
 	}
-	orm.NewOrm().Raw(`SELECT setval('"` + tableName + `_user_id_seq"', 1, false)`).Exec()
+	orm.NewOrm().Raw(`SELECT setval('"` + tableName + `_` + column + `_seq"', 1, false)`).Exec()
 }
 
 func LoginTokan() string {
@@ -75,10 +75,10 @@ func LoginTokan() string {
 		log.Print(err.Error())
 		return ""
 	}
-	Data := resultMap["Result"]
+	Data := resultMap["result"]
 	dataMap, ok := Data.(map[string]interface{})
 	if !ok {
-		log.Print("Result is not a map[string]interface{}", resultMap["Success"])
+		log.Print("Result is not a map[string]interface{}", resultMap["status"])
 		return ""
 	}
 	Tokan := dataMap["Tokan"].(string)
