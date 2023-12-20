@@ -24,7 +24,7 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 
 	"github.com/beego/beego/v2/server/web/context"
-	// "github.com/golang-jwt/jwt"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jung-kurt/gofpdf"
 	"github.com/tealeg/xlsx"
@@ -63,8 +63,6 @@ func VerifyHashedData(hashedString string, dataString string) error {
 func SendMailOTp(userEmail string, name string, subject string, body string) (bool, error) {
 	from := conf.ConfigMaps["email"]
 	password := conf.ConfigMaps["password"]
-	// from, _ := config.String("EMAIL")
-	// password, _ := config.String("PASSWORD")
 	to := []string{
 		userEmail,
 	}
@@ -268,7 +266,7 @@ func SetLanguage(ctx *context.Context, lang string) {
 	if err != nil {
 		log.Print(err)
 	}
-	ctx.SetCookie("lang", lang, 24*60*60, "/") // cookie to expire in 24 hours
+	ctx.SetCookie("lang", lang, 24*60*60, "/")
 
 	defaultLang = lang
 }
@@ -322,7 +320,6 @@ func CreateINIFiles(data []map[string]string) error {
 			return err
 		}
 
-		// log.Printf("INI file created successfully: %s", fileName)
 	}
 
 	return nil
@@ -330,7 +327,7 @@ func CreateINIFiles(data []map[string]string) error {
 func formateCSVDate(value interface{}) string {
 	switch v := value.(type) {
 	case time.Time:
-		return v.Format("2006-01-02 15:04:05") // Format the time value as needed
+		return v.Format("2006-01-02 15:04:05")
 	default:
 		return fmt.Sprintf("%v", value)
 	}
@@ -377,7 +374,7 @@ func CreateFile(data []map[string]interface{}, headers []string, folderPath, fil
 		}
 
 		if folderPath == "" {
-			folderPath = "uploads/FILES/XLSX"
+			folderPath = "assets/uploads/FILES/XLSX"
 		}
 
 		if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
@@ -393,7 +390,7 @@ func CreateFile(data []map[string]interface{}, headers []string, folderPath, fil
 
 	case "CSV":
 		if folderPath == "" {
-			folderPath = "uploads/FILES/CSV"
+			folderPath = "assets/uploads/FILES/CSV"
 		}
 
 		if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
@@ -474,7 +471,7 @@ func CreateFile(data []map[string]interface{}, headers []string, folderPath, fil
 
 		// If filepath not given, it takes the default
 		if folderPath == "" {
-			folderPath = "uploads/FILES/PDF"
+			folderPath = "assets/uploads/FILES/PDF"
 		}
 
 		// If the folder is not present in the directory, it creates a new folder directory
@@ -520,7 +517,6 @@ func ReadXLSXFiles(filePath string) ([]map[string]interface{}, error) {
 			allRows = append(allRows, rowData)
 		}
 	}
-
 	return allRows, nil
 }
 
@@ -796,65 +792,6 @@ func NewCarType(input string) (dto.CarType, error) {
 }
 
 /*FILTER DATA ACCORDING TO QUERY AND GIVE FILTER DATA COUNTS*/
-// func FilterData(currentPage, pageSize int, query, tableName, search string, searchFields []string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
-// 	db := orm.NewOrm()
-// 	if currentPage <= 0 {
-// 		currentPage = 1
-// 	}
-// 	if pageSize <= 0 {
-// 		pageSize = 10
-// 	}
-// 	offset := (currentPage - 1) * pageSize
-
-// 	var homeResponse []orm.Params
-// 	search = strings.ToLower(search)
-
-// 	interfaceSearchFields := generateSearchParameters(searchFields, search, applyPosition)
-
-// 	if len(interfaceSearchFields) == 0 {
-// 		return nil, nil, 0, nil
-// 	}
-
-// 	_, err := db.Raw(query, append(interfaceSearchFields, pageSize, offset)...).Values(&homeResponse)
-// 	if err != nil {
-// 		return nil, nil, 0, err
-// 	}
-
-// 	var totalMatchData int
-
-// 	if search != "" {
-// 		err = db.Raw(countQuery, interfaceSearchFields...).QueryRow(&totalMatchData)
-// 		if err != nil {
-// 			return nil, nil, 0, err
-// 		}
-// 	}
-
-// 	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName)
-// 	if paginationErr != nil {
-// 		return nil, paginationData, 0, paginationErr
-// 	}
-
-// 	return homeResponse, paginationData, totalMatchData, nil
-// }
-
-// func generateSearchParameters(fields []string, search string, applyPostion string) []interface{} {
-// 	var parameters []interface{}
-// 	applyPostion = strings.ToUpper(applyPostion)
-// 	for _, field := range fields {
-
-// 		if applyPostion == "" {
-// 			parameters = append(parameters, "%"+search+"%")
-// 		} else if applyPostion == "START" {
-// 			parameters = append(parameters, search+"%")
-// 		} else {
-// 			parameters = append(parameters, "%"+search)
-// 			log.Print(field)
-// 		}
-// 	}
-
-// 	return parameters
-// }
-
 func FilterData(currentPage, pageSize int, query, tableName string, searchFields map[string]string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
 	db := orm.NewOrm()
 
@@ -997,11 +934,7 @@ func ConvertStructToMap(data interface{}) (map[string]interface{}, error) {
 	return result, nil
 }
 
-// func CurrentDateTime() time.Time {
-// 	istLocation, _ := time.LoadLocation("Asia/Kolkata")
-// 	return time.Now().In(istLocation)
-// }
-
+/*-----------------------Image validation----------------------------------*/
 func GetFileExtension(file string) string {
 	splitFileName := strings.Split(file, ".")
 	return splitFileName[len(splitFileName)-1]
@@ -1012,3 +945,5 @@ func ValidImageType(file string) bool {
 	ext := GetFileExtension(file)
 	return CheckIfExists(ext, extensions)
 }
+
+/*-------------------------------end----------------------------------------*/

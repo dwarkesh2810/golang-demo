@@ -87,7 +87,7 @@ paths:
         type: string
       - in: formData
         name: file
-        description: File to be uploaded
+        description: File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]
         required: true
         type: file
       - in: header
@@ -155,7 +155,7 @@ paths:
         type: string
       - in: formData
         name: file
-        description: File to be uploaded
+        description: File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]
         type: file
       - in: header
         name: Authorization

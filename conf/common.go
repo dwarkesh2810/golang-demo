@@ -17,19 +17,6 @@ func loadConfig(ext, path string) error {
 	return nil
 }
 
-// func LoadConfig() error {
-// 	return loadConfig("ini", "/home/silicon/Dwarkesh/golang/golang-demo/golang-demo/conf/app.conf")
-// }
-
-// func GetValue(key string) (string, error) {
-// 	LoadConfig()
-// 	val, err := Config.String(key)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return val, nil
-// }
-
 func GetConfigMap() error {
 	loadConfig("ini", "conf/app.conf")
 	a, err := Config.GetSection("golang-demo")

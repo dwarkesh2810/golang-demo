@@ -9,7 +9,6 @@ import (
 
 func TestCarModels(t *testing.T) {
 	t.Run("Register New car", func(t *testing.T) {
-		// TruncateTable("car")
 		car := dto.GetNewCarRequest{
 			CarName:    "swift",
 			ModifiedBy: "suzuki",
@@ -29,7 +28,6 @@ func TestCarModels(t *testing.T) {
 	})
 
 	t.Run("Update  car", func(t *testing.T) {
-		// TruncateTable("car")
 		car := dto.UpdateCarRequest{
 			Id: 4,
 			CarName:    "swift",

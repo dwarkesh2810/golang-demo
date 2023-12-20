@@ -43,7 +43,6 @@ func RegisterSetting(c dto.HomeSeetingInsert, user_id float64, file_path interfa
 func UpdateUniqueCode(user_id int) (int64, error) {
 	db := orm.NewOrm()
 
-	// unique_codes := helpers.UniqueCode(user_id, os.Getenv("homePageModule"))
 	unique_codes := helpers.UniqueCode(user_id, "homePageModule")
 
 	home_page_setting := HomePagesSettingTable{PageSettingId: user_id}

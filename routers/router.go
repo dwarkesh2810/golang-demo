@@ -50,7 +50,6 @@ func init() {
 			beego.NSBefore(middleware.JWTMiddleware),
 			beego.NSRouter("/", &controllers.CarController{}, "post:GetSingleCar"),
 			beego.NSRouter("/cars", &controllers.CarController{}, "get:GetAllCars"),
-			// beego.NSRouter("/search", &controllers.CarController{}, "post:GetCarUsingSearch"),
 			beego.NSRouter("/create", &controllers.CarController{}, "post:AddNewCar"),
 			beego.NSRouter("/update", &controllers.CarController{}, "put:UpdateCar"),
 			beego.NSRouter("/delete", &controllers.CarController{}, "delete:DeleteCar"),

@@ -25,7 +25,7 @@ type CarController struct {
 // @Param modified_by formData string true "modified by"
 // @Param model formData string true "Car Model"
 // @Param type formData string true "accepted type 'sedan','SUV','hatchback'"
-// @Param file formData file true "File to be uploaded"
+// @Param file formData file true "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
@@ -62,7 +62,7 @@ func (c *CarController) AddNewCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
 		return
 	}
-	uploadDir := "./uploads/Cars/images/"
+	uploadDir := "./assets/uploads/Cars/images/"
 	filepaths, err := helpers.UploadFile(file, fileheader, uploadDir)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
@@ -85,7 +85,7 @@ func (c *CarController) AddNewCar() {
 // @Param modified_by formData string false "modified by"
 // @Param model formData string false "Car Model"
 // @Param type formData string false "accepted type 'sedan','SUV','hatchback'"
-// @Param file formData file false "File to be uploaded"
+// @Param file formData file false "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
@@ -157,7 +157,7 @@ func (c *CarController) UpdateCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
 		return
 	}
-	uploadDir := "./uploads/Cars/images/"
+	uploadDir := "./assets/uploads/Cars/images/"
 	filepaths, err := helpers.UploadFile(file, fileheader, uploadDir)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))

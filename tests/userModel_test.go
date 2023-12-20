@@ -9,7 +9,6 @@ import (
 
 func TestUserModels(t *testing.T) {
 	t.Run("Register new user", func(t *testing.T) {
-		// TruncateTable("users")
 		var user = dto.NewUserRequest{
 			FirstName:   "Ridesh",
 			LastName:    "Nath",

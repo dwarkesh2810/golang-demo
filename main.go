@@ -4,6 +4,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/admin"
 	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/controllers"
+	"github.com/dwarkesh2810/golang-demo/logger"
 	"github.com/dwarkesh2810/golang-demo/models"
 	_ "github.com/dwarkesh2810/golang-demo/routers"
 	"github.com/dwarkesh2810/golang-demo/validations"
@@ -25,7 +26,7 @@ func init() {
 	languageLablesFunc.FetchAllAndWriteInINIFiles()
 
 	validations.Init()
-
+	logger.Init()
 	admin.CreateTask("EmailLog", "0 */5 * * * *", admin.SendPendingEmail)
 }
 
