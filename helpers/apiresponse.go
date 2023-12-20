@@ -87,9 +87,9 @@ func ApiSuccessResponse(w http.ResponseWriter, result interface{}, message strin
 	}
 
 	responseMap := map[string]interface{}{
-		"Message":   message,
-		"ResStatus": 1,
-		"Result":    result,
+		"message":   message,
+		"status": 1,
+		"result":    result,
 	}
 
 	if pagination_data != nil && pagination_data != "" {

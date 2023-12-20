@@ -49,6 +49,13 @@ func (c *CarController) AddNewCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
 		return
 	}
+
+	ok := helpers.ValidImageType(fileheader.Filename)
+	if !ok {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+		return
+	}
+
 	var carType string = string(cars.Type)
 	cars.Type, err = helpers.NewCarType(carType)
 	if err != nil {
@@ -109,6 +116,13 @@ func (c *CarController) UpdateCar() {
 	}
 
 	file, fileheader, err := c.GetFile("file")
+
+	ok := helpers.ValidImageType(fileheader.Filename)
+	if !ok {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+		return
+	}
+
 	if err != nil {
 		if cars.CarName == "" {
 			cars.CarName = data.CarName

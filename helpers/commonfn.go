@@ -997,7 +997,18 @@ func ConvertStructToMap(data interface{}) (map[string]interface{}, error) {
 	return result, nil
 }
 
-func CurrentDateTime() time.Time {
-	istLocation, _ := time.LoadLocation("Asia/Kolkata")
-	return time.Now().In(istLocation)
+// func CurrentDateTime() time.Time {
+// 	istLocation, _ := time.LoadLocation("Asia/Kolkata")
+// 	return time.Now().In(istLocation)
+// }
+
+func GetFileExtension(file string) string {
+	splitFileName := strings.Split(file, ".")
+	return splitFileName[len(splitFileName)-1]
+}
+
+func ValidImageType(file string) bool {
+	extensions := []string{"jpeg", "jpg", "png", "svg"}
+	ext := GetFileExtension(file)
+	return CheckIfExists(ext, extensions)
 }
