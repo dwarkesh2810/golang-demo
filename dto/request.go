@@ -69,7 +69,7 @@ type LanguageLableInsert struct {
 type HomeSeetingInsert struct {
 	Section     string `json:"section" form:"section" valid:"Required;MinSize(3)"`
 	DataType    string `json:"data_type" form:"data_type" valid:"Required; WithIn"`
-	SettingData string `json:"setting_data" form:"setting_data" valid:"Required"`
+	SettingData string `json:"setting_data" form:"setting_data"`
 	LangKey     string `json:"lang_key" form:"lang_key"`
 }
 
@@ -95,11 +95,15 @@ type HomeSeetingSearch struct {
 }
 
 type HomeSeetingSearchFilter struct {
-	SettingId   int    `json:"setting_id" form:"setting_id"`
-	SearchParam string `json:"search_string" form:"search_string"`
-	LangKey     string `json:"lang_key" form:"lang_key"`
-	PageSize    int    `json:"page_size" form:"page_size"`
-	OpenPage    int    `json:"open_page" form:"open_page"`
+	UniqueCode          string `json:"unique_code" form:"unique_code"`
+	SearchParam         string `json:"search_string" form:"search_string"`
+	LangKey             string `json:"lang_key" form:"lang_key"`
+	PageSize            int    `json:"page_size" form:"page_size"`
+	OpenPage            int    `json:"open_page" form:"open_page"`
+	DataType            string `json:"data_type" form:"data_type"`
+	Section             string `json:"section" form:"section"`
+	SettingData         string `json:"setting_data" form:"setting_data"`
+	ApplySearchPosition string `json:"apply_position" form:"apply_position"`
 }
 
 type FileType struct {

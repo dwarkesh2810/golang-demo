@@ -24,7 +24,8 @@ type HomeSettingController struct {
 // @Title After Login User Can Register Home Page settings
 // @Description In this function after login can register Home page settings
 // @Param	setting_data   formData 	file	false		"body for file"
-// @Param	data_type   formData 	string	false		"body for file"
+// @Param	setting_data   formData 	string	false		"body for file"
+// @Param	data_type   formData 	string	false		"body for html text or other "
 // @Param	section   formData 	string	false		"body for file"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.HomePagesSettingTable
@@ -387,42 +388,53 @@ func (c *HomeSettingController) ImportFile() {
 // @Description In this function after login user  can FilterData with pagination and Check Count Of Match Data from  Home page settings
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
-// @Param search_string formData string false "it filter in database and give match count records with pagination"
+// @Param setting_data formData string false "it filter in database and give match"
+// @Param data_type formData string false "it filter in database and give match"
+// @Param unique_code formData string false "it filter in database and give match"
+// @Param section formData string false "it filter in database and give match"
+// @Param apply_position formData string false "if you apply_position pass start than it will match record with starting of a string or if you  apply_position not pass it will search in perticular/allcolumns  all string"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /filter_hpst [post]
 func (u *HomeSettingController) FiltersFetchSettings() {
-
 	var search dto.HomeSeetingSearchFilter
 	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
 		return
 	}
 
 	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
 
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&search); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
-		return
+	searchFields := map[string]string{
+		"setting_data": search.SettingData,
+		"section":      search.Section,
+		"data_type":    search.DataType,
+		"unique_code":  search.UniqueCode,
 	}
+	if search.Section != "" || search.SettingData != "" || search.DataType != "" || search.UniqueCode != "" {
+		result, pagination_data, _ := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
+		if result == nil && pagination_data["matchCount"] == 0 {
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search Match Not Found")
+			return
+		}
 
-	result, pagination_data, _ := models.FilterFetchSettingPagination(search.OpenPage, search.PageSize, search.SearchParam)
-	if pagination_data["pageOpen_error"] == 1 {
-		current := pagination_data["current_page"]
-		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
-		return
-	}
+		if pagination_data["pageOpen_error"] == 1 {
+			current := pagination_data["current_page"]
+			last := pagination_data["last_page"]
+			message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+			return
+		}
 
-	if result != nil {
-		section_message := "found"
-		section := "home_page_setting_success_message_section"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
-		return
+		if result != nil {
+			section_message := "found"
+			section := "home_page_setting_success_message_section"
+			message := helpers.TranslateMessage(u.Ctx, section, section_message)
+			helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+			return
+		}
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search Field Should Not Be Empty! Atleast One Field TO pass")
 }

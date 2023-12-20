@@ -393,27 +393,27 @@ func FetchSettingPaginations(current_page, pageSize int) ([]orm.Params, map[stri
 	return result_data, pagination, nil
 }
 
-func FilterFetchSettingPagination(currentPage, pageSize int, search string) ([]orm.Params, map[string]interface{}, error) {
+func FilterWithPaginationFetchSettings(currentPage, pageSize int, applyPositions string, searchFields map[string]string) ([]orm.Params, map[string]interface{}, error) {
+
 	tableName := "home_pages_setting_table"
+
 	query := `
         SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
         concat(umt.first_name,' ',umt.last_name) as created_by  
         FROM home_pages_setting_table as hpst
         LEFT JOIN users as umt ON umt.user_id = hpst.created_by
-        WHERE LOWER(hpst.setting_data) LIKE LOWER(?) OR LOWER(hpst.section) LIKE LOWER(?) OR LOWER(hpst.data_type) LIKE LOWER(?)
-        ORDER BY hpst.created_date DESC
-        LIMIT ? OFFSET ?
     `
 	countQuery := `
         SELECT COUNT(*) as count
         FROM home_pages_setting_table as hpst
         LEFT JOIN users as umt ON umt.user_id = hpst.created_by
-        WHERE LOWER(hpst.setting_data) LIKE LOWER(?) OR LOWER(hpst.section) LIKE LOWER(?) OR LOWER(hpst.data_type) LIKE LOWER(?)
     `
-	searchFields := []string{"hpst.setting_data", "hpst.section", "hpst.data_type"}
-	applyPosition := "start"
 
-	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, search, searchFields, applyPosition, countQuery)
+	applyPosition := ""
+	if applyPositions != "" {
+		applyPosition = applyPositions
+	}
+	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery)
 	if errs != nil {
 		return nil, nil, errs
 	}
@@ -422,5 +422,6 @@ func FilterFetchSettingPagination(currentPage, pageSize int, search string) ([]o
 	if count > 0 {
 		pagination["matchCount"] = count
 	}
+
 	return filterResult, pagination, nil
 }

@@ -796,8 +796,68 @@ func NewCarType(input string) (dto.CarType, error) {
 }
 
 /*FILTER DATA ACCORDING TO QUERY AND GIVE FILTER DATA COUNTS*/
-func FilterData(currentPage, pageSize int, query, tableName, search string, searchFields []string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
+// func FilterData(currentPage, pageSize int, query, tableName, search string, searchFields []string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
+// 	db := orm.NewOrm()
+// 	if currentPage <= 0 {
+// 		currentPage = 1
+// 	}
+// 	if pageSize <= 0 {
+// 		pageSize = 10
+// 	}
+// 	offset := (currentPage - 1) * pageSize
+
+// 	var homeResponse []orm.Params
+// 	search = strings.ToLower(search)
+
+// 	interfaceSearchFields := generateSearchParameters(searchFields, search, applyPosition)
+
+// 	if len(interfaceSearchFields) == 0 {
+// 		return nil, nil, 0, nil
+// 	}
+
+// 	_, err := db.Raw(query, append(interfaceSearchFields, pageSize, offset)...).Values(&homeResponse)
+// 	if err != nil {
+// 		return nil, nil, 0, err
+// 	}
+
+// 	var totalMatchData int
+
+// 	if search != "" {
+// 		err = db.Raw(countQuery, interfaceSearchFields...).QueryRow(&totalMatchData)
+// 		if err != nil {
+// 			return nil, nil, 0, err
+// 		}
+// 	}
+
+// 	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName)
+// 	if paginationErr != nil {
+// 		return nil, paginationData, 0, paginationErr
+// 	}
+
+// 	return homeResponse, paginationData, totalMatchData, nil
+// }
+
+// func generateSearchParameters(fields []string, search string, applyPostion string) []interface{} {
+// 	var parameters []interface{}
+// 	applyPostion = strings.ToUpper(applyPostion)
+// 	for _, field := range fields {
+
+// 		if applyPostion == "" {
+// 			parameters = append(parameters, "%"+search+"%")
+// 		} else if applyPostion == "START" {
+// 			parameters = append(parameters, search+"%")
+// 		} else {
+// 			parameters = append(parameters, "%"+search)
+// 			log.Print(field)
+// 		}
+// 	}
+
+// 	return parameters
+// }
+
+func FilterData(currentPage, pageSize int, query, tableName string, searchFields map[string]string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
 	db := orm.NewOrm()
+
 	if currentPage <= 0 {
 		currentPage = 1
 	}
@@ -807,13 +867,22 @@ func FilterData(currentPage, pageSize int, query, tableName, search string, sear
 	offset := (currentPage - 1) * pageSize
 
 	var homeResponse []orm.Params
-	search = strings.ToLower(search)
 
-	interfaceSearchFields := generateSearchParameters(searchFields, search, applyPosition)
+	if len(searchFields) > 0 {
+		query += " WHERE 1=1"
+		countQuery += " WHERE 1=1"
+	}
+
+	interfaceSearchFields := generateSearchParameters(searchFields, applyPosition)
 
 	if len(interfaceSearchFields) == 0 {
 		return nil, nil, 0, nil
 	}
+
+	whereClause := generateWhereClause(searchFields, applyPosition)
+	query = query + whereClause + `
+        LIMIT ? OFFSET ?
+    `
 
 	_, err := db.Raw(query, append(interfaceSearchFields, pageSize, offset)...).Values(&homeResponse)
 	if err != nil {
@@ -822,7 +891,8 @@ func FilterData(currentPage, pageSize int, query, tableName, search string, sear
 
 	var totalMatchData int
 
-	if search != "" {
+	if len(searchFields) > 0 {
+		countQuery = countQuery + whereClause
 		err = db.Raw(countQuery, interfaceSearchFields...).QueryRow(&totalMatchData)
 		if err != nil {
 			return nil, nil, 0, err
@@ -837,18 +907,42 @@ func FilterData(currentPage, pageSize int, query, tableName, search string, sear
 	return homeResponse, paginationData, totalMatchData, nil
 }
 
-func generateSearchParameters(fields []string, search string, applyPostion string) []interface{} {
+func generateWhereClause(fields map[string]string, applyPosition string) string {
+	var conditions []string
+	applyPosition = strings.ToUpper(applyPosition)
+	for field, value := range fields {
+		if value != "" {
+			condition := ""
+			if applyPosition == "" {
+				condition = field + " LIKE ?"
+			} else if applyPosition == "START" {
+				condition = field + " LIKE ?"
+			} else {
+				condition = field + " LIKE ?"
+				log.Print(value)
+			}
+			conditions = append(conditions, condition)
+		}
+	}
+	if len(conditions) > 0 {
+		whereClause := " AND " + strings.Join(conditions, " OR ")
+		return whereClause
+	}
+	return ""
+}
+
+func generateSearchParameters(fields map[string]string, applyPostion string) []interface{} {
 	var parameters []interface{}
 	applyPostion = strings.ToUpper(applyPostion)
 	for _, field := range fields {
-
-		if applyPostion == "" {
-			parameters = append(parameters, "%"+search+"%")
-		} else if applyPostion == "START" {
-			parameters = append(parameters, search+"%")
-		} else {
-			parameters = append(parameters, "%"+search)
-			log.Print(field)
+		if field != "" {
+			if applyPostion == "" {
+				parameters = append(parameters, "%"+field+"%")
+			} else if applyPostion == "START" {
+				parameters = append(parameters, field+"%")
+			} else {
+				parameters = append(parameters, "%"+field)
+			}
 		}
 	}
 
