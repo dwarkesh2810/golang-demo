@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -44,7 +45,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 		PhoneNumber: Data.PhoneNumber,
 		Password:    pass,
 		Role:        Data.Role,
-		CreatedDate: helpers.CurrentDateTime(),
+		CreatedDate: time.Now(),
 	}
 	num, err := o.Insert(&user)
 	if err != nil {
@@ -88,7 +89,7 @@ func UpdateUser(Data dto.UpdateUserRequest) (Users, error) {
 		CountryId:   Data.Country,
 		Email:       Data.Email,
 		Role:        Data.Role,
-		UpdatedDate: helpers.CurrentDateTime(),
+		UpdatedDate: time.Now(),
 		PhoneNumber: Data.PhoneNumber,
 	}
 	o := orm.NewOrm()
@@ -139,7 +140,7 @@ func GetEmailOTP(username string, otp string) (Users, error) {
 
 func UpdateIsVerified(id int) error {
 	o := orm.NewOrm()
-	var user = Users{UserId: id, Isverified: 1, UpdatedDate: helpers.CurrentDateTime()}
+	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
 	num, err := o.Update(&user, "isverified", "updated_date")
 	if err != nil {
 		return err

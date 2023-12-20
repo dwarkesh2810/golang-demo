@@ -28,7 +28,7 @@ func RegisterSetting(c dto.HomeSeetingInsert, user_id float64, file_path interfa
 		SettingData: file_path.(string),
 		CreatedBy:   int(user_id),
 		UpdatedBy:   0,
-		CreatedDate: helpers.CurrentDateTime(),
+		CreatedDate: time.Now(),
 	}
 
 	_, err := db.Insert(&res)
@@ -75,7 +75,7 @@ func UpdateSetting(c dto.HomeSeetingUpdate, file_path interface{}, user_id float
 	}
 	homePageData := HomePagesSettingTable{PageSettingId: page_setting_id,
 		UpdatedBy:   int(user_id),
-		UpdatedDate: helpers.CurrentDateTime(),
+		UpdatedDate: time.Now(),
 		DataType:    c.DataType,
 		Section:     c.Section,
 		SettingData: file_path.(string),
@@ -197,7 +197,7 @@ func UpdateSettings(c dto.HomeSeetingUpdate, file_path interface{}, user_id floa
 	}
 	homePageData := HomePagesSettingTable{PageSettingId: page_setting_id,
 		UpdatedBy:   int(user_id),
-		UpdatedDate: helpers.CurrentDateTime(),
+		UpdatedDate: time.Now(),
 		DataType:    c.DataType,
 		Section:     c.Section,
 		SettingData: file_path.(string),
@@ -296,8 +296,8 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				SettingData: row["setting_data"].(string),
 				CreatedBy:   int(user_id),
 				UpdatedBy:   0,
-				CreatedDate: helpers.CurrentDateTime(),
-				UpdatedDate: helpers.CurrentDateTime(),
+				CreatedDate: time.Now(),
+				UpdatedDate: time.Now(),
 			}
 
 			_, err := tx.Insert(&newRecord)
@@ -332,7 +332,7 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 			existingRecord.DataType = row["data_type"].(string)
 			existingRecord.SettingData = row["setting_data"].(string)
 			existingRecord.UpdatedBy = int(user_id)
-			existingRecord.UpdatedDate = helpers.CurrentDateTime()
+			existingRecord.UpdatedDate = time.Now()
 
 			_, err = tx.Update(&existingRecord)
 			if err != nil {
@@ -351,8 +351,8 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				SettingData:   row["setting_data"].(string),
 				CreatedBy:     int(user_id),
 				UpdatedBy:     0,
-				CreatedDate:   helpers.CurrentDateTime(),
-				UpdatedDate:   helpers.CurrentDateTime(),
+				CreatedDate:   time.Now(),
+				UpdatedDate:   time.Now(),
 			}
 
 			_, err := tx.Insert(&newRecords)
