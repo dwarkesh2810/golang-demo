@@ -20,7 +20,7 @@ func init() {
 	orm.RegisterDriver(conf.ConfigMaps["dbdriver"], orm.DRPostgres)
 	orm.RegisterDataBase("default", conf.ConfigMaps["dbdriver"], conf.ConfigMaps["conn"])
 
-	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.LanguageLable), new(models.LanguageLableLang), new(models.EmailLogs))
+	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.LanguageLable), new(models.LanguageLableLang), new(models.EmailLogs), new(models.ModCountryMaster))
 
 	languageLablesFunc := controllers.LangLableController{}
 	languageLablesFunc.FetchAllAndWriteInINIFiles()
