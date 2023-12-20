@@ -44,6 +44,7 @@ SMTP_PORT=587
 **Usefull CLI Commands**
 
 ```
+go mod tidy
 bee migrate -driver=[dbdriver] -conn="[dbdriver]://[dbuser]:[dbpassword]@localhost:5432/dbname?sslmode=disable"
 bee run -downdoc=true -gendoc=true
 ```
