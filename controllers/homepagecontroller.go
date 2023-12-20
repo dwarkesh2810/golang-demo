@@ -32,12 +32,6 @@ type HomeSettingController struct {
 // @Failure 403
 // @router /register_settings [post]
 func (u *HomeSettingController) RegisterSettings() {
-	// logedIN := u.GetSession("user_login")
-	// if logedIN == "" {
-	// 	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Login ")
-	// 	return
-	// }
-
 	var settings dto.HomeSeetingInsert
 	var filePath string
 
@@ -55,11 +49,9 @@ func (u *HomeSettingController) RegisterSettings() {
 	}
 
 	data_types := strings.ToUpper(settings.DataType)
-	// uploadDir := os.Getenv("uploadHomePageImages")
-	uploadDir := "uploads/Home/files/images"
+	uploadDir := "./assets/uploads/Home/files/images"
 	if data_types == "LOGO" {
-		// uploadDir = os.Getenv("uploadHomePageLogos")
-		uploadDir = "uploads/Home/files/logo"
+		uploadDir = "./assets/uploads/Home/files/logo"
 	} else if data_types != "BANNER" {
 		filePath = ""
 	}
@@ -83,7 +75,6 @@ func (u *HomeSettingController) RegisterSettings() {
 	}
 
 	tokenData := helpers.GetTokenClaims(u.Ctx)
-	// log.Print(tokenData, "=================")
 	userID := tokenData["User_id"]
 	result, _ := models.RegisterSetting(settings, userID.(float64), filePath)
 	if result != 0 {
@@ -110,11 +101,6 @@ func (u *HomeSettingController) RegisterSettings() {
 // @Failure 403
 // @router /update_settings [post]
 func (u *HomeSettingController) UpdateSettings() {
-	// logedIN := u.GetSession("user_login")
-	// if logedIN == "" {
-	// 	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Login ")
-	// 	return
-	// }
 	var settings dto.HomeSeetingUpdate
 	var filePath string
 
@@ -137,12 +123,10 @@ func (u *HomeSettingController) UpdateSettings() {
 
 	data_types := strings.ToUpper(settings.DataType)
 
-	// uploadDir := os.Getenv("uploadHomePageImages")
-	uploadDir := "uploads/Home/files/images"
+	uploadDir := "./assets/uploads/Home/files/images"
 
 	if data_types == "LOGO" {
-		// uploadDir = os.Getenv("uploadHomePageLogos")
-		uploadDir = "uploads/Home/files/logo"
+		uploadDir = "./assets/uploads/Home/files/logo"
 
 	} else if data_types != "BANNER" {
 		filePath = ""
@@ -228,12 +212,6 @@ func (u *HomeSettingController) FetchSettings() {
 // @router /delete_settings [post]
 func (u *HomeSettingController) DeleteSetting() {
 
-	// logedIN := u.GetSession("user_login")
-	// if logedIN == "" {
-	// 	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Please Login ")
-	// 	return
-	// }
-
 	section_message := "delete"
 	section := "home_page_setting_success_message_section"
 	message := helpers.TranslateMessage(u.Ctx, section, section_message)
@@ -270,11 +248,6 @@ func (u *HomeSettingController) DeleteSetting() {
 // @Failure 403
 // @router /export [post]
 func (c *HomeSettingController) ExportFile() {
-	// logedIN := c.GetSession("user_login")
-	// if logedIN == "" {
-	// 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Please Login ")
-	// 	return
-	// }
 	var fileTypes dto.FileType
 	if err := c.ParseForm(&fileTypes); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -322,18 +295,13 @@ func (c *HomeSettingController) ExportFile() {
 // @Failure 403
 // @router /import [post]
 func (c *HomeSettingController) ImportFile() {
-	// logedIN := c.GetSession("user_login")
-	// if logedIN == "" {
-	// 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Please Login ")
-	// 	return
-	// }
 	file, fileHeader, err := c.GetFile("import_type")
 	if err != nil {
 		c.Ctx.WriteString("Error uploading file")
 		return
 	}
 
-	uploadDir := "uploads/FILES/IMPORT"
+	uploadDir := "./assets/uploads/FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
 

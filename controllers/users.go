@@ -91,7 +91,6 @@ func (c *UserController) Login() {
 // @Failure 403
 // @router /register [post]
 func (c *UserController) RegisterNewUser() {
-	// _ = c.Ctx.Input.GetData("lang")
 	bodyData := dto.NewUserRequest{}
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))

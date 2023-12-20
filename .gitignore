@@ -1,18 +1,7 @@
 \.env
-bin/
 conf/app.conf
 
-\*.env
-
-app.env
-
-# test.sql
-
-car_demo
 logs/
 logs
 
 golang-demo
-
-# docker-compose.yaml
-# Dockerfile

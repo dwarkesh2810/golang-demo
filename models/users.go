@@ -70,7 +70,6 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 }
 func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
-	// orm.Debug = true
 	var user Users
 	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number", "password")
 	if err != nil {
@@ -154,7 +153,6 @@ func UpdateIsVerified(id int) error {
 func SearchUser(search string) ([]Users, error) {
 	o := orm.NewOrm()
 	var user []Users
-	// orm.Debug = true
 	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&user)
 	if err != nil {
 		return nil, err
@@ -187,7 +185,6 @@ func VerifyEmail(email string, name string) (string, error) {
 	o := orm.NewOrm()
 	sendemail := EmailLogs{}
 	_, err := helpers.SendMailOTp(email, name, subject, body)
-	// fmt.Println(err.Error())
 	if err != nil {
 		sendemail = EmailLogs{
 			To:      email,
