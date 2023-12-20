@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -45,7 +44,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 		PhoneNumber: Data.PhoneNumber,
 		Password:    pass,
 		Role:        Data.Role,
-		CreatedDate: time.Now(),
+		CreatedDate: helpers.CurrentDateTime(),
 	}
 	num, err := o.Insert(&user)
 	if err != nil {
@@ -72,7 +71,7 @@ func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
 	// orm.Debug = true
 	var user Users
-	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number","password")
+	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number", "password")
 	if err != nil {
 		return user, err
 	}
@@ -89,7 +88,7 @@ func UpdateUser(Data dto.UpdateUserRequest) (Users, error) {
 		CountryId:   Data.Country,
 		Email:       Data.Email,
 		Role:        Data.Role,
-		UpdatedDate: time.Now(),
+		UpdatedDate: helpers.CurrentDateTime(),
 		PhoneNumber: Data.PhoneNumber,
 	}
 	o := orm.NewOrm()
@@ -140,7 +139,7 @@ func GetEmailOTP(username string, otp string) (Users, error) {
 
 func UpdateIsVerified(id int) error {
 	o := orm.NewOrm()
-	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
+	var user = Users{UserId: id, Isverified: 1, UpdatedDate: helpers.CurrentDateTime()}
 	num, err := o.Update(&user, "isverified", "updated_date")
 	if err != nil {
 		return err

@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -17,7 +16,7 @@ func InsertNewCar(data dto.GetNewCarRequest) (Car, error) {
 		ModifiedBy:  data.ModifiedBy,
 		Model:       data.Model,
 		Type:        data.Type,
-		CreatedDate: time.Now(),
+		CreatedDate: helpers.CurrentDateTime(),
 	}
 	_, err := o.Insert(&car)
 	if err != nil {
@@ -45,7 +44,7 @@ func UpdateCar(data dto.UpdateCarRequest) (interface{}, error) {
 		Model:      data.Model,
 		Type:       data.Type,
 		CarImage:   data.CarImage,
-		UpdateDate: time.Now(),
+		UpdateDate: helpers.CurrentDateTime(),
 	}
 
 	num, err := o.Update(&car, "id", "car_name", "modified_by", "model", "car_type", "car_image", "updated_at")
