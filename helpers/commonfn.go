@@ -31,7 +31,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/beego/beego/v2/client/orm"
-	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/i18n"
 	"github.com/go-ini/ini"
 )
@@ -234,11 +233,11 @@ func GetFormatedDate(date time.Time, formate string) string {
 var defaultLang = "en-US"
 
 func Init() {
-	web.InsertFilter("*", web.BeforeRouter, func(ctx *context.Context) {
+	beego.InsertFilter("*", beego.BeforeRouter, func(ctx *context.Context) {
 		lang := GetLanguageFromMultipleSources(ctx)
 		SetLanguage(ctx, lang)
 	})
-	web.InsertFilter("*", web.AfterExec, func(ctx *context.Context) {
+	beego.InsertFilter("*", beego.AfterExec, func(ctx *context.Context) {
 
 	})
 }
@@ -937,13 +936,7 @@ func ConvertStructToMap(data interface{}) (map[string]interface{}, error) {
 /*-----------------------Image validation----------------------------------*/
 func GetFileExtension(file string) string {
 	splitFileName := strings.Split(file, ".")
-	return splitFileName[len(splitFileName)-1]
-}
-
-func ValidImageType(file string) bool {
-	extensions := []string{"jpeg", "jpg", "png", "svg"}
-	ext := GetFileExtension(file)
-	return CheckIfExists(ext, extensions)
+	return strings.ToLower(splitFileName[len(splitFileName)-1])
 }
 
 /*-------------------------------end----------------------------------------*/

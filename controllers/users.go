@@ -145,7 +145,7 @@ func (c *UserController) GetAllUsers() {
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		return
 	}

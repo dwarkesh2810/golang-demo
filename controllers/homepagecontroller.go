@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
+	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
@@ -49,14 +50,21 @@ func (u *HomeSettingController) RegisterSettings() {
 	}
 
 	data_types := strings.ToUpper(settings.DataType)
-	uploadDir := "./assets/uploads/Home/files/images"
+	uploadDir := conf.ConfigMaps["basepath"] + "Home/files/images"
 	if data_types == "LOGO" {
-		uploadDir = "./assets/uploads/Home/files/logo"
+		uploadDir = conf.ConfigMaps["basepath"] + "Home/files/logo"
 	} else if data_types != "BANNER" {
 		filePath = ""
 	}
+
 	if data_types == "LOGO" || data_types == "BANNER" {
 		file, fileHeader, err := u.GetFile("setting_data")
+
+		ok := validations.ValidImageType(fileHeader.Filename)
+		if !ok {
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "validation", "ValidImage"))
+			return
+		}
 		if err != nil {
 
 			section_failed_msg := "file_failed"
@@ -123,10 +131,10 @@ func (u *HomeSettingController) UpdateSettings() {
 
 	data_types := strings.ToUpper(settings.DataType)
 
-	uploadDir := "./assets/uploads/Home/files/images"
+	uploadDir := conf.ConfigMaps["basepath"] + "Home/files/images"
 
 	if data_types == "LOGO" {
-		uploadDir = "./assets/uploads/Home/files/logo"
+		uploadDir = conf.ConfigMaps["basepath"] + "Home/files/logo"
 
 	} else if data_types != "BANNER" {
 		filePath = ""
@@ -134,6 +142,12 @@ func (u *HomeSettingController) UpdateSettings() {
 
 	if data_types == "LOGO" || data_types == "BANNER" {
 		file, fileHeader, err := u.GetFile("setting_data")
+
+		ok := validations.ValidImageType(fileHeader.Filename)
+		if !ok {
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "validation", "ValidImage"))
+			return
+		}
 		if err != nil {
 			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "filenotfound"))
 			return
@@ -186,7 +200,7 @@ func (u *HomeSettingController) FetchSettings() {
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
 		return
 	}
@@ -301,7 +315,13 @@ func (c *HomeSettingController) ImportFile() {
 		return
 	}
 
-	uploadDir := "./assets/uploads/FILES/IMPORT"
+	ok := validations.ValidFileType(fileHeader.Filename)
+	if !ok {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidFile"))
+		return
+	}
+
+	uploadDir := conf.ConfigMaps["basepath"] + "FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
 
@@ -368,7 +388,7 @@ func (c *HomeSettingController) ImportFile() {
 func (u *HomeSettingController) FiltersFetchSettings() {
 	var search dto.HomeSeetingSearchFilter
 	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -383,14 +403,14 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 	if search.Section != "" || search.SettingData != "" || search.DataType != "" || search.UniqueCode != "" {
 		result, pagination_data, _ := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
 		if result == nil && pagination_data["matchCount"] == 0 {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search Match Not Found")
+			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 			return
 		}
 
 		if pagination_data["pageOpen_error"] == 1 {
 			current := pagination_data["current_page"]
 			last := pagination_data["last_page"]
-			message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+			message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
 			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
 			return
 		}
@@ -402,7 +422,7 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 			helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 			return
 		}
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "datanotfound"))
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search Field Should Not Be Empty! Atleast One Field TO pass")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "search"))
 }

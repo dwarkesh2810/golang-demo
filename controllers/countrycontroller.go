@@ -35,7 +35,7 @@ func (u *CountryController) FetchCountries() {
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
 		return
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
+	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
@@ -44,13 +45,13 @@ func (c *CarController) AddNewCar() {
 		return
 	}
 
-	file, fileheader, err := c.GetFile("file")
+	file, fileHeader, err := c.GetFile("file")
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
 		return
 	}
 
-	ok := helpers.ValidImageType(fileheader.Filename)
+	ok := validations.ValidImageType(fileHeader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
 		return
@@ -58,22 +59,28 @@ func (c *CarController) AddNewCar() {
 
 	var carType string = string(cars.Type)
 	cars.Type, err = helpers.NewCarType(carType)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
 		return
 	}
-	uploadDir := "./assets/uploads/Cars/images/"
-	filepaths, err := helpers.UploadFile(file, fileheader, uploadDir)
+
+	uploadDir := conf.ConfigMaps["basepath"] + "Cars/images/"
+	filepaths, err := helpers.UploadFile(file, fileHeader, uploadDir)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
 		return
 	}
+
 	cars.CarImage = filepaths
 	data, err := models.InsertNewCar(cars)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "create"), "")
 }
 
@@ -92,10 +99,12 @@ func (c *CarController) AddNewCar() {
 // @router /update [PUT]
 func (c *CarController) UpdateCar() {
 	var cars dto.UpdateCarRequest
+
 	if err := c.ParseForm(&cars); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
 	}
+
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
 
 	valid := validation.Validation{}
@@ -117,7 +126,7 @@ func (c *CarController) UpdateCar() {
 
 	file, fileheader, err := c.GetFile("file")
 
-	ok := helpers.ValidImageType(fileheader.Filename)
+	ok := validations.ValidImageType(fileheader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
 		return
@@ -153,27 +162,34 @@ func (c *CarController) UpdateCar() {
 	}
 	var carType string = string(cars.Type)
 	cars.Type, err = helpers.NewCarType(carType)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
 		return
 	}
-	uploadDir := "./assets/uploads/Cars/images/"
+
+	uploadDir := conf.ConfigMaps["basepath"] + "Cars/images/"
 	filepaths, err := helpers.UploadFile(file, fileheader, uploadDir)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
 		return
 	}
+
 	cars.CarImage = filepaths
 	res, err := models.UpdateCar(cars)
+
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+
 	err = os.Remove(data.CarImage)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
 		return
 	}
+
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
 }
 
@@ -187,6 +203,7 @@ func (c *CarController) UpdateCar() {
 // @router /delete [delete]
 func (c *CarController) DeleteCar() {
 	var car dto.GetcarRequest
+
 	if err := c.ParseForm(&car); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
@@ -215,11 +232,13 @@ func (c *CarController) DeleteCar() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 		return
 	}
+
 	err = os.Remove(res.CarImage)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
 		return
 	}
+
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "delete"), "")
 }
 
@@ -233,6 +252,7 @@ func (c *CarController) DeleteCar() {
 // @router /cars [post]
 func (c *CarController) GetAllCars() {
 	var search dto.PaginationReq
+
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
@@ -249,7 +269,7 @@ func (c *CarController) GetAllCars() {
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		return
 	}
