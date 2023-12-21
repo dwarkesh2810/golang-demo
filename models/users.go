@@ -150,17 +150,31 @@ func UpdateIsVerified(id int) error {
 	return nil
 }
 
-func SearchUser(search string) ([]Users, error) {
+func SearchUser(search string, page_size, open_page int) ([]Users, map[string]interface{}, error) {
 	o := orm.NewOrm()
-	var user []Users
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&user)
+	if page_size <= 0 {
+		page_size = 10
+	}
+	if open_page <= 0 {
+		open_page = 1
+	}
+	var count []Users
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&count)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	if num == 0 {
-		return nil, errors.New("DATABASE_ERROR")
+	pagination, err := helpers.PaginationForSearch(open_page, page_size, len(count))
+	if err != nil {
+		return nil, nil, err
 	}
-	return user, nil
+	offset := (open_page - 1) * page_size
+	var user []Users
+	_, err = o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).Limit(page_size).Offset(offset).All(&user)
+	if err != nil {
+		return nil, nil, err
+	}
+	pagination["matchCount"] = len(count)
+	return user, pagination, nil
 }
 func VerifyEmail(email string, name string) (string, error) {
 	OTP := helpers.GenerateUniqueCodeString(4)

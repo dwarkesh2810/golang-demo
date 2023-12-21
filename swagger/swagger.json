@@ -253,6 +253,165 @@
                 }
             }
         },
+        "/country/country_wise_state": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "StateController.Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "country_id",
+                        "description": "Enter Country Id To Search State",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/country/list_countries": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "In this function after login user  can Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "CountryController.After Login User Can Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/country/list_states": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "StateController.Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/country/search_state": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "StateController.Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "search",
+                        "description": "Search State",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/homepage/delete_settings": {
             "post": {
                 "tags": [
@@ -596,42 +755,6 @@
                 }
             }
         },
-        "/user/list_countries": {
-            "post": {
-                "tags": [
-                    "user"
-                ],
-                "description": "In this function after login user  can Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "CountryController.After Login User Can Fetch Data Country",
-                "parameters": [
-                    {
-                        "in": "formData",
-                        "name": "open_page",
-                        "description": "if you want to open specific page than give page number",
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "page_size",
-                        "description": "how much data you want to show at a time default it will give 10 records",
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/user/login": {
             "post": {
                 "tags": [
@@ -887,13 +1010,27 @@
                 "operationId": "UserController.Search User",
                 "parameters": [
                     {
-                        "in": "body",
-                        "name": "body",
-                        "description": "otp verification for email",
+                        "in": "formData",
+                        "name": "search",
+                        "description": "enter search",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SearchRequest"
+                            "$ref": "#/definitions/strings"
                         }
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
                     },
                     {
                         "in": "query",
@@ -1135,15 +1272,6 @@
                 }
             }
         },
-        "dto.SearchRequest": {
-            "title": "SearchRequest",
-            "type": "object",
-            "properties": {
-                "search": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.SendOtpData": {
             "title": "SendOtpData",
             "type": "object",
@@ -1293,6 +1421,10 @@
         },
         "object": {
             "title": "object",
+            "type": "object"
+        },
+        "strings": {
+            "title": "strings",
             "type": "object"
         }
     }

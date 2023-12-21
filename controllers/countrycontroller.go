@@ -23,7 +23,7 @@ type CountryController struct {
 // @Failure 403
 // @router /list_countries [post]
 func (u *CountryController) FetchCountries() {
-	var search dto.CountrySearch
+	var search dto.PaginationReq
 	if err := u.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return

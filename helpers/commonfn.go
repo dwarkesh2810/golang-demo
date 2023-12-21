@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"math/rand"
 	"mime/multipart"
@@ -261,8 +262,10 @@ func isValidLanguage(lang string) bool {
 func SetLanguage(ctx *context.Context, lang string) {
 	ctx.Input.SetData("lang", lang)
 
-	i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
-
+	err := i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
+	if err != nil {
+		log.Print(err)
+	}
 	ctx.SetCookie("lang", lang, 24*60*60, "/")
 
 	defaultLang = lang
@@ -305,8 +308,9 @@ func CreateINIFiles(data []map[string]string) error {
 			return err
 		}
 
-		for key := range item {
+		for key, _ := range item {
 			if key == "" {
+				log.Print(key)
 			}
 			section.NewKey(item["lable_code"], item["language_value"])
 		}
@@ -852,6 +856,7 @@ func generateWhereClause(fields map[string]string, applyPosition string) string 
 				condition = field + " LIKE ?"
 			} else {
 				condition = field + " LIKE ?"
+				log.Print(value)
 			}
 			conditions = append(conditions, condition)
 		}
@@ -942,3 +947,37 @@ func ValidImageType(file string) bool {
 }
 
 /*-------------------------------end----------------------------------------*/
+
+/*------------------------------------Pagination for search ------------------------------------------------*/
+
+func PaginationForSearch(current_page, pageSize, totalRows int) (map[string]interface{}, error) {
+	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
+
+	lastPageNumber := totalPages
+	if lastPageNumber == 0 {
+		lastPageNumber = 1
+	}
+	previousPageNumber := current_page - 1
+	if previousPageNumber < 1 {
+		previousPageNumber = 0
+	}
+	nextPageNumber := current_page + 1
+	if nextPageNumber > totalPages {
+		nextPageNumber = totalPages
+	}
+	pagination_data := map[string]interface{}{
+		"CurrentPage":   current_page,
+		"PreviousPage":  previousPageNumber,
+		"NextPage":      nextPageNumber,
+		"PerPageRecord": pageSize,
+		"TotalRows":     totalRows,
+		"TotalPages":    totalPages,
+		"LastPage":      lastPageNumber,
+	}
+	if current_page > lastPageNumber {
+		pagination_data["pageOpen_error"] = 1
+		pagination_data["current_page"] = current_page
+		pagination_data["last_page"] = lastPageNumber
+	}
+	return pagination_data, nil
+}

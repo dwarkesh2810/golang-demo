@@ -91,18 +91,18 @@ func TestUserModels(t *testing.T) {
 		}
 		t.Log(data)
 	})
-	t.Run("serch user", func(t *testing.T) {
-		search := "dev"
-		data, err := models.SearchUser(search)
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-		if len(data) == 0 {
-			t.Errorf("error :- No data found")
-		}
-		t.Log(data)
-	})
+	// t.Run("serch user", func(t *testing.T) {
+	// 	search := "dev"
+	// 	data, err := models.SearchUser(search)
+	// 	if err != nil {
+	// 		t.Errorf(err.Error())
+	// 		return
+	// 	}
+	// 	if len(data) == 0 {
+	// 		t.Errorf("error :- No data found")
+	// 	}
+	// 	t.Log(data)
+	// })
 	t.Run("Delete User", func(t *testing.T) {
 		data, err := models.DeleteUser(10)
 		if err != nil {

@@ -243,7 +243,7 @@ func (c *UserController) UpdateUser() {
 		return
 	}
 
-	userDetails := dto.UserDetailsResponse{Id: uint(user.UserId), FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId}
+	userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, userDetails, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
 }
 
@@ -410,7 +410,9 @@ func (c *UserController) VerifyOtpResetpassword() {
 // SearchUser ...
 // @Title Search User
 // @Desciption SearchUser
-// @Param body body dto.SearchRequest true "otp verification for email"
+// @Param search formData strings true "enter search"
+// @Param open_page formData int false "if you want to open specific page than give page number"
+// @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
@@ -429,19 +431,30 @@ func (c *UserController) SearchUser() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
 		return
 	}
-	user, err := models.SearchUser(bodyData.Search)
-	if err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	if len(bodyData.Search) < 3 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
 		return
 	}
-	if len(user) == 0 {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+	user, pagination_data, _ := models.SearchUser(bodyData.Search, bodyData.PageSize, bodyData.OpenPage)
+	if pagination_data["pageOpen_error"] == 1 {
+		current := pagination_data["current_page"]
+		last := pagination_data["last_page"]
+		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		return
 	}
-	var output []dto.UserDetailsResponse
-	for _, user := range user {
-		userDetails := dto.UserDetailsResponse{Id: uint(user.UserId), FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId, CreatedDate: helpers.GetFormatedDate(user.CreatedDate, "dd-mm-yyyy")}
-		output = append(output, userDetails)
+
+	if user != nil {
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		var output []dto.UserDetailsResponse
+		for _, user := range user {
+			userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId, CreatedDate: helpers.GetFormatedDate(user.CreatedDate, "dd-mm-yyyy")}
+			output = append(output, userDetails)
+		}
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, message, pagination_data)
+		return
 	}
-	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 }

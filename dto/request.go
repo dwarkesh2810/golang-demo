@@ -56,7 +56,9 @@ type ResetUserPasswordOtp struct {
 }
 
 type SearchRequest struct {
-	Search string `json:"search" valid:"Required"`
+	Search   string `json:"search" form:"search" valid:"Required"`
+	PageSize int    `json:"page_size" form:"page_size"`
+	OpenPage int    `json:"open_page" form:"open_page"`
 }
 
 type LanguageLableInsert struct {
@@ -146,7 +148,8 @@ type GetcarRequest struct {
 	Id uint `json:"car_id"`
 }
 
-type CountrySearch struct {
-	PageSize int `json:"page_size" form:"page_size"`
-	OpenPage int `json:"open_page" form:"open_page"`
+type CountryWiseState struct {
+	CountryId string `json:"country_id" form:"country_id"`
+	PageSize  int    `json:"page_size" form:"page_size"`
+	OpenPage  int    `json:"open_page" form:"open_page"`
 }
