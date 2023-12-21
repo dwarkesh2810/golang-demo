@@ -13,12 +13,9 @@ func GetUserByEmail(username string) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
 	// orm.Debug = true
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).All(&user)
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).All(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
-	}
-	if num == 0 {
-		return user, errors.New("LOGIN_ERROR")
+		return user, err
 	}
 	return user, nil
 }
@@ -26,12 +23,9 @@ func GetUserByEmail(username string) (Users, error) {
 func LoginUser(username string, pass string) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
-	num, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("password", pass).All(&user)
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("password", pass).All(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
-	}
-	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	return user, nil
 }
@@ -55,7 +49,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 	}
 	num, err := o.Insert(&user)
 	if err != nil {
-		return user, errors.New("DATABASE_ERROR")
+		return user, err
 	}
 	if num == 0 {
 		return user, errors.New("DATABASE_ERROR")
@@ -65,17 +59,125 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 func UpadteOtpForEmail(id int, otp string) (string, error) {
 	o := orm.NewOrm()
 	var user = Users{UserId: id, OtpCode: otp, Isverified: 0}
-	num, err := o.Update(&user, "otp", "verified")
+	num, err := o.Update(&user, "otp_code", "isverified")
 	if err != nil {
-		return "num", errors.New("DATABASE_ERROR")
+		return "num", err
 	}
 	if num == 0 {
 		return "user", errors.New("DATABASE_ERROR")
 	}
-	return "OTP_SENT", nil
+	return "otpsent", nil
+}
+func GetUserDetails(id interface{}) (Users, error) {
+	o := orm.NewOrm()
+	var user Users
+	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number", "password")
+	if err != nil {
+		return user, err
+	}
+	if num == 0 {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	return user, nil
+}
+func UpdateUser(Data dto.UpdateUserRequest) (Users, error) {
+	var user = Users{
+		UserId:      Data.Id,
+		FirstName:   Data.FirstName,
+		LastName:    Data.LastName,
+		CountryId:   Data.Country,
+		Email:       Data.Email,
+		Role:        Data.Role,
+		UpdatedDate: time.Now(),
+		PhoneNumber: Data.PhoneNumber,
+	}
+	o := orm.NewOrm()
+	num, err := o.Update(&user, "user_id", "first_name", "last_name", "country_id", "email", "role", "updated_date", "phone_number")
+	if err != nil {
+		return user, err
+	}
+	if num == 0 {
+		return user, errors.New("DATABASE_ERROR")
+	}
+	return user, nil
+}
+
+func ResetPassword(Password string, id int) (interface{}, error) {
+	pass, err := helpers.HashData(Password)
+	if err != nil {
+		return nil, err
+	}
+	o := orm.NewOrm()
+	var user = Users{UserId: id, Password: pass}
+	num, err := o.Update(&user, "password")
+	if err != nil {
+		return num, errors.New("DATABASE_ERROR")
+	}
+	return "PASSWORD_RESET", nil
+}
+func DeleteUser(id int) (string, error) {
+	o := orm.NewOrm()
+	var user = Users{UserId: id}
+	num, err := o.Delete(&user)
+	if err != nil {
+		return "", err
+	}
+	if num == 0 {
+		return "", errors.New("DATABASE_ERROR")
+	}
+	return "User deleted success", nil
+}
+func GetEmailOTP(username string, otp string) (Users, error) {
+	o := orm.NewOrm()
+	var user Users
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("phone_number", username).Or("email", username)).Filter("otp_code", otp).All(&user)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func UpdateIsVerified(id int) error {
+	o := orm.NewOrm()
+	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
+	num, err := o.Update(&user, "isverified", "updated_date")
+	if err != nil {
+		return err
+	}
+	if num == 0 {
+		return errors.New("DATABASE_ERROR")
+	}
+	return nil
+}
+
+func SearchUser(search string, page_size, open_page int) ([]Users, map[string]interface{}, error) {
+	o := orm.NewOrm()
+	if page_size <= 0 {
+		page_size = 10
+	}
+	if open_page <= 0 {
+		open_page = 1
+	}
+	var count []Users
+	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&count)
+	if err != nil {
+		return nil, nil, err
+	}
+	pagination, err := helpers.PaginationForSearch(open_page, page_size, len(count))
+	if err != nil {
+		return nil, nil, err
+	}
+	offset := (open_page - 1) * page_size
+	var user []Users
+	_, err = o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).Limit(page_size).Offset(offset).All(&user)
+	if err != nil {
+		return nil, nil, err
+	}
+	pagination["matchCount"] = len(count)
+	return user, pagination, nil
 }
 func VerifyEmail(email string, name string) (string, error) {
-	OTP := helpers.GenerateOtp()
+	OTP := helpers.GenerateUniqueCodeString(4)
 	subject := "Verify your email"
 	body := `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
 	<div style="margin:50px auto;width:70%;padding:20px 0">
@@ -107,8 +209,9 @@ func VerifyEmail(email string, name string) (string, error) {
 		}
 		_, err := o.Insert(&sendemail)
 		if err != nil {
-			return "", errors.New("DATABASE_ERROR")
+			return "", err
 		}
+		return "failed to send otp", nil
 	}
 	sendemail = EmailLogs{
 		To:      email,
@@ -126,11 +229,25 @@ func VerifyEmail(email string, name string) (string, error) {
 		return "", err
 	}
 	if err != nil {
-		return "", errors.New("DATABASE_ERROR")
+		return "", err
 	}
 	res, err := UpadteOtpForEmail(output.UserId, OTP)
 	if err != nil {
 		return "", err
 	}
 	return res, nil
+}
+
+func FetchUsers(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
+	tableName := "users"
+	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
+	FROM users as u
+	ORDER BY u.user_id
+	LIMIT ? OFFSET ?
+`
+	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)
+	if errs != nil {
+		return nil, nil, errs
+	}
+	return result_data, pagination, nil
 }

@@ -14,16 +14,5 @@ import (
 )
 
 func init() {
-	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/user",
-			beego.NSInclude(&controllers.UserController{}),
-			beego.NSRouter("/register", &controllers.UserController{}, "Post:RegisterNewUser"),
-			beego.NSRouter("/login", &controllers.UserController{}, "post:Login"),
-			beego.NSNamespace("/secure",
-				beego.NSBefore(middleware.JWTMiddleware),
-				beego.NSRouter("/Users", &controllers.UserController{}, "post:GetAllUser"),
-			),
-		),
-	)
-	beego.AddNamespace(ns)
+
 }

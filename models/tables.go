@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/dwarkesh2810/golang-demo/dto"
+)
 
 type Users struct {
 	UserId      int `orm:"auto;pk"`
@@ -17,23 +21,15 @@ type Users struct {
 	UpdatedDate time.Time `orm:"null"`
 }
 
-type CarType string
-
-const (
-	Sedan     CarType = "sedan"
-	Hatchback CarType = "hatchback"
-	SUV       CarType = "SUV"
-)
-
 type Car struct {
-	Id          uint      `json:"car_id" orm:"pk;auto;column(id)"`
-	CarName     string    `orm:"column(car_name)"`
-	CarImage    string    `orm:"null;column(car_image)" form:"file" json:"file"`
-	ModifiedBy  string    `orm:"column(modified_by)"`
-	Model       string    `orm:"column(model)"`
-	Type        CarType   `orm:"column(car_type);type(enum)"`
-	CreatedDate time.Time `orm:"null;column(ctreated_date)"`
-	UpdateDate  time.Time `orm:"null;column(updated_at)"`
+	Id          uint        `json:"car_id" orm:"pk;auto;column(id)"`
+	CarName     string      `orm:"column(car_name)"`
+	CarImage    string      `orm:"null;column(car_image)" form:"file" json:"file"`
+	ModifiedBy  string      `orm:"column(modified_by)"`
+	Model       string      `orm:"column(model)"`
+	Type        dto.CarType `orm:"column(car_type);type(enum)"`
+	CreatedDate time.Time   `orm:"null;column(ctreated_date)"`
+	UpdateDate  time.Time   `orm:"null;column(updated_at)"`
 }
 
 type HomePagesSettingTable struct {

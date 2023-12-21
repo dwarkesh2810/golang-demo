@@ -1,22 +1,21 @@
 package middleware
 
 import (
-	"net/http"
 	"strings"
 
-	beego "github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/dwarkesh2810/golang-demo/conf"
+	"github.com/dwarkesh2810/golang-demo/helpers"
 )
 
-var key, _ = beego.AppConfig.String("JWT_SEC_KEY")
+var key = conf.ConfigMaps["JWT_SEC_KEY"]
 var jwtKey = []byte(key)
 
 func JWTMiddleware(ctx *context.Context) {
 	tokenString := ctx.Input.Header("Authorization")
 	if tokenString == "" {
-		ctx.Output.SetStatus(http.StatusUnauthorized)
-		ctx.Output.JSON(map[string]string{"error": "Unauthorized"}, true, false)
+		helpers.ApiFailedResponse(ctx.ResponseWriter, helpers.TranslateMessage(ctx, "error", "token"))
 		return
 	}
 	bearer := ContainsBearer(tokenString)
@@ -28,8 +27,7 @@ func JWTMiddleware(ctx *context.Context) {
 		return jwtKey, nil
 	})
 	if err != nil || !token.Valid {
-		ctx.Output.SetStatus(http.StatusUnauthorized)
-		ctx.Output.JSON(map[string]string{"error": "Invalid tokan"}, true, false)
+		helpers.ApiFailedResponse(ctx.ResponseWriter, helpers.TranslateMessage(ctx, "error", "token"))
 		return
 	}
 	ctx.Input.SetData("user", token.Claims.(jwt.MapClaims))

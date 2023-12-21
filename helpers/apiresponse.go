@@ -13,21 +13,22 @@ type ResponseSuccess struct {
 }
 
 type ResponseFailed struct {
-	ResStatus int    `json:"status"`
-	Message   string `json:"message"`
+	ResStatus int         `json:"status"`
+	Message   interface{} `json:"message"`
 }
 
 type PaginationRes struct {
-	PreviousPage   int `json:"previous_page"`
-	CurrentPage    int `json:"current_page"`
-	NextPage       int `json:"next_page"`
-	LastPage       int `json:"last_page"`
-	PerpageRecords int `json:"perpage_records"`
-	TotalPages     int `json:"total_pages"`
-	TotalRecords   int `json:"total_records"`
+	PreviousPage    int `json:"previous_page"`
+	CurrentPage     int `json:"current_page"`
+	NextPage        int `json:"next_page"`
+	LastPage        int `json:"last_page"`
+	PerpageRecords  int `json:"perpage_records"`
+	TotalPages      int `json:"total_pages"`
+	TotalRecords    int `json:"total_records"`
+	FilterDataMatch int `json:"total_match_records"`
 }
 
-func ApiFailedResponse(w http.ResponseWriter, message string) {
+func ApiFailedResponse(w http.ResponseWriter, message interface{}) {
 	response := ResponseFailed{
 		Message:   message,
 		ResStatus: 0,
@@ -39,7 +40,6 @@ func ApiFailedResponse(w http.ResponseWriter, message string) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonResponse)
-
 }
 
 func ApiSuccessResponse(w http.ResponseWriter, result interface{}, message string, pagination_data interface{}) {
@@ -62,6 +62,11 @@ func ApiSuccessResponse(w http.ResponseWriter, result interface{}, message strin
 		nextPage, nextPageExists := paginationMap["NextPage"].(int)
 		prevPage, prevPageExists := paginationMap["PreviousPage"].(int)
 		lastPage, lastPageExists := paginationMap["LastPage"].(int)
+		matchRecords := paginationMap["matchCount"].(int)
+		matchData := 0
+		if matchRecords > 0 {
+			matchData = matchRecords
+		}
 
 		if !currentPageExists || !totalPagesExists || !perpageRecordsExists || !totalRecordsExists || !nextPageExists || !prevPageExists || !lastPageExists {
 			http.Error(w, "Missing required keys in pagination data", http.StatusInternalServerError)
@@ -69,20 +74,22 @@ func ApiSuccessResponse(w http.ResponseWriter, result interface{}, message strin
 		}
 
 		pagination = PaginationRes{
-			PreviousPage:   prevPage,
-			CurrentPage:    currentPage,
-			NextPage:       nextPage,
-			LastPage:       lastPage,
-			PerpageRecords: perPageRecords,
-			TotalPages:     totalPages,
-			TotalRecords:   totalRecords,
+			PreviousPage:    prevPage,
+			CurrentPage:     currentPage,
+			NextPage:        nextPage,
+			LastPage:        lastPage,
+			PerpageRecords:  perPageRecords,
+			TotalPages:      totalPages,
+			TotalRecords:    totalRecords,
+			FilterDataMatch: matchData,
 		}
+
 	}
 
 	responseMap := map[string]interface{}{
-		"Message":   message,
-		"ResStatus": 1,
-		"Result":    result,
+		"message":   message,
+		"status": 1,
+		"result":    result,
 	}
 
 	if pagination_data != nil && pagination_data != "" {
