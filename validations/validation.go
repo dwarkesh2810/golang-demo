@@ -14,7 +14,6 @@ import (
 func Init() {
 	validation.AddCustomFunc("InMobile", indianMobile)
 	validation.AddCustomFunc("WithIn", RequiredTag)
-	validation.AddCustomFunc("ValidType", RequiredFileType)
 }
 
 func ValidErr(err []*validation.Error) []string {
@@ -83,17 +82,15 @@ func RequiredTag(v *validation.Validation, obj interface{}, key string) {
 	}
 }
 
-func RequiredFileType(v *validation.Validation, obj interface{}, key string) {
-	tags := []string{"csv", "xlsx", "pdf"}
 
-	value, ok := obj.(string)
-	if !ok {
-		return
-	}
-
-	ok = helpers.CheckIfExists(value, tags)
-	if !ok {
-		v.SetError(key, "please select with in [csv, xlsx, pdf]")
-	}
+func ValidImageType(file string) bool {
+	extensions := []string{"jpeg", "jpg", "png", "svg"}
+	ext := helpers.GetFileExtension(file)
+	return helpers.CheckIfExists(ext, extensions)
 }
 
+func ValidFileType(file string) bool {
+	extensions := []string{"csv", "xlsx"}
+	ext := helpers.GetFileExtension(file)
+	return helpers.CheckIfExists(ext, extensions)
+}

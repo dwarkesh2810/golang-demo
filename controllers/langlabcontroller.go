@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -20,7 +21,7 @@ type LangLableController struct {
 func (u *LangLableController) InsertLanguageLables() {
 	var langLables dto.LanguageLableInsert
 	if err := u.ParseForm(&langLables); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
@@ -34,16 +35,16 @@ func (u *LangLableController) InsertLanguageLables() {
 
 	exists_code := models.ExistsLanguageLable(langLables.LableCode)
 	if exists_code == 1 {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, `[`+langLables.LableCode+`] Already Exists Please Use Different Lable Code !`)
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "langlbl"), langLables.LableCode))
 		return
 	}
 	result, _ := models.InsertLanguageLabels(langLables)
 	if result != "" {
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, " Successfully Created Language Lable", "")
+		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, helpers.TranslateMessage(u.Ctx, "success", "langlbl"), "")
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Create Please Try Again !")
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "failedlanglbl"))
 }
 
 func (u *LangLableController) FetchAllAndWriteInINIFiles() {

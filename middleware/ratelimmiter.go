@@ -30,11 +30,18 @@ func RateLimiter(ctx *context.Context) {
 	// Get IP address of the client
 	ip := ctx.Input.IP()
 	limit, err := strconv.Atoi(conf.ConfigMaps["ratelimiter"])
-	logger.Error("failed to convert string to int", err)
-	
+
+	if err != nil {
+		logger.Error("failed to convert string to int", err)
+		return
+	}
+
 	blockTime, err := strconv.Atoi(conf.ConfigMaps["blocktime"])
 
-	logger.Error("failed to convert string to int", err)
+	if err != nil {
+		logger.Error("failed to convert string to int", err)
+		return
+	}
 
 	// Limit requests from an IP address
 	mutex.Lock()
@@ -75,7 +82,7 @@ func RateLimiter(ctx *context.Context) {
 
 		day, hr, min, sec := helpers.SecondsToDayHourMinAndSeconds(int(remainingSeconds))
 
-		message := fmt.Sprintf("Too many request, Please try again after %d days %d hours %d min %d.", day, hr, min, sec)
+		message := fmt.Sprintf(helpers.TranslateMessage(ctx, "error", "toomanyreq"), day, hr, min, sec)
 
 		resp := &RateLimmiterResponse{
 			Message: message,
