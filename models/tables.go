@@ -69,28 +69,3 @@ type EmailLogs struct {
 	Body    string
 	Status  string
 }
-
-type ModCountryMaster struct {
-	CountryId      int64
-	Name           string
-	Iso3           string
-	Iso2           string
-	NumericCode    int64
-	PhoneCode      string
-	Capital        string
-	Currency       string
-	CurrencyName   string
-	CurrencySymbol string
-	Tld            string
-	Native         string
-	Region         string
-	RegionID       string
-	Subregion      string
-	SubregionID    string
-	Nationality    string
-	Timezones      string
-	Latitude       string
-	Longitude      string
-	Emoji          string
-	EmojiU         string
-}

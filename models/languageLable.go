@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
 )
@@ -64,7 +62,6 @@ func FetchAllLabels() (interface{}, error) {
 
 	_, err := db.Raw(`SELECT lable_code, language_value, language_code,section FROM language_lable`).Values(&labelsList)
 	if err != nil {
-		log.Println("Error executing query:", err)
 		return nil, err
 	}
 	return labelsList, nil
@@ -76,7 +73,6 @@ func FetchAllDefaultlables() (interface{}, error) {
 
 	_, err := db.Raw(`SELECT lable_code, language_value, language_code,section FROM language_lable_lang`).Values(&labelsList)
 	if err != nil {
-		log.Println("Error executing query:", err)
 		return nil, err
 	}
 	return labelsList, nil

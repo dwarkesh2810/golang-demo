@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"math/rand"
 	"mime/multipart"
@@ -262,10 +261,8 @@ func isValidLanguage(lang string) bool {
 func SetLanguage(ctx *context.Context, lang string) {
 	ctx.Input.SetData("lang", lang)
 
-	err := i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
-	if err != nil {
-		log.Print(err)
-	}
+	i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
+
 	ctx.SetCookie("lang", lang, 24*60*60, "/")
 
 	defaultLang = lang
@@ -308,9 +305,8 @@ func CreateINIFiles(data []map[string]string) error {
 			return err
 		}
 
-		for key, _ := range item {
+		for key := range item {
 			if key == "" {
-				log.Print(key)
 			}
 			section.NewKey(item["lable_code"], item["language_value"])
 		}
@@ -856,7 +852,6 @@ func generateWhereClause(fields map[string]string, applyPosition string) string 
 				condition = field + " LIKE ?"
 			} else {
 				condition = field + " LIKE ?"
-				log.Print(value)
 			}
 			conditions = append(conditions, condition)
 		}
