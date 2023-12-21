@@ -3,7 +3,6 @@ package middleware
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -12,6 +11,7 @@ import (
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/logger"
 )
 
 var (
@@ -30,14 +30,11 @@ func RateLimiter(ctx *context.Context) {
 	// Get IP address of the client
 	ip := ctx.Input.IP()
 	limit, err := strconv.Atoi(conf.ConfigMaps["ratelimiter"])
-	if err != nil {
-		log.Print(err)
-	}
+	logger.Error("failed to convert string to int", err)
+	
 	blockTime, err := strconv.Atoi(conf.ConfigMaps["blocktime"])
 
-	if err != nil {
-		log.Print(err)
-	}
+	logger.Error("failed to convert string to int", err)
 
 	// Limit requests from an IP address
 	mutex.Lock()
