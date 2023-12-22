@@ -448,13 +448,8 @@ func (c *UserController) SearchUser() {
 		section_message := "read"
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		var output []dto.UserDetailsResponse
-		for _, user := range user {
-			userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId, CreatedDate: helpers.GetFormatedDate(user.CreatedDate, "dd-mm-yyyy")}
-			output = append(output, userDetails)
-		}
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, message, pagination_data)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
 }

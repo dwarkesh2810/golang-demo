@@ -149,7 +149,7 @@ type GetcarRequest struct {
 }
 
 type CountryWiseState struct {
-	CountryId string `json:"country_id" form:"country_id"`
+	CountryId string `json:"country_id" form:"country_id" valid:"Required"`
 	PageSize  int    `json:"page_size" form:"page_size"`
 	OpenPage  int    `json:"open_page" form:"open_page"`
 }
@@ -166,4 +166,12 @@ type CountrySearch struct {
 	PageSize    int    `json:"page_size" form:"page_size"`
 	OpenPage    int    `json:"open_page" form:"open_page"`
 	SearchParam string `json:"search_param" form:"search_param"`
+}
+
+type GetStateRequest struct {
+	Id int `json:"state_id" form:"state_id" valid:"Required"`
+}
+
+type GetCountryRequest struct {
+	Id int `json:"country_id" form:"country_id" valid:"Required"`
 }

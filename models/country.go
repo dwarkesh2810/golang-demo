@@ -79,73 +79,24 @@ func CityFilter(currentPage, pageSize, country_id, state_id, other_field_count i
 	return filterResult, pagination, nil
 }
 
-/*state_models------------------------------------------------------*/
-func FetchStateList(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
-	tableName := "states"
-	query := `
-SELECT state_id ,state_name ,state_iso_code FROM states 
-	LIMIT ? OFFSET ?
-`
-	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)
-	if errs != nil {
-		return nil, nil, errs
-	}
-	return result_data, pagination, nil
-}
-func CountryWiseState(open_page, page_size int, country string) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-	if page_size <= 0 {
-		page_size = 10
-	}
-	if open_page <= 0 {
-		open_page = 1
-	}
-	var count []orm.Params
-	query := `SELECT state_id ,state_name ,state_iso_code FROM states where country_id = ` + country
-	_, err := db.Raw(query).Values(&count)
+func FilterCountries(search string, open_page, page_size int) ([]orm.Params, map[string]interface{}, error) {
+	matchCountQuery := `SELECT country_id, country_name, country_iso_code FROM countries WHERE country_name LIKE '%` + search + `%' OR country_iso_code LIKE '%` + search + `%';`
+	totalRecordQuery := `SELECT COUNT(*) as totalRows FROM countries`
+	mainRecordQuery := `SELECT country_id, country_name, country_iso_code FROM countries WHERE country_name LIKE '%` + search + `%' OR country_iso_code LIKE '%` + search + `%' LIMIT ? OFFSET ?`
+	states, pagination, err := helpers.PaginationForSearch(open_page, page_size, totalRecordQuery, matchCountQuery, mainRecordQuery)
 	if err != nil {
 		return nil, nil, err
 	}
-	pagination, err := helpers.PaginationForSearch(open_page, page_size, len(count))
-	if err != nil {
-		return nil, nil, err
-	}
-	offset := (open_page - 1) * page_size
-	var states []orm.Params
-	query = `SELECT state_id ,state_name ,state_iso_code FROM states where country_id = ` + country + ` LIMIT ? OFFSET ?`
-	_, err = db.Raw(query, page_size, offset).Values(&states)
-	if err != nil {
-		return nil, nil, err
-	}
-	pagination["matchCount"] = len(count)
 	return states, pagination, nil
 }
-func FilterStates(search string, open_page, page_size int) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-	if page_size <= 0 {
-		page_size = 10
-	}
-	if open_page <= 0 {
-		open_page = 1
-	}
-	var count []orm.Params
-	query := `SELECT state_id, state_name, state_iso_code FROM states WHERE state_name LIKE '%` + search + `%' OR state_iso_code LIKE '%` + search + `%';`
-	_, err := db.Raw(query).Values(&count)
-	if err != nil {
-		return nil, nil, err
-	}
 
-	pagination, err := helpers.PaginationForSearch(open_page, page_size, len(count))
+func GetCountry(state_id int) ([]orm.Params, error) {
+	o := orm.NewOrm()
+	query := `SELECT country_id, country_name, country_iso_code FROM countries WHERE country_id = ? LIMIT 1`
+	var country []orm.Params
+	_, err := o.Raw(query, state_id).Values(&country)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	offset := (open_page - 1) * page_size
-	var states []orm.Params
-	query = `SELECT state_id ,state_name ,state_iso_code FROM states WHERE state_name LIKE '%` + search + `%' OR state_iso_code LIKE '%` + search + `%' LIMIT ? OFFSET ?`
-	_, err = db.Raw(query, page_size, offset).Values(&states)
-	if err != nil {
-		return nil, nil, err
-	}
-	pagination["matchCount"] = len(count)
-	return states, pagination, nil
+	return country, nil
 }

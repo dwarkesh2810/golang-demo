@@ -949,8 +949,33 @@ func GetFileExtension(file string) string {
 
 /*------------------------------------Pagination for search ------------------------------------------------*/
 
-func PaginationForSearch(current_page, pageSize, totalRows int) (map[string]interface{}, error) {
-	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
+
+func PaginationForSearch(current_page, pageSize int, totalRecordQuery, matchCountQuery, mainRecordQuery string) ([]orm.Params, map[string]interface{}, error) {
+	db := orm.NewOrm()
+	// orm.Debug = true			
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if current_page <= 0 {
+		current_page = 1
+	}
+	offset := (current_page - 1) * pageSize
+	var states []orm.Params
+	_, err := db.Raw(mainRecordQuery, pageSize, offset).Values(&states)
+	if err != nil {
+		return nil, nil, err
+	}
+	var totalRows int
+	err = db.Raw(totalRecordQuery).QueryRow(&totalRows)
+	if err != nil {
+		return nil, nil, err
+	}
+	var count []orm.Params
+	_, err = db.Raw(matchCountQuery).Values(&count)
+	if err != nil {
+		return nil, nil, err
+	}
+	totalPages := int(math.Ceil(float64(len(count)) / float64(pageSize)))
 
 	lastPageNumber := totalPages
 	if lastPageNumber == 0 {
@@ -978,5 +1003,19 @@ func PaginationForSearch(current_page, pageSize, totalRows int) (map[string]inte
 		pagination_data["current_page"] = current_page
 		pagination_data["last_page"] = lastPageNumber
 	}
-	return pagination_data, nil
+	pagination_data["matchCount"] = len(count)
+	return states, pagination_data, nil
+}
+
+func CapitalizeWords(s string) string {
+	words := strings.Fields(s) // Split the string into words
+	capitalizedWords := make([]string, len(words))
+
+	for i, word := range words {
+		if len(word) > 0 { // Ensure the word is not empty
+			capitalizedWords[i] = strings.ToUpper(string(word[0])) + word[1:]
+		}
+	}
+
+	return strings.Join(capitalizedWords, " ") // Join the capitalized words back into a string
 }
