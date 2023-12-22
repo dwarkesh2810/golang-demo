@@ -188,6 +188,56 @@
                 }
             }
         },
+        "/car/search_car": {
+            "post": {
+                "tags": [
+                    "car"
+                ],
+                "description": "Fetch Filter car\n\u003cbr\u003e",
+                "operationId": "CarController.Filter car",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "search",
+                        "description": "Search car",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/car/update": {
             "put": {
                 "tags": [
@@ -245,50 +295,6 @@
                         "description": "",
                         "schema": {
                             "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/country/country_wise_state": {
-            "post": {
-                "tags": [
-                    "country"
-                ],
-                "description": "Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "CountryController.Fetch Data Country",
-                "parameters": [
-                    {
-                        "in": "formData",
-                        "name": "country_id",
-                        "description": "Enter Country Id To Search State",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "open_page",
-                        "description": "if you want to open specific page than give page number",
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "page_size",
-                        "description": "how much data you want to show at a time default it will give 10 records",
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
                         }
                     },
                     "403": {
@@ -395,6 +401,35 @@
                 }
             }
         },
+        "/country/get_country": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "operationId": "CountryController.get country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "country_id",
+                        "description": "get perticuler states using country_id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/country/list_countries": {
             "post": {
                 "tags": [
@@ -431,43 +466,7 @@
                 }
             }
         },
-        "/country/list_states": {
-            "post": {
-                "tags": [
-                    "country"
-                ],
-                "description": "Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "CountryController.Fetch Data Country",
-                "parameters": [
-                    {
-                        "in": "formData",
-                        "name": "open_page",
-                        "description": "if you want to open specific page than give page number",
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "page_size",
-                        "description": "how much data you want to show at a time default it will give 10 records",
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/country/search_state": {
+        "/country/search_country": {
             "post": {
                 "tags": [
                     "country"
@@ -478,7 +477,7 @@
                     {
                         "in": "formData",
                         "name": "search",
-                        "description": "Search State",
+                        "description": "Search Country",
                         "required": true,
                         "type": "string"
                     },
@@ -845,6 +844,158 @@
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/state/country_wise_state": {
+            "post": {
+                "tags": [
+                    "state"
+                ],
+                "description": "Country wise states\n\u003cbr\u003e",
+                "operationId": "StateController.Country wise states",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "country_id",
+                        "description": "Enter Country Id To Search State",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/state/get_state": {
+            "post": {
+                "tags": [
+                    "state"
+                ],
+                "operationId": "StateController.get car",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "state_id",
+                        "description": "get perticuler states using state_id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/state/list_states": {
+            "post": {
+                "tags": [
+                    "state"
+                ],
+                "description": "Fetch Data Country\n\u003cbr\u003e",
+                "operationId": "StateController.Fetch Data Country",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/state/search_state": {
+            "post": {
+                "tags": [
+                    "state"
+                ],
+                "description": "Fetch Filter States\n\u003cbr\u003e",
+                "operationId": "StateController.Filter states",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "search",
+                        "description": "Search State",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
                         }
                     },
                     "403": {

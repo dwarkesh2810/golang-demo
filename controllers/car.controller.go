@@ -312,3 +312,43 @@ func (c *CarController) GetSingleCar() {
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
 }
+
+// Filter Car
+// @Title Filter car
+// @Description Fetch Filter car
+// @Param search formData string true "Search car"
+// @Param open_page formData int false "if you want to open specific page than give page number"
+// @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Success 200 {object} object
+// @Failure 403
+// @router /search_car [post]
+func (u *CarController) FilterCars() {
+	var bodyData dto.SearchRequest
+	if err := u.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+		return
+	}
+	json.Unmarshal(u.Ctx.Input.RequestBody, &bodyData)
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&bodyData); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
+	result, pagination_data, _ := models.Filtercar(bodyData.Search, bodyData.OpenPage, bodyData.PageSize)
+	if pagination_data["pageOpen_error"] == 1 {
+		current := pagination_data["current_page"]
+		last := pagination_data["last_page"]
+		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		return
+	}
+	if result != nil {
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(u.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		return
+	}
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "search"))
+}

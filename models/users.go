@@ -150,30 +150,14 @@ func UpdateIsVerified(id int) error {
 	return nil
 }
 
-func SearchUser(search string, page_size, open_page int) ([]Users, map[string]interface{}, error) {
-	o := orm.NewOrm()
-	if page_size <= 0 {
-		page_size = 10
-	}
-	if open_page <= 0 {
-		open_page = 1
-	}
-	var count []Users
-	_, err := o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).All(&count)
+func SearchUser(search string, page_size, open_page int) ([]orm.Params, map[string]interface{}, error) {
+	matchCountQuery := `SELECT user_id, first_name FROM users WHERE first_name LIKE '%` + search + `%' OR last_name LIKE '%` + search + `%' OR email LIKE '%` + search + `%' OR phone_number LIKE '%` + search + `%' OR role LIKE '%` + search + `%';`
+	totalRecordQuery := `SELECT COUNT(*) as totalRows FROM users`
+	mainRecordQuery := `SELECT user_id ,first_name ,last_name,email,phone_number,role FROM users WHERE first_name LIKE '%` + search + `%' OR last_name LIKE '%` + search + `%' OR email LIKE '%` + search + `%' OR phone_number LIKE '%` + search + `%' OR role LIKE '%` + search + `%' LIMIT ? OFFSET ?`
+	user, pagination, err := helpers.PaginationForSearch(open_page, page_size, totalRecordQuery, matchCountQuery, mainRecordQuery)
 	if err != nil {
 		return nil, nil, err
 	}
-	pagination, err := helpers.PaginationForSearch(open_page, page_size, len(count))
-	if err != nil {
-		return nil, nil, err
-	}
-	offset := (open_page - 1) * page_size
-	var user []Users
-	_, err = o.QueryTable(new(Users)).SetCond(orm.NewCondition().Or("first_name__icontains", search).Or("email__icontains", search).Or("last_name__icontains", search).Or("role__icontains", search)).Limit(page_size).Offset(offset).All(&user)
-	if err != nil {
-		return nil, nil, err
-	}
-	pagination["matchCount"] = len(count)
 	return user, pagination, nil
 }
 func VerifyEmail(email string, name string) (string, error) {

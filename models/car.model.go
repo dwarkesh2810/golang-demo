@@ -83,3 +83,15 @@ func FetchCars(current_page, pageSize int) ([]orm.Params, map[string]interface{}
 	}
 	return result_data, pagination, nil
 }
+
+
+func Filtercar(search string, open_page, page_size int) ([]orm.Params, map[string]interface{}, error) {
+	matchCountQuery := `SELECT id, car_name FROM car WHERE car_name LIKE '%` + search + `%' OR modified_by LIKE '%` + search + `%' OR model LIKE '%` + search + `%' OR car_type LIKE '%` + search + `%';`
+	totalRecordQuery := `SELECT COUNT(*) as totalRows FROM car`
+	mainRecordQuery := `SELECT id ,car_name ,modified_by, model,car_type FROM car WHERE car_name LIKE '%` + search + `%' OR modified_by LIKE '%` + search + `%' OR model LIKE '%` + search + `%' OR car_type LIKE '%` + search + `%' LIMIT ? OFFSET ?`
+	states, pagination, err := helpers.PaginationForSearch(open_page, page_size, totalRecordQuery, matchCountQuery, mainRecordQuery)
+	if err != nil {
+		return nil, nil, err
+	}
+	return states, pagination, nil
+}
