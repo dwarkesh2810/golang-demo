@@ -102,12 +102,14 @@ func (u *CountryController) FilterCountries() {
 }
 
 // filter_city
-// @Title Filter Countries
-// @Description it give country_name and country_id
+// @Title Filter Cities
+// @Description it give city_names and country_id
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
-// @Param state_id formData int false "how much data you want to show at a time default it will give 10 records"
-// @Param country_id formData int false "how much data you want to show at a time default it will give 10 records"
+// @Param state_id formData int false "state_id if you provide country_id than use it"
+// @Param country_id formData int false "country_id if you provide state_id than use it"
+// @Param country_name formData string false "if you provide proper country name than it returns all cities of that country"
+// @Param state_name formData string false "if you provide proper state  name than it returns all cities of that states"
 // @Param search_param formData string false "it filter in database and give match"
 // @Success 200 {object} object
 // @Failure 403
@@ -123,12 +125,12 @@ func (u *CountryController) FilterCity() {
 		"city_name": search.SearchParam,
 	}
 
-	otherFieldSCount := 0
+	otherFieldSCount := 2
 	if search.CountryId > 0 && search.StateId > 0 {
 		otherFieldSCount = 2
 	}
 
-	result, pagination_data, _ := models.CityFilter(search.OpenPage, search.PageSize, search.CountryId, search.StateId, otherFieldSCount, "start", searchFields)
+	result, pagination_data, _ := models.CityFilter(search.OpenPage, search.PageSize, search.CountryId, search.StateId, otherFieldSCount, "start", search.CountryName, search.StateName, searchFields)
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search City Not Found")
 		return
