@@ -50,14 +50,41 @@ func CountryFilter(currentPage, pageSize int, applyPositions string, searchField
 }
 
 /*City Models-------------------------------------------------------------------------------------------------------*/
-func CityFilter(currentPage, pageSize, country_id, state_id, other_field_count int, applyPositions string, searchFields map[string]string) ([]orm.Params, map[string]interface{}, error) {
+
+func CityFilter(currentPage, pageSize, country_id, state_id, other_field_count int, applyPositions, countryName, stateName string, searchFields map[string]string) ([]orm.Params, map[string]interface{}, error) {
 	tableName := "cities"
 	query := `SELECT country_id,state_id,city_id ,city_name FROM cities`
 	countQuery := `SELECT COUNT(*) as count FROM cities`
-
 	if country_id != 0 && state_id != 0 {
 		query += fmt.Sprintf(` WHERE country_id = %d AND state_id = %d `, country_id, state_id)
 		countQuery += fmt.Sprintf(` WHERE country_id = %d AND state_id = %d`, country_id, state_id)
+	}
+
+	if countryName != "" || stateName != "" {
+		query = fmt.Sprintf(`select city.city_name as city_name,city.city_id as city_id from countries as c
+		LEFT JOIN cities as city ON city.country_id=c.country_id
+		LEFT JOIN states as s ON s.state_id = city.state_id
+		WHERE upper(c.country_name) = upper('%s') or upper(s.state_name)=upper('%s')
+		`, countryName, stateName)
+
+		countQuery = fmt.Sprintf(`select COUNT(*) as count from countries as c
+		LEFT JOIN cities as city ON city.country_id=c.country_id
+		LEFT JOIN states as s ON s.state_id = city.state_id
+		WHERE upper(c.country_name) = upper('%s') or upper(s.state_name)=upper('%s')
+		`, countryName, stateName)
+
+		if countryName != "" && stateName != "" {
+			query = fmt.Sprintf(`select city.city_name as city_name,city.city_id as city_id from countries as c
+			LEFT JOIN cities as city ON city.country_id=c.country_id
+			LEFT JOIN states as s ON s.state_id = city.state_id
+			WHERE upper(c.country_name) = upper('%s') AND upper(s.state_name)=upper('%s')
+			`, countryName, stateName)
+			countQuery = fmt.Sprintf(`select COUNT(*) as count from countries as c
+			LEFT JOIN cities as city ON city.country_id=c.country_id
+			LEFT JOIN states as s ON s.state_id = city.state_id
+			WHERE upper(c.country_name) = upper('%s') AND upper(s.state_name)=upper('%s')
+			`, countryName, stateName)
+		}
 	}
 
 	applyPosition := ""

@@ -308,8 +308,8 @@
                 "tags": [
                     "country"
                 ],
-                "description": "it give country_name and country_id\n\u003cbr\u003e",
-                "operationId": "CountryController.Filter Countries",
+                "description": "it give city_names and country_id\n\u003cbr\u003e",
+                "operationId": "CountryController.Filter Cities",
                 "parameters": [
                     {
                         "in": "formData",
@@ -328,16 +328,28 @@
                     {
                         "in": "formData",
                         "name": "state_id",
-                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "description": "state_id if you provide country_id than use it",
                         "type": "integer",
                         "format": "int64"
                     },
                     {
                         "in": "formData",
                         "name": "country_id",
-                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "description": "country_id if you provide state_id than use it",
                         "type": "integer",
                         "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "country_name",
+                        "description": "if you provide proper country name than it returns all cities of that country",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "state_name",
+                        "description": "if you provide proper state  name than it returns all cities of that states",
+                        "type": "string"
                     },
                     {
                         "in": "formData",

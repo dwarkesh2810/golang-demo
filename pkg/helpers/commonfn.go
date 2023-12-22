@@ -823,6 +823,7 @@ func FilterData(currentPage, pageSize int, query, tableName string, searchFields
 	query += `
         LIMIT ? OFFSET ?
     `
+	log.Print(query, append(generateSearchParameters(searchFields, applyPosition), pageSize, offset), "_______________________")
 	_, err := db.Raw(query, append(generateSearchParameters(searchFields, applyPosition), pageSize, offset)...).Values(&homeResponse)
 	if err != nil {
 		return nil, nil, 0, err
@@ -949,10 +950,9 @@ func GetFileExtension(file string) string {
 
 /*------------------------------------Pagination for search ------------------------------------------------*/
 
-
 func PaginationForSearch(current_page, pageSize int, totalRecordQuery, matchCountQuery, mainRecordQuery string) ([]orm.Params, map[string]interface{}, error) {
 	db := orm.NewOrm()
-	// orm.Debug = true			
+	// orm.Debug = true
 	if pageSize <= 0 {
 		pageSize = 10
 	}

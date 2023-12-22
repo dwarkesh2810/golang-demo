@@ -56,7 +56,7 @@ type ResetUserPasswordOtp struct {
 }
 
 type SearchRequest struct {
-	Search   string `json:"search" form:"search" valid:"Required"`
+	Search   string `json:"search" form:"search" valid:"Required;MinSize(3)"`
 	PageSize int    `json:"page_size" form:"page_size"`
 	OpenPage int    `json:"open_page" form:"open_page"`
 }
@@ -160,11 +160,14 @@ type CitySearch struct {
 	SearchParam string `json:"search_param" form:"search_param"`
 	CountryId   int    `json:"country_id" form:"country_id"`
 	StateId     int    `json:"state_id" form:"state_id"`
+	CountryName string `json:"country_name" form:"country_name"`
+	StateName   string `json:"state_name" form:"state_name"`
 }
 
 type CountrySearch struct {
-	PageSize    int    `json:"page_size" form:"page_size"`
-	OpenPage    int    `json:"open_page" form:"open_page"`
+	PageSize int `json:"page_size" form:"page_size"`
+	OpenPage int `json:"open_page" form:"open_page"`
+
 	SearchParam string `json:"search_param" form:"search_param"`
 }
 
