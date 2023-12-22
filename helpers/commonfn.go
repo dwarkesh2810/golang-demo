@@ -307,9 +307,9 @@ func CreateINIFiles(data []map[string]string) error {
 			return err
 		}
 
-		for key, _ := range item {
+		for key, data := range item {
 			if key == "" {
-				log.Print(key)
+				log.Print(key, data)
 			}
 			section.NewKey(item["lable_code"], item["language_value"])
 		}

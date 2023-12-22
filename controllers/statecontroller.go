@@ -44,7 +44,7 @@ func (u *StateController) FetchStates() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "datanotfound"))
 }
 
 // Country Wise State
@@ -78,7 +78,7 @@ func (u *StateController) CountryWiseState() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "datanotfound"))
 }
 
 // Country Wise State
@@ -116,5 +116,5 @@ func (u *StateController) FilterStates() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "datanotfound"))
 }
