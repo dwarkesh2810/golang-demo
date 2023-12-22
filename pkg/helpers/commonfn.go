@@ -35,7 +35,7 @@ import (
 	"github.com/go-ini/ini"
 )
 
-func SecondsToDayHourMinAndSeconds(seconds int) (int64, int64, int64, int64) {
+func SecondsToDayHourMinAndSeconds(seconds int64) (int64, int64, int64, int64) {
 	days := seconds / 86400
 	hour := (seconds % 86400) / 3600
 	minute := (seconds % 3600) / 60
@@ -78,16 +78,28 @@ func SendMailOTp(userEmail string, name string, subject string, body string) (bo
 }
 
 /*PAGINATION FUNCTION PROVIDE ALL DETAILS LIKE AS  CURRENT PAGE,LAST PAGE AND TOTAL ROWS AND TOTAL PAGES IT ALSO */
-func Pagination(current_page, pageSize int, tableName string) (map[string]interface{}, error) {
+func Pagination(current_page, pageSize int, tableName string, totalMatchCount int) (map[string]interface{}, error) {
 	db := orm.NewOrm()
+	if current_page <= 0 {
+		current_page = 1
+	}
+	if pageSize < 0 {
+		pageSize = 10
+	}
+
 	var totalRows int
-	err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
-	if err != nil {
-		return nil, err
+	if totalMatchCount > 0 {
+		totalRows = totalMatchCount
+	}
+
+	if totalMatchCount == 0 && tableName != "" {
+		err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
-
 	lastPageNumber := totalPages
 	if lastPageNumber == 0 {
 		lastPageNumber = 1
@@ -117,6 +129,7 @@ func Pagination(current_page, pageSize int, tableName string) (map[string]interf
 		pagination_data["current_page"] = current_page
 		pagination_data["last_page"] = lastPageNumber
 	}
+
 	return pagination_data, nil
 }
 
@@ -791,9 +804,8 @@ func NewCarType(input string) (dto.CarType, error) {
 }
 
 /*FILTER DATA ACCORDING TO QUERY AND GIVE FILTER DATA COUNTS*/
-func FilterData(currentPage, pageSize int, query, tableName string, searchFields map[string]string, applyPosition, countQuery string) ([]orm.Params, map[string]interface{}, int, error) {
+func FilterData(currentPage, pageSize int, query, tableName string, searchFields map[string]string, applyPosition, countQuery string, otherFieldSCount int) ([]orm.Params, map[string]interface{}, int, error) {
 	db := orm.NewOrm()
-
 	if currentPage <= 0 {
 		currentPage = 1
 	}
@@ -801,67 +813,61 @@ func FilterData(currentPage, pageSize int, query, tableName string, searchFields
 		pageSize = 10
 	}
 	offset := (currentPage - 1) * pageSize
-
 	var homeResponse []orm.Params
 
 	if len(searchFields) > 0 {
-		query += " WHERE 1=1"
-		countQuery += " WHERE 1=1"
+		whereClause := generateWhereClause(searchFields, applyPosition, otherFieldSCount)
+		query += " " + whereClause
+		countQuery += " " + whereClause
 	}
-
-	interfaceSearchFields := generateSearchParameters(searchFields, applyPosition)
-
-	if len(interfaceSearchFields) == 0 {
-		return nil, nil, 0, nil
-	}
-
-	whereClause := generateWhereClause(searchFields, applyPosition)
-	query = query + whereClause + `
+	query += `
         LIMIT ? OFFSET ?
     `
-
-	_, err := db.Raw(query, append(interfaceSearchFields, pageSize, offset)...).Values(&homeResponse)
+	_, err := db.Raw(query, append(generateSearchParameters(searchFields, applyPosition), pageSize, offset)...).Values(&homeResponse)
+	if err != nil {
+		return nil, nil, 0, err
+	}
+	var totalMatchData int
+	err = db.Raw(countQuery, generateSearchParameters(searchFields, applyPosition)...).QueryRow(&totalMatchData)
 	if err != nil {
 		return nil, nil, 0, err
 	}
 
-	var totalMatchData int
-
-	if len(searchFields) > 0 {
-		countQuery = countQuery + whereClause
-		err = db.Raw(countQuery, interfaceSearchFields...).QueryRow(&totalMatchData)
-		if err != nil {
-			return nil, nil, 0, err
-		}
-	}
-
-	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName)
+	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName, totalMatchData)
 	if paginationErr != nil {
 		return nil, paginationData, 0, paginationErr
 	}
-
 	return homeResponse, paginationData, totalMatchData, nil
 }
 
-func generateWhereClause(fields map[string]string, applyPosition string) string {
+func generateWhereClause(fields map[string]string, applyPosition string, otherFieldCount int) string {
 	var conditions []string
 	applyPosition = strings.ToUpper(applyPosition)
 	for field, value := range fields {
 		if value != "" {
 			condition := ""
 			if applyPosition == "" {
-				condition = field + " LIKE ?"
+				condition = field + " ILIKE ?"
 			} else if applyPosition == "START" {
-				condition = field + " LIKE ?"
+				condition = field + " ILIKE ?"
 			} else {
-				condition = field + " LIKE ?"
+				condition = field + " ILIKE ?"
 				log.Print(value)
 			}
 			conditions = append(conditions, condition)
 		}
 	}
-	if len(conditions) > 0 {
+	var otherFileds int = 0
+	if otherFieldCount > 0 {
+		otherFileds = otherFieldCount
+	}
+	if otherFileds > 0 && len(conditions) > 0 {
 		whereClause := " AND " + strings.Join(conditions, " OR ")
+		return whereClause
+	}
+
+	if len(conditions) > 0 {
+		whereClause := " WHERE " + strings.Join(conditions, " OR ")
 		return whereClause
 	}
 	return ""
@@ -904,7 +910,7 @@ func FetchDataWithPaginations(current_page, pageSize int, tableName, query strin
 	if err != nil {
 		return nil, nil, err
 	}
-	pagination_data, pagination_err := Pagination(current_page, pageSize, tableName)
+	pagination_data, pagination_err := Pagination(current_page, pageSize, tableName, 0)
 	if pagination_err != nil {
 		return nil, pagination_data, nil
 	}

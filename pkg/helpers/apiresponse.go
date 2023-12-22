@@ -6,14 +6,14 @@ import (
 )
 
 type ResponseSuccess struct {
-	ResStatus  int         `json:"status"`
+	ResStatus  int         `json:"Status"`
 	Message    string      `json:"message"`
 	Pagination interface{} `json:"pagination"`
 	Result     interface{} `json:"data"`
 }
 
 type ResponseFailed struct {
-	ResStatus int         `json:"status"`
+	ResStatus int         `json:"Status"`
 	Message   interface{} `json:"message"`
 }
 
@@ -87,13 +87,13 @@ func ApiSuccessResponse(w http.ResponseWriter, result interface{}, message strin
 	}
 
 	responseMap := map[string]interface{}{
-		"message":   message,
-		"status": 1,
-		"result":    result,
+		"message": message,
+		"Status":  1,
+		"result":  result,
 	}
 
 	if pagination_data != nil && pagination_data != "" {
-		responseMap["Pagination"] = pagination
+		responseMap["pagination"] = pagination
 	}
 
 	jsonResponse, err := json.Marshal(responseMap)

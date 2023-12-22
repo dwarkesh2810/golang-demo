@@ -13,9 +13,9 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dwarkesh2810/golang-demo/controllers"
-	"github.com/dwarkesh2810/golang-demo/middleware"
 	"github.com/dwarkesh2810/golang-demo/models"
-	"github.com/dwarkesh2810/golang-demo/validations"
+	"github.com/dwarkesh2810/golang-demo/pkg/middleware"
+	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
 func init() {

@@ -10,7 +10,7 @@ package routers
 import (
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dwarkesh2810/golang-demo/controllers"
-	"github.com/dwarkesh2810/golang-demo/middleware"
+	"github.com/dwarkesh2810/golang-demo/pkg/middleware"
 )
 
 func init() {
@@ -56,11 +56,12 @@ func init() {
 		),
 		beego.NSNamespace("/country",
 			beego.NSInclude(&controllers.CountryController{}),
-			beego.NSInclude(&controllers.StateController{}),
 			beego.NSRouter("/list_countries", &controllers.CountryController{}, "post:FetchCountries"),
-			beego.NSRouter("/list_states", &controllers.StateController{}, "post:FetchStates"),
-			beego.NSRouter("/country_wise_state", &controllers.StateController{}, "post:CountryWiseState"),
-			beego.NSRouter("/search_state", &controllers.StateController{}, "post:FilterStates"),
+			beego.NSRouter("/filter_country", &controllers.CountryController{}, "post:FilterCountries"),
+			beego.NSRouter("/filter_city", &controllers.CountryController{}, "post:FilterCity"),
+			beego.NSRouter("/list_states", &controllers.CountryController{}, "post:FetchStates"),
+			beego.NSRouter("/country_wise_state", &controllers.CountryController{}, "post:CountryWiseState"),
+			beego.NSRouter("/search_state", &controllers.CountryController{}, "post:FilterStates"),
 		),
 	)
 	beego.AddNamespace(ns)

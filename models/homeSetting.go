@@ -9,7 +9,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
-	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
 func RegisterSetting(c dto.HomeSeetingInsert, user_id float64, file_path interface{}) (int, error) {
@@ -140,7 +140,7 @@ func FetchSettingPagination(current_page, pageSize int) ([]orm.Params, map[strin
 		SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
 		concat(umt.first_name,' ',umt.last_name) as created_by  
 		FROM home_pages_setting_table as hpst
-		LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by
+		LEFT JOIN users as umt ON umt.user_id = hpst.created_by
 		ORDER BY hpst.created_date DESC
 		LIMIT ? OFFSET ?
 	`, pageSize, offset).Values(&homeResponse)
@@ -149,7 +149,7 @@ func FetchSettingPagination(current_page, pageSize int) ([]orm.Params, map[strin
 		return nil, nil, err
 	}
 
-	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, "home_pages_setting_table")
+	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, "home_pages_setting_table", 0)
 	if pagination_err != nil {
 		return nil, pagination_data, nil
 	}
@@ -166,7 +166,7 @@ func FetchSetting() (interface{}, error) {
 		UpdatedDate time.Time `json:"updated_date"`
 		CreatedBy   string    `json:"created_by"`
 	}
-	_, err := db.Raw(`SELECT hpst.section, hpst.data_type, hpst.setting_data,hpst.created_date, hpst.updated_date ,concat(umt.first_name,' ',umt.last_name) as created_by  FROM home_pages_setting_table as hpst LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by ORDER BY hpst.created_date DESC`).QueryRows(&homeResponse)
+	_, err := db.Raw(`SELECT hpst.section, hpst.data_type, hpst.setting_data,hpst.created_date, hpst.updated_date ,concat(umt.first_name,' ',umt.last_name) as created_by  FROM home_pages_setting_table as hpst LEFT JOIN users as umt ON umt.user_id = hpst.created_by ORDER BY hpst.created_date DESC`).QueryRows(&homeResponse)
 
 	if err != nil {
 		return nil, err
@@ -229,14 +229,14 @@ func ExportData(limit, starting_FromRow int) (interface{}, error) {
 
 		query = fmt.Sprintf(`SELECT hpst.page_setting_id, hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date, concat(umt.first_name,' ',umt.last_name) as created_by 
 			FROM home_pages_setting_table as hpst 
-			LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by  
+			LEFT JOIN users as umt ON umt.user_id = hpst.created_by  
 			ORDER BY hpst.page_setting_id 
 			LIMIT %d`, limit)
 	} else {
 
 		query = fmt.Sprintf(`SELECT hpst.page_setting_id, hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date, concat(umt.first_name,' ',umt.last_name) as created_by 
 			FROM home_pages_setting_table as hpst 
-			LEFT JOIN user_master_table as umt ON umt.user_id = hpst.created_by  
+			LEFT JOIN users as umt ON umt.user_id = hpst.created_by  
 			WHERE hpst.page_setting_id >= %d
 			ORDER BY hpst.page_setting_id 
 			LIMIT %d`, starting_FromRow, limit)
@@ -412,7 +412,8 @@ func FilterWithPaginationFetchSettings(currentPage, pageSize int, applyPositions
 	if applyPositions != "" {
 		applyPosition = applyPositions
 	}
-	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery)
+	otherFieldSCount := 0
+	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery, otherFieldSCount)
 	if errs != nil {
 		return nil, nil, errs
 	}

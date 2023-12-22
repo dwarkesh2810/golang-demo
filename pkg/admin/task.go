@@ -42,8 +42,8 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/task"
-	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
 func CreateTask(taskName, schedule string, f task.TaskFunc) {
@@ -51,7 +51,6 @@ func CreateTask(taskName, schedule string, f task.TaskFunc) {
 	task.AddTask(taskName, tasks)
 	task.StartTask()
 }
-
 
 func SendPendingEmail(c context.Context) error {
 	o := orm.NewOrm()

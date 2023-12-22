@@ -10,9 +10,9 @@ import (
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dwarkesh2810/golang-demo/dto"
-	"github.com/dwarkesh2810/golang-demo/helpers"
 	"github.com/dwarkesh2810/golang-demo/models"
-	"github.com/dwarkesh2810/golang-demo/validations"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
 type UserController struct {
