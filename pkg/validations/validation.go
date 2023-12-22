@@ -8,7 +8,7 @@ import (
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
-	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
 func Init() {
@@ -81,7 +81,6 @@ func RequiredTag(v *validation.Validation, obj interface{}, key string) {
 		v.SetError(key, "please enter with in [logo, text, banner, html]")
 	}
 }
-
 
 func ValidImageType(file string) bool {
 	extensions := []string{"jpeg", "jpg", "png", "svg"}

@@ -6,7 +6,7 @@ import (
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
-	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
 func InsertNewCar(data dto.GetNewCarRequest) (Car, error) {

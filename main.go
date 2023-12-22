@@ -1,13 +1,13 @@
 package main
 
 import (
-	ad "github.com/dwarkesh2810/golang-demo/admin"
 	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/controllers"
-	"github.com/dwarkesh2810/golang-demo/logger"
 	"github.com/dwarkesh2810/golang-demo/models"
+	ad "github.com/dwarkesh2810/golang-demo/pkg/admin"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
+	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 	_ "github.com/dwarkesh2810/golang-demo/routers"
-	"github.com/dwarkesh2810/golang-demo/validations"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/admin"

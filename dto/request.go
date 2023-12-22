@@ -154,4 +154,16 @@ type CountryWiseState struct {
 	OpenPage  int    `json:"open_page" form:"open_page"`
 }
 
+type CitySearch struct {
+	PageSize    int    `json:"page_size" form:"page_size"`
+	OpenPage    int    `json:"open_page" form:"open_page"`
+	SearchParam string `json:"search_param" form:"search_param"`
+	CountryId   int    `json:"country_id" form:"country_id"`
+	StateId     int    `json:"state_id" form:"state_id"`
+}
 
+type CountrySearch struct {
+	PageSize    int    `json:"page_size" form:"page_size"`
+	OpenPage    int    `json:"open_page" form:"open_page"`
+	SearchParam string `json:"search_param" form:"search_param"`
+}

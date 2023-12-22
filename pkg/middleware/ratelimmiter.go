@@ -10,8 +10,8 @@ import (
 
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/dwarkesh2810/golang-demo/conf"
-	"github.com/dwarkesh2810/golang-demo/helpers"
-	"github.com/dwarkesh2810/golang-demo/logger"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 )
 
 var (
@@ -80,7 +80,7 @@ func RateLimiter(ctx *context.Context) {
 
 		remainingSeconds := unBlocked[ip] - time.Now().Unix()
 
-		day, hr, min, sec := helpers.SecondsToDayHourMinAndSeconds(int(remainingSeconds))
+		day, hr, min, sec := helpers.SecondsToDayHourMinAndSeconds(int64(remainingSeconds))
 
 		message := fmt.Sprintf(helpers.TranslateMessage(ctx, "error", "toomanyreq"), day, hr, min, sec)
 

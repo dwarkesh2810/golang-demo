@@ -259,7 +259,7 @@
                     "country"
                 ],
                 "description": "Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "StateController.Fetch Data Country",
+                "operationId": "CountryController.Fetch Data Country",
                 "parameters": [
                     {
                         "in": "formData",
@@ -282,6 +282,104 @@
                         "description": "how much data you want to show at a time default it will give 10 records",
                         "type": "integer",
                         "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/country/filter_city": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "it give country_name and country_id\n\u003cbr\u003e",
+                "operationId": "CountryController.Filter Countries",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "state_id",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "country_id",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "search_param",
+                        "description": "it filter in database and give match",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/country/filter_country": {
+            "post": {
+                "tags": [
+                    "country"
+                ],
+                "description": "it give country_name and country_id\n\u003cbr\u003e",
+                "operationId": "CountryController.Filter Countries",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "open_page",
+                        "description": "if you want to open specific page than give page number",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "page_size",
+                        "description": "how much data you want to show at a time default it will give 10 records",
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "search_param",
+                        "description": "it filter in database and give match",
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -339,7 +437,7 @@
                     "country"
                 ],
                 "description": "Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "StateController.Fetch Data Country",
+                "operationId": "CountryController.Fetch Data Country",
                 "parameters": [
                     {
                         "in": "formData",
@@ -375,7 +473,7 @@
                     "country"
                 ],
                 "description": "Fetch Data Country\n\u003cbr\u003e",
-                "operationId": "StateController.Fetch Data Country",
+                "operationId": "CountryController.Fetch Data Country",
                 "parameters": [
                     {
                         "in": "formData",

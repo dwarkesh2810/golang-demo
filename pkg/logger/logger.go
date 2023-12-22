@@ -8,7 +8,7 @@ var log *logs.BeeLogger
 
 func Init() {
 	log = logs.NewLogger(100)
-	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"logs/app.log","maxlines":10000000,"separate":["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]}`)
+	logs.SetLogger(logs.AdapterMultiFile, `{"filename":"pkg/logger/logs/app.log","maxlines":10000000,"separate":["emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"]}`)
 
 }
 

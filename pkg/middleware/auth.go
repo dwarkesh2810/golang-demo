@@ -6,7 +6,7 @@ import (
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dwarkesh2810/golang-demo/conf"
-	"github.com/dwarkesh2810/golang-demo/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
 var key = conf.ConfigMaps["JWT_SEC_KEY"]
