@@ -47,19 +47,22 @@ func (u *LangLableController) InsertLanguageLables() {
 	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "failedlanglbl"))
 }
 
-func (u *LangLableController) FetchAllAndWriteInINIFiles() {
+func (u *LangLableController) FetchAllAndWriteInINIFiles() bool {
 	langugeLables, _ := models.FetchAllLabels()
 	languageLangLables, _ := models.FetchAllDefaultlables()
 	langLangLables, done := languageLangLables.([]orm.Params)
 	if !done {
 		log.Fatal("Failed to convert 'results' to []orm.Params")
+		return false
 	}
 	langResult, _ := helpers.ConvertToMapSlice(langLangLables)
 	helpers.CreateINIFiles(langResult)
 	ormParams, ok := langugeLables.([]orm.Params)
 	if !ok {
 		log.Fatal("Failed to convert 'results' to []orm.Params")
+		return false
 	}
 	res, _ := helpers.ConvertToMapSlice(ormParams)
 	helpers.CreateINIFiles(res)
+	return true
 }
