@@ -5,6 +5,7 @@ import (
 
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web/context"
+	"github.com/beego/i18n"
 	"github.com/dwarkesh2810/golang-demo/models"
 )
 
@@ -51,4 +52,8 @@ func InsertAuditLogs(c *context.Context, discription string, userId uint) error 
 		CreatedDate: time.Now(),
 	}
 	return models.InsertAuditLog(log)
+}
+
+func LogMessage(c *context.Context, key string) string {
+	return i18n.Tr("en-US", key)
 }

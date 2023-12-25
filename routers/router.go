@@ -49,7 +49,7 @@ func init() {
 			beego.NSInclude(&controllers.CarController{}),
 			beego.NSBefore(middleware.JWTMiddleware),
 			beego.NSRouter("/", &controllers.CarController{}, "post:GetSingleCar"),
-			beego.NSRouter("/cars", &controllers.CarController{}, "get:GetAllCars"),
+			beego.NSRouter("/cars", &controllers.CarController{}, "post:GetAllCars"),
 			beego.NSRouter("/create", &controllers.CarController{}, "post:AddNewCar"),
 			beego.NSRouter("/update", &controllers.CarController{}, "put:UpdateCar"),
 			beego.NSRouter("/delete", &controllers.CarController{}, "delete:DeleteCar"),
@@ -64,12 +64,12 @@ func init() {
 			beego.NSRouter("/get_country", &controllers.CountryController{}, "post:GetCountry"),
 		),
 		beego.NSNamespace("/state",
-		beego.NSInclude(&controllers.StateController{}),
-		beego.NSRouter("/list_states", &controllers.StateController{}, "post:FetchStates"),
-		beego.NSRouter("/country_wise_state", &controllers.StateController{}, "post:CountryWiseState"),
-		beego.NSRouter("/search_state", &controllers.StateController{}, "post:FilterStates"),
-		beego.NSRouter("/get_state", &controllers.StateController{}, "post:GetState"),
-	),
+			beego.NSInclude(&controllers.StateController{}),
+			beego.NSRouter("/list_states", &controllers.StateController{}, "post:FetchStates"),
+			beego.NSRouter("/country_wise_state", &controllers.StateController{}, "post:CountryWiseState"),
+			beego.NSRouter("/search_state", &controllers.StateController{}, "post:FilterStates"),
+			beego.NSRouter("/get_state", &controllers.StateController{}, "post:GetState"),
+		),
 	)
 	beego.AddNamespace(ns)
 }

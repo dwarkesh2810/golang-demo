@@ -128,24 +128,26 @@ const (
 )
 
 type GetNewCarRequest struct {
-	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3);Required"`
 	CarImage   string  `json:"car_imag" form:"file"`
-	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
-	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3);Required"`
+	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3);Required"`
 	Type       CarType `json:"type" form:"type"`
+	CreatedBy  int
 }
 
 type UpdateCarRequest struct {
-	Id         uint    `json:"car_id" form:"car_id"`
-	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	Id         uint    `json:"car_id" form:"car_id" valid:"Required"`
+	CarName    string  `json:"car_name" form:"car_name" valid:"MaxSize(255);MinSize(3)"`
 	CarImage   string  `json:"car_imag" form:"file"`
-	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
-	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3);Required;Match(/^[a-zA-Z][a-zA-Z0-9._-]{0,31}$/)"`
+	ModifiedBy string  `json:"modified_by" form:"modified_by" valid:"MaxSize(255);MinSize(3)"`
+	Model      string  `json:"model" form:"model" valid:"MaxSize(255);MinSize(3)"`
 	Type       CarType `json:"type" form:"type"`
+	UpdatedBy  int
 }
 
 type GetcarRequest struct {
-	Id uint `json:"car_id"`
+	Id uint `json:"car_id" valid:"Required"`
 }
 
 type CountryWiseState struct {
