@@ -124,7 +124,7 @@ func (u *StateController) FilterStates() {
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "search"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "searchnotfound"))
 }
 
 // Get State ...

@@ -18,6 +18,7 @@ func InsertNewCar(data dto.GetNewCarRequest) (Car, error) {
 		Model:       data.Model,
 		Type:        data.Type,
 		CreatedDate: time.Now(),
+		CreatedBy:   data.CreatedBy,
 	}
 	_, err := o.Insert(&car)
 	if err != nil {
@@ -46,9 +47,10 @@ func UpdateCar(data dto.UpdateCarRequest) (Car, error) {
 		Type:       data.Type,
 		CarImage:   data.CarImage,
 		UpdateDate: time.Now(),
+		UpdatedBy:  data.UpdatedBy,
 	}
 
-	num, err := o.Update(&car, "id", "car_name", "modified_by", "model", "car_type", "car_image", "updated_at")
+	num, err := o.Update(&car, "id", "car_name", "modified_by", "model", "car_type", "car_image", "updated_date", "updated_by")
 	if err != nil {
 		return car, err
 	}
@@ -58,15 +60,15 @@ func UpdateCar(data dto.UpdateCarRequest) (Car, error) {
 	return car, nil
 }
 
-func DeleteCar(id uint) (interface{}, error) {
+func DeleteCar(id uint) (Car, error) {
 	o := orm.NewOrm()
 	var car = Car{Id: id}
 	num, err := o.Delete(&car)
 	if err != nil {
-		return nil, err
+		return car, err
 	}
 	if num == 0 {
-		return nil, errors.New("NOT_FOUND")
+		return car, errors.New("NOT_FOUND")
 	}
 	return car, nil
 }
@@ -83,7 +85,6 @@ func FetchCars(current_page, pageSize int) ([]orm.Params, map[string]interface{}
 	}
 	return result_data, pagination, nil
 }
-
 
 func Filtercar(search string, open_page, page_size int) ([]orm.Params, map[string]interface{}, error) {
 	matchCountQuery := `SELECT id, car_name FROM car WHERE car_name LIKE '%` + search + `%' OR modified_by LIKE '%` + search + `%' OR model LIKE '%` + search + `%' OR car_type LIKE '%` + search + `%';`

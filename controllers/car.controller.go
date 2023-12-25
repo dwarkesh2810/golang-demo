@@ -11,6 +11,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
@@ -32,9 +33,12 @@ type CarController struct {
 // @Failure 403
 // @router /create [post]
 func (c *CarController) AddNewCar() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
 	var cars dto.GetNewCarRequest
 	if err := c.ParseForm(&cars); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- while parsing form/json data", uint(id))
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
@@ -42,18 +46,21 @@ func (c *CarController) AddNewCar() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&cars); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", uint(id))
 		return
 	}
 
 	file, fileHeader, err := c.GetFile("file")
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), uint(id))
 		return
 	}
 
 	ok := validations.ValidImageType(fileHeader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- Invalid image extention when register car", uint(id))
 		return
 	}
 
@@ -62,6 +69,7 @@ func (c *CarController) AddNewCar() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), uint(id))
 		return
 	}
 
@@ -70,17 +78,19 @@ func (c *CarController) AddNewCar() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), uint(id))
 		return
 	}
-
+	cars.CreatedBy = int(id)
 	cars.CarImage = filepaths
 	data, err := models.InsertNewCar(cars)
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), uint(id))
 		return
 	}
-
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Register new car by user : %v, new car id : %v", id, data.Id), uint(id))
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "create"), "")
 }
 
@@ -99,39 +109,37 @@ func (c *CarController) AddNewCar() {
 // @router /update [PUT]
 func (c *CarController) UpdateCar() {
 	var cars dto.UpdateCarRequest
-
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
 	if err := c.ParseForm(&cars); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : while parsing form/json data", uint(id))
 		return
 	}
-
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
-
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&cars); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", uint(id))
 		return
 	}
-
 	data, err := models.GetSingleCar(cars.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
-
 	if data.CarName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 		return
 	}
-
 	file, fileheader, err := c.GetFile("file")
-
 	ok := validations.ValidImageType(fileheader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+		logger.InsertAuditLogs(c.Ctx, "Error : Invalid file type", uint(id))
 		return
 	}
-
 	if err != nil {
 		if cars.CarName == "" {
 			cars.CarName = data.CarName
@@ -149,8 +157,10 @@ func (c *CarController) UpdateCar() {
 		cars.Type, err = helpers.NewCarType(carType)
 		if err != nil {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
+			logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), uint(id))
 			return
 		}
+		cars.UpdatedBy = int(id)
 		cars.CarImage = data.CarImage
 		res, err := models.UpdateCar(cars)
 		if err != nil {
@@ -158,6 +168,7 @@ func (c *CarController) UpdateCar() {
 			return
 		}
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
+		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Update car by user : %v , car id : %v", id, res.Id), uint(id))
 		return
 	}
 	var carType string = string(cars.Type)
@@ -173,23 +184,24 @@ func (c *CarController) UpdateCar() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
-
+	cars.UpdatedBy = int(id)
 	cars.CarImage = filepaths
 	res, err := models.UpdateCar(cars)
-
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
-
 	err = os.Remove(data.CarImage)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
-
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Update car by user : %v , car id : %v", id, res.Id), uint(id))
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
 }
 
@@ -202,43 +214,49 @@ func (c *CarController) UpdateCar() {
 // @Failure 403
 // @router /delete [delete]
 func (c *CarController) DeleteCar() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
 	var car dto.GetcarRequest
-
 	if err := c.ParseForm(&car); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &car)
-
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&car); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", uint(id))
 		return
 	}
 
 	res, err := models.GetSingleCar(car.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 
 	if res.CarName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : Invalid carId when getting data", uint(id))
 		return
 	}
 
 	data, err := models.DeleteCar(car.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 
 	err = os.Remove(res.CarImage)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
-
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Delete car by user : %v , car id : %v", id, data.Id), uint(id))
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "delete"), "")
 }
 
@@ -251,26 +269,22 @@ func (c *CarController) DeleteCar() {
 // @Failure 403
 // @router /cars [post]
 func (c *CarController) GetAllCars() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
 	var search dto.PaginationReq
-
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
-
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&search); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		return
-	}
-
-	result, pagination_data, _ := models.FetchCars(search.OpenPage, search.PageSize)
+	result, pagination_data, err := models.FetchCars(search.OpenPage, search.PageSize)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+message, uint(id))
 		return
 	}
 
@@ -279,9 +293,11 @@ func (c *CarController) GetAllCars() {
 		section := ""
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Get all car record by user : %v", id), uint(id))
 		return
 	}
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 }
 
 // GetSingleCar ...
@@ -293,22 +309,32 @@ func (c *CarController) GetAllCars() {
 // @Failure 403
 // @router / [post]
 func (c *CarController) GetSingleCar() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	id := claims["User_id"].(float64)
 	var bodyData dto.GetcarRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
-
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", uint(id))
 		return
 	}
 
 	Data, err := models.GetSingleCar(bodyData.Id)
 	if err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), uint(id))
+		return
+	}
+	if Data.Id == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
+		logger.InsertAuditLogs(c.Ctx, "Error : Invalid id when getting car data", uint(id))
+		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
 }
@@ -324,23 +350,28 @@ func (c *CarController) GetSingleCar() {
 // @Failure 403
 // @router /search_car [post]
 func (u *CarController) FilterCars() {
+	claims := helpers.GetTokenClaims(u.Ctx)
+	id := claims["User_id"].(float64)
 	var bodyData dto.SearchRequest
 	if err := u.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(u.Ctx, "Error : "+err.Error(), uint(id))
 		return
 	}
 	json.Unmarshal(u.Ctx.Input.RequestBody, &bodyData)
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		logger.InsertAuditLogs(u.Ctx, "Error : Validation error", uint(id))
 		return
 	}
-	result, pagination_data, _ := models.Filtercar(bodyData.Search, bodyData.OpenPage, bodyData.PageSize)
+	result, pagination_data, err := models.Filtercar(bodyData.Search, bodyData.OpenPage, bodyData.PageSize)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
 		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(u.Ctx, "Error : "+message, uint(id))
 		return
 	}
 	if result != nil {
@@ -348,7 +379,9 @@ func (u *CarController) FilterCars() {
 		section := "success"
 		message := helpers.TranslateMessage(u.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(u.Ctx, message, uint(id))
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "search"))
+	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "searchnotfound"))
+	logger.InsertAuditLogs(u.Ctx, "Error : "+err.Error(), uint(id))
 }

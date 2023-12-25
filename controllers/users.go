@@ -38,40 +38,46 @@ func (c *UserController) Login() {
 	err := json.Unmarshal(c.Ctx.Input.RequestBody, &userReq)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, err.Error(), 0)
 		return
 	}
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&userReq); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : validation error", 0)
 		return
 	}
 
 	dbUser, err := models.GetUserByEmail(userReq.Username)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	if dbUser.Email == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.login"), 0)
 		return
 	}
 	err = helpers.VerifyHashedData(dbUser.Password, userReq.Password)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "credential"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), uint(dbUser.UserId))
 		return
 	}
 	userData, err := models.LoginUser(userReq.Username, dbUser.Password)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), uint(dbUser.UserId))
 		return
 	}
 	if userData.Email == "" && userData.FirstName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
-		logger.InsertAuditLogs(c.Ctx, "Error : mobile or email required", uint(userData.UserId))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.login"), uint(userData.UserId))
 		return
 	}
-	expirationTime := time.Now().Add(24 * time.Hour)
+	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &dto.JwtClaim{Email: userData.Email, ID: int(userData.UserId), StandardClaims: jwt.StandardClaims{
 		ExpiresAt: expirationTime.Unix(),
 	}}
@@ -79,7 +85,7 @@ func (c *UserController) Login() {
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "accesstoken"))
-		logger.InsertAuditLogs(c.Ctx, "Error : failed to get accesstoken", uint(userData.UserId))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.accesstoken"), uint(userData.UserId))
 		return
 	}
 	data := map[string]interface{}{"User_Data": token.Claims, "Tokan": tokenString}
@@ -100,6 +106,7 @@ func (c *UserController) RegisterNewUser() {
 	bodyData := dto.NewUserRequest{}
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -107,17 +114,20 @@ func (c *UserController) RegisterNewUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : validation error", 0)
 		return
 	}
 
 	data, _ := models.GetUserByEmail(bodyData.Email)
 	if data.Email == bodyData.Email || data.PhoneNumber == bodyData.PhoneNumber {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "userexist"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.userexist"), 0)
 		return
 	}
 	output, err := models.InsertNewUser(bodyData)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	go models.VerifyEmail(output.Email, output.FirstName)
@@ -137,24 +147,23 @@ func (c *UserController) RegisterNewUser() {
 // @router /secure/users/ [post]
 func (c *UserController) GetAllUsers() {
 	var search dto.PaginationReq
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&search); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		return
-	}
-
-	result, pagination_data, _ := models.FetchUsers(search.OpenPage, search.PageSize)
+	result, pagination_data, err := models.FetchUsers(search.OpenPage, search.PageSize)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
@@ -163,9 +172,11 @@ func (c *UserController) GetAllUsers() {
 		section := ""
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // VerifyEmailOTP ...
@@ -179,8 +190,12 @@ func (c *UserController) GetAllUsers() {
 // @router /secure/verify_email_otp [post]
 func (c *UserController) VerifyEmailOTP() {
 	var bodyData dto.VerifyEmailOTPRequest
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -188,23 +203,28 @@ func (c *UserController) VerifyEmailOTP() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
 		return
 	}
 	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	if data.OtpCode != bodyData.Otp {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "otp"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.otp"), userId)
 		return
 	}
 	err = models.UpdateIsVerified(data.UserId)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "Verified", helpers.TranslateMessage(c.Ctx, "success", "verify"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.verify"), userId)
 }
 
 // UpdateUser .
@@ -218,8 +238,13 @@ func (c *UserController) VerifyEmailOTP() {
 // @router /secure/update [put]
 func (c *UserController) UpdateUser() {
 	var bodyData dto.UpdateUserRequest
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -227,32 +252,38 @@ func (c *UserController) UpdateUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
 		return
 	}
 	data, err := models.GetUserDetails(bodyData.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	if bodyData.Email != data.Email {
 		res, _ := models.GetUserByEmail(bodyData.Email)
 		if res.Email == bodyData.Email {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "userexist"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.userexist"), userId)
 			return
 		}
 		if data.Email == "" {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.invalidid"), userId)
 			return
 		}
 	}
 	user, err := models.UpdateUser(bodyData)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 
 	userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, userDetails, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 }
 
 // ResetPassword ...
@@ -266,15 +297,17 @@ func (c *UserController) UpdateUser() {
 // @router /secure/reset_pass [post]
 func (c *UserController) ResetPassword() {
 	claims := helpers.GetTokenClaims(c.Ctx)
-	id := claims["User_id"].(float64)
-	output, err := models.GetUserDetails(id)
+	userId := uint(claims["User_id"].(float64))
+	output, err := models.GetUserDetails(userId)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	var bodyData dto.ResetUserPassword
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -282,23 +315,29 @@ func (c *UserController) ResetPassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
 		return
 	}
 	err = helpers.VerifyHashedData(output.Password, bodyData.CurrentPass)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "hashpassword"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.hashpassword"), userId)
 		return
 	}
 	if bodyData.ConfirmPass != bodyData.NewPass {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "passwordnotmatched"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.passwordnotmatched"), userId)
+
 		return
 	}
-	uppass, err := models.ResetPassword(bodyData.NewPass, int(id))
+	uppass, err := models.ResetPassword(bodyData.NewPass, int(userId))
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, uppass, helpers.TranslateMessage(c.Ctx, "success", "passwordreset"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.passwordreset"), userId)
 }
 
 // @Title delete user
@@ -310,18 +349,25 @@ func (c *UserController) ResetPassword() {
 // @Failure 403
 // @router /secure/delete/:id([0-9]+) [delete]
 func (c *UserController) DeleteUser() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	idString := c.Ctx.Input.Params()
 	id, err := strconv.Atoi(idString["1"])
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "convert", "atoi"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	data, err := models.DeleteUser(id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "delete"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.delete"), userId)
 }
 
 // SendOtp ...
@@ -329,14 +375,15 @@ func (c *UserController) DeleteUser() {
 // @Desciption forgot password
 // @Param body body dto.SendOtpData true "forgot password this is send otp on mobile and email"
 // @Param lang query string false "use en-US or hi-IN"
-// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
 // @router /secure/forgot_pass [post]
 func (c *UserController) ForgotPassword() {
+
 	var bodyData dto.SendOtpData
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -344,23 +391,28 @@ func (c *UserController) ForgotPassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", 0)
 		return
 	}
 	output, err := models.GetUserByEmail(bodyData.Username)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	if output.Email == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.login"), 0)
 		return
 	}
 	res, err := models.VerifyEmail(output.Email, output.FirstName)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "success", res), helpers.TranslateMessage(c.Ctx, "success", "otpsent"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.otpsent"), 0)
 }
 
 // VerifyOtpResetpassword ...
@@ -368,7 +420,6 @@ func (c *UserController) ForgotPassword() {
 // @Desciption otp verification for forgot password
 // @Param body body dto.ResetUserPasswordOtp true "otp verification for forgot password"
 // @Param lang query string false "use en-US or hi-IN"
-// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
 // @router /secure/reset_pass_otp [post]
@@ -376,6 +427,7 @@ func (c *UserController) VerifyOtpResetpassword() {
 	var bodyData dto.ResetUserPasswordOtp
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -383,36 +435,45 @@ func (c *UserController) VerifyOtpResetpassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", 0)
 		return
 	}
 	output, err := models.GetUserByEmail(bodyData.Username)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	if output.Email == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.login"), 0)
 		return
 	}
 	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	if data.OtpCode != bodyData.Otp {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "otp"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.otp"), 0)
+		return
 	}
 	err = models.UpdateIsVerified(data.UserId)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	uppass, err := models.ResetPassword(bodyData.NewPass, output.UserId)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, uppass, helpers.TranslateMessage(c.Ctx, "success", "passwordreset"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.passwordreset"), 0)
 }
 
 // SearchUser ...
@@ -427,9 +488,14 @@ func (c *UserController) VerifyOtpResetpassword() {
 // @Failure 403
 // @router /secure/search [post]
 func (c *UserController) SearchUser() {
+
+	a := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(a["User_id"].(float64))
+
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -437,18 +503,21 @@ func (c *UserController) SearchUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", userId)
 		return
 	}
 	if len(bodyData.Search) < 3 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.serchfield"), userId)
 		return
 	}
-	user, pagination_data, _ := models.SearchUser(bodyData.Search, bodyData.PageSize, bodyData.OpenPage)
+	user, pagination_data, err := models.SearchUser(bodyData.Search, bodyData.PageSize, bodyData.OpenPage)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
@@ -457,7 +526,9 @@ func (c *UserController) SearchUser() {
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
