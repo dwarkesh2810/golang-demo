@@ -71,7 +71,7 @@ func (c *UserController) Login() {
 		logger.InsertAuditLogs(c.Ctx, "Error : mobile or email required", uint(userData.UserId))
 		return
 	}
-	expirationTime := time.Now().Add(1 * time.Hour)
+	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &dto.JwtClaim{Email: userData.Email, ID: int(userData.UserId), StandardClaims: jwt.StandardClaims{
 		ExpiresAt: expirationTime.Unix(),
 	}}

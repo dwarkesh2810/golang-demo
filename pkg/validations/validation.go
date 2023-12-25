@@ -103,7 +103,7 @@ func ValidImageType(file string) bool {
 	return helpers.CheckIfExists(ext, extensions)
 }
 
-func ValidFileType(file string) bool {
+func ImportValidFileType(file string) bool {
 	extensions := []string{"csv", "xlsx"}
 	ext := helpers.GetFileExtension(file)
 	return helpers.CheckIfExists(ext, extensions)
