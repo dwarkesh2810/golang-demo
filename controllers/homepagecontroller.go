@@ -256,6 +256,7 @@ func (u *HomeSettingController) DeleteSetting() {
 // @Title After Login User Can Export File in Home Page settings
 // @Description In this function after login user  can Export File in Home page settings
 // @Param file_type  formData string true "Here only select file within [XLSX,CSV,PDF]"
+// @Param starting_from  formData int true "you want data from row first or id 1 to 20 so you can pass starting_from as 1"
 // @Param limit  formData int true "How Much you want to export data Ex.10"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.HomePagesSettingTable
@@ -315,7 +316,7 @@ func (c *HomeSettingController) ImportFile() {
 		return
 	}
 
-	ok := validations.ValidFileType(fileHeader.Filename)
+	ok := validations.ImportValidFileType(fileHeader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidFile"))
 		return

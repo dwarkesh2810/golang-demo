@@ -735,9 +735,10 @@ func ConvertToMapSlice(results []orm.Params) ([]map[string]string, error) {
 	return converted, nil
 }
 
-/*TRANSLATE DATA INTO KEY VALUE PAIRS*/
+/*TRANSLATE DATA INTO KEY VALUE PAIRS IT WILL WORK BOTH []ORM.PARAMS AND  DATA INTERFACE{}*/
 func TransformToKeyValuePairs(data interface{}) ([]map[string]interface{}, error) {
 	value := reflect.ValueOf(data)
+
 	if value.Kind() != reflect.Slice {
 		return nil, fmt.Errorf("input data must be a slice")
 	}
@@ -746,19 +747,28 @@ func TransformToKeyValuePairs(data interface{}) ([]map[string]interface{}, error
 
 	for i := 0; i < value.Len(); i++ {
 		item := value.Index(i)
-		if item.Kind() != reflect.Struct {
-			return nil, fmt.Errorf("items in the slice must be structs")
-		}
-
 		fields := make(map[string]interface{})
-		for j := 0; j < item.NumField(); j++ {
-			field := item.Type().Field(j)
-			fieldName := field.Tag.Get("json")
-			if fieldName == "" {
-				fieldName = strings.ToLower(field.Name)
-			}
 
-			fields[fieldName] = item.Field(j).Interface()
+		switch item.Interface().(type) {
+		case orm.Params:
+			for key, value := range item.Interface().(orm.Params) {
+				fields[key] = value
+			}
+		case map[string]interface{}:
+			fields = item.Interface().(map[string]interface{})
+		default:
+			if item.Kind() == reflect.Struct {
+				for j := 0; j < item.NumField(); j++ {
+					field := item.Type().Field(j)
+					fieldName := field.Tag.Get("json")
+					if fieldName == "" {
+						fieldName = strings.ToLower(field.Name)
+					}
+					fields[fieldName] = item.Field(j).Interface()
+				}
+			} else {
+				return nil, fmt.Errorf("items in the slice must be orm.Params, map[string]interface{}, or structs")
+			}
 		}
 
 		result[i] = fields

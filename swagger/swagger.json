@@ -578,6 +578,14 @@
                     },
                     {
                         "in": "formData",
+                        "name": "starting_from",
+                        "description": "you want data from row first or id 1 to 20 so you can pass starting_from as 1",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "formData",
                         "name": "limit",
                         "description": "How Much you want to export data Ex.10",
                         "required": true,
