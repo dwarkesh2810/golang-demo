@@ -9,9 +9,11 @@ import (
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
@@ -19,7 +21,7 @@ type UserController struct {
 	beego.Controller
 }
 
-var key, _ = beego.AppConfig.String("JWT_SEC_KEY")
+var key = conf.ConfigMaps["JWT_SEC_KEY"]
 var jwtKey = []byte(key)
 
 // Login ...
@@ -66,6 +68,7 @@ func (c *UserController) Login() {
 	}
 	if userData.Email == "" && userData.FirstName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		logger.InsertAuditLogs(c.Ctx, "Error : mobile or email required", uint(userData.UserId))
 		return
 	}
 	expirationTime := time.Now().Add(1 * time.Hour)
@@ -76,10 +79,13 @@ func (c *UserController) Login() {
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "accesstoken"))
+		logger.InsertAuditLogs(c.Ctx, "Error : failed to get accesstoken", uint(userData.UserId))
 		return
 	}
 	data := map[string]interface{}{"User_Data": token.Claims, "Tokan": tokenString}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "login"), "")
+
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Login by user : %d", userData.UserId), uint(userData.UserId))
 }
 
 // RegisterNewUser ...
@@ -116,6 +122,8 @@ func (c *UserController) RegisterNewUser() {
 	}
 	go models.VerifyEmail(output.Email, output.FirstName)
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, helpers.TranslateMessage(c.Ctx, "success", "user"), "")
+
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Register by new user : %d", output.UserId), uint(output.UserId))
 }
 
 // GetAll ...

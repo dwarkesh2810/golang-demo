@@ -29,7 +29,9 @@ type Car struct {
 	Model       string      `orm:"column(model)"`
 	Type        dto.CarType `orm:"column(car_type);type(enum)"`
 	CreatedDate time.Time   `orm:"null;column(ctreated_date)"`
-	UpdateDate  time.Time   `orm:"null;column(updated_at)"`
+	UpdateDate  time.Time   `orm:"null;column(updated_date)"`
+	CreatedBy   int
+	UpdatedBy   int `orm:"null"`
 }
 
 type HomePagesSettingTable struct {
@@ -68,4 +70,14 @@ type EmailLogs struct {
 	Subject string
 	Body    string
 	Status  string
+}
+
+type AuditLogs struct {
+	LogsId      uint `orm:"pk;auto;column(LogId)"`
+	UserId      uint
+	Action      string
+	UserIp      string
+	Discription string
+	EndPoints   string
+	CreatedDate time.Time
 }

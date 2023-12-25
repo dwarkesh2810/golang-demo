@@ -1,7 +1,11 @@
 package logger
 
 import (
+	"time"
+
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web/context"
+	"github.com/dwarkesh2810/golang-demo/models"
 )
 
 var log *logs.BeeLogger
@@ -30,4 +34,21 @@ func Alert(message string, alert string) {
 
 func Warning(message string, warning string) {
 	log.Warning("%s ------------------------------------------> %v", message, warning)
+}
+
+func InsertAuditLogs(c *context.Context, discription string, userId uint) error {
+
+	action := c.Request.Method
+	ip := c.Input.IP()
+	endPoint := c.Request.URL.Path
+
+	log := models.AuditLogs{
+		UserId:      userId,
+		Action:      action,
+		UserIp:      ip,
+		Discription: discription,
+		EndPoints:   endPoint,
+		CreatedDate: time.Now(),
+	}
+	return models.InsertAuditLog(log)
 }
