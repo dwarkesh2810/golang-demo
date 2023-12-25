@@ -1163,13 +1163,6 @@
                         "name": "lang",
                         "description": "use en-US or hi-IN",
                         "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
-                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -1248,13 +1241,6 @@
                         "in": "query",
                         "name": "lang",
                         "description": "use en-US or hi-IN",
-                        "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
                         "type": "string"
                     }
                 ],

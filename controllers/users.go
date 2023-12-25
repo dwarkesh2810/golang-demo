@@ -45,7 +45,7 @@ func (c *UserController) Login() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&userReq); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : validation error", 0)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 
@@ -114,7 +114,7 @@ func (c *UserController) RegisterNewUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : validation error", 0)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 
@@ -133,7 +133,7 @@ func (c *UserController) RegisterNewUser() {
 	go models.VerifyEmail(output.Email, output.FirstName)
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, output, helpers.TranslateMessage(c.Ctx, "success", "user"), "")
 
-	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Register by new user : %d", output.UserId), uint(output.UserId))
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("New user registered: %d", output.UserId), uint(output.UserId))
 }
 
 // GetAll ...
@@ -203,7 +203,7 @@ func (c *UserController) VerifyEmailOTP() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 	data, err := models.GetEmailOTP(bodyData.Username, bodyData.Otp)
@@ -252,7 +252,7 @@ func (c *UserController) UpdateUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 	data, err := models.GetUserDetails(bodyData.Id)
@@ -315,7 +315,7 @@ func (c *UserController) ResetPassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 	err = helpers.VerifyHashedData(output.Password, bodyData.CurrentPass)
@@ -391,7 +391,7 @@ func (c *UserController) ForgotPassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", 0)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"Validation error", 0)
 		return
 	}
 	output, err := models.GetUserByEmail(bodyData.Username)
@@ -435,7 +435,7 @@ func (c *UserController) VerifyOtpResetpassword() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", 0)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"Validation error", 0)
 		return
 	}
 	output, err := models.GetUserByEmail(bodyData.Username)
@@ -489,8 +489,8 @@ func (c *UserController) VerifyOtpResetpassword() {
 // @router /secure/search [post]
 func (c *UserController) SearchUser() {
 
-	a := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(a["User_id"].(float64))
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
 
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
@@ -503,7 +503,7 @@ func (c *UserController) SearchUser() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+"validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+"Validation error", userId)
 		return
 	}
 	if len(bodyData.Search) < 3 {
@@ -517,7 +517,7 @@ func (c *UserController) SearchUser() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 

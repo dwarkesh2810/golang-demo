@@ -11,6 +11,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 	_ "github.com/lib/pq"
 
@@ -32,20 +33,26 @@ type HomeSettingController struct {
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /register_settings [post]
-func (u *HomeSettingController) RegisterSettings() {
+func (c *HomeSettingController) RegisterSettings() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var settings dto.HomeSeetingInsert
 	var filePath string
 
-	if err := u.ParseForm(&settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&settings); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
-	json.Unmarshal(u.Ctx.Input.RequestBody, &settings)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &settings)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&settings); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
@@ -58,43 +65,47 @@ func (u *HomeSettingController) RegisterSettings() {
 	}
 
 	if data_types == "LOGO" || data_types == "BANNER" {
-		file, fileHeader, err := u.GetFile("setting_data")
+		file, fileHeader, err := c.GetFile("setting_data")
 
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "validation", "ValidImage"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "validation.ValidImage"), userId)
 			return
 		}
 		if err != nil {
 
 			section_failed_msg := "file_failed"
 			section := "home_page_setting_failed_message_section"
-			message_failed := helpers.TranslateMessage(u.Ctx, section, section_failed_msg)
+			message_failed := helpers.TranslateMessage(c.Ctx, section, section_failed_msg)
 
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message_failed)
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message_failed)
+			logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 			return
 		}
 
 		filePath, err = helpers.UploadFile(file, fileHeader, uploadDir)
 		if err != nil {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "upload"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 			return
 		}
 	}
 
-	tokenData := helpers.GetTokenClaims(u.Ctx)
+	tokenData := helpers.GetTokenClaims(c.Ctx)
 	userID := tokenData["User_id"]
-	result, _ := models.RegisterSetting(settings, userID.(float64), filePath)
+	result, err := models.RegisterSetting(settings, userID.(float64), filePath)
 	if result != 0 {
-
-		section_success_msg := "register"
-		section := "home_page_setting_success_message_section"
-		message_success := helpers.TranslateMessage(u.Ctx, section, section_success_msg)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, "", message_success, "")
+		section_success_msg := "create"
+		section := "success"
+		message_success := helpers.TranslateMessage(c.Ctx, section, section_success_msg)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message_success, "")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.create"), userId)
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // UpdateSettings
@@ -108,24 +119,30 @@ func (u *HomeSettingController) RegisterSettings() {
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /update_settings [post]
-func (u *HomeSettingController) UpdateSettings() {
+func (c *HomeSettingController) UpdateSettings() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var settings dto.HomeSeetingUpdate
 	var filePath string
 
-	if err := u.ParseForm(&settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&settings); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
 	section_message := "update"
-	section := "home_page_setting_success_message_section"
-	message := helpers.TranslateMessage(u.Ctx, section, section_message)
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
-	json.Unmarshal(u.Ctx.Input.RequestBody, &settings)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &settings)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&settings); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
@@ -141,35 +158,40 @@ func (u *HomeSettingController) UpdateSettings() {
 	}
 
 	if data_types == "LOGO" || data_types == "BANNER" {
-		file, fileHeader, err := u.GetFile("setting_data")
+		file, fileHeader, err := c.GetFile("setting_data")
 
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "validation", "ValidImage"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "validation.ValidImage"), userId)
 			return
 		}
 		if err != nil {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "filenotfound"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "filenotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.filenotfound"), userId)
 			return
 		}
 
 		filePath, err = helpers.UploadFile(file, fileHeader, uploadDir)
 		if err != nil {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "upload"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "upload"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.upload"), userId)
 			return
 		}
 	}
 
-	tokenData := helpers.GetTokenClaims(u.Ctx)
+	tokenData := helpers.GetTokenClaims(c.Ctx)
 	userID := tokenData["User_id"]
-	result, _ := models.UpdateSetting(settings, filePath, userID.(float64))
+	result, err := models.UpdateSetting(settings, filePath, userID.(float64))
 
 	if result != 0 {
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, "", message, "")
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // FetchSettings
@@ -181,39 +203,49 @@ func (u *HomeSettingController) UpdateSettings() {
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /fetch_settings [post]
-func (u *HomeSettingController) FetchSettings() {
+func (c *HomeSettingController) FetchSettings() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var search dto.HomeSeetingSearch
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&search); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
-	result, pagination_data, _ := models.FetchSettingPaginations(search.OpenPage, search.PageSize)
+	result, pagination_data, err := models.FetchSettingPaginations(search.OpenPage, search.PageSize)
 
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
 	if result != nil {
-		section_message := "found"
-		section := "home_page_setting_success_message_section"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // @Title DeleteSetting
@@ -224,32 +256,38 @@ func (u *HomeSettingController) FetchSettings() {
 // @Success 200 {string} string
 // @Failure 403
 // @router /delete_settings [post]
-func (u *HomeSettingController) DeleteSetting() {
+func (c *HomeSettingController) DeleteSetting() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
 
 	section_message := "delete"
-	section := "home_page_setting_success_message_section"
-	message := helpers.TranslateMessage(u.Ctx, section, section_message)
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
 	var home_settings dto.HomeSeetingDelete
-	if err := u.ParseForm(&home_settings); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&home_settings); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &home_settings)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &home_settings)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&home_settings); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
 	result := models.HomePageSettingExistsDelete(home_settings)
 	if result != 0 {
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, "", message, "")
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.delete"), userId)
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
 }
 
 // ExportFile
@@ -263,9 +301,14 @@ func (u *HomeSettingController) DeleteSetting() {
 // @Failure 403
 // @router /export [post]
 func (c *HomeSettingController) ExportFile() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var fileTypes dto.FileType
 	if err := c.ParseForm(&fileTypes); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
@@ -274,6 +317,7 @@ func (c *HomeSettingController) ExportFile() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&fileTypes); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
@@ -281,6 +325,7 @@ func (c *HomeSettingController) ExportFile() {
 
 	if create_file_type == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "type"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.type"), userId)
 		return
 	}
 
@@ -292,13 +337,16 @@ func (c *HomeSettingController) ExportFile() {
 		res_result, _ := helpers.CreateFile(res_s, header, "", "apps", create_file_type)
 		if res_result == "" {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
 			return
 		}
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res_result, helpers.TranslateMessage(c.Ctx, "success", "filecreate"), "")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.filecreate"), userId)
 		return
 	}
 
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
 }
 
 // ImportFile
@@ -310,23 +358,29 @@ func (c *HomeSettingController) ExportFile() {
 // @Failure 403
 // @router /import [post]
 func (c *HomeSettingController) ImportFile() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	file, fileHeader, err := c.GetFile("import_type")
 	if err != nil {
 		c.Ctx.WriteString("Error uploading file")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
 	ok := validations.ImportValidFileType(fileHeader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidFile"))
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "validation.ValidFile"), userId)
 		return
 	}
 
 	uploadDir := conf.ConfigMaps["basepath"] + "FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
-
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.crete"), userId)
 		return
 	}
 	defer helpers.RemoveFileByPath(filePath)
@@ -337,17 +391,19 @@ func (c *HomeSettingController) ImportFile() {
 	case strings.HasSuffix(filePath, ".xlsx"):
 		allRows, err = helpers.ReadXLSXFile(filePath)
 		if err != nil {
-
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 			return
 		}
-		result, update_id, _ := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 35, filePath, allRows)
+		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, float64(userId), filePath, allRows)
 		if (len(result) > 0 && len(update_id) == 0) || (len(result) > 0 && len(update_id) > 0) || (len(result) == 0 && len(update_id) > 0) {
-			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "sucess", "upload"), "")
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
+			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.upload"), userId)
 			return
 		}
 
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 	case strings.HasSuffix(filePath, ".csv"):
 
@@ -356,18 +412,22 @@ func (c *HomeSettingController) ImportFile() {
 		if err != nil {
 
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "notread"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 			return
 		}
 
-		result, update_id, _ := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
+		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
 		if result != nil || update_id != nil {
 			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
 			return
 		}
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 	default:
 
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
 		return
 	}
 }
@@ -386,14 +446,19 @@ func (c *HomeSettingController) ImportFile() {
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /filter_hpst [post]
-func (u *HomeSettingController) FiltersFetchSettings() {
+func (c *HomeSettingController) FiltersFetchSettings() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var search dto.HomeSeetingSearchFilter
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
 	searchFields := map[string]string{
 		"setting_data": search.SettingData,
@@ -404,26 +469,31 @@ func (u *HomeSettingController) FiltersFetchSettings() {
 	if search.Section != "" || search.SettingData != "" || search.DataType != "" || search.UniqueCode != "" {
 		result, pagination_data, _ := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
 		if result == nil && pagination_data["matchCount"] == 0 {
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), userId)
 			return
 		}
 
 		if pagination_data["pageOpen_error"] == 1 {
 			current := pagination_data["current_page"]
 			last := pagination_data["last_page"]
-			message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
-			helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+			message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+			logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 			return
 		}
 
 		if result != nil {
-			section_message := "found"
-			section := "home_page_setting_success_message_section"
-			message := helpers.TranslateMessage(u.Ctx, section, section_message)
-			helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+			section_message := "read"
+			section := "success"
+			message := helpers.TranslateMessage(c.Ctx, section, section_message)
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 			return
 		}
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "datanotfound"))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "search"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.search"), userId)
 }

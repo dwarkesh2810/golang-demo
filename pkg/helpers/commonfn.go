@@ -268,7 +268,7 @@ func GetLanguageFromMultipleSources(ctx *context.Context) string {
 }
 func isValidLanguage(lang string) bool {
 	lang = strings.ToUpper(lang)
-	allowedLanguages := map[string]bool{"EN-US": true, "EN-GB": true, "HI-IN": true}
+	allowedLanguages := map[string]bool{"EN-US": true, "EN-GB": true, "HI-IN": true, "BO-IN": true, "EN-IN": true, "PS-AF": true, "GU-IN": true, "KN-IN": true, "MR-IN": true, "NE-IN": true, "OR-IN": true, "TA-IN": true, "TE-IN": true, "UR-IN": true, "FR-FR": true, "RU-RU": true, "IG-NG": true}
 	return allowedLanguages[lang]
 }
 func SetLanguage(ctx *context.Context, lang string) {

@@ -10,6 +10,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
@@ -25,33 +26,41 @@ type CountryController struct {
 // @Success 200 {object} object
 // @Failure 403
 // @router /list_countries [post]
-func (u *CountryController) FetchCountries() {
+func (c *CountryController) FetchCountries() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var search dto.PaginationReq
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
-	result, pagination_data, _ := models.FetchCountriesList(search.OpenPage, search.PageSize)
+	result, pagination_data, err := models.FetchCountriesList(search.OpenPage, search.PageSize)
 
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "page"), current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
 	if result != nil {
-		section_message := "found"
-		section := "country_message"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "db"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // FilterCountries
@@ -63,42 +72,51 @@ func (u *CountryController) FetchCountries() {
 // @Success 200 {object} object
 // @Failure 403
 // @router /filter_country [post]
-func (u *CountryController) FilterCountries() {
+func (c *CountryController) FilterCountries() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var search dto.CountrySearch
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 	searchFields := map[string]string{
 		"country_name": search.SearchParam,
 	}
 
-	result, pagination_data, _ := models.CountryFilter(search.OpenPage, search.PageSize, "start", searchFields)
+	result, pagination_data, err := models.CountryFilter(search.OpenPage, search.PageSize, "start", searchFields)
 	log.Print(pagination_data)
 	if result == nil && pagination_data["matchCount"] == 0 {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search Country Not Found")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search Country Not Found")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 		return
 	}
 
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
 	if result != nil {
-		section_message := "found"
-		section := "home_page_setting_success_message_section"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // filter_city
@@ -114,13 +132,18 @@ func (u *CountryController) FilterCountries() {
 // @Success 200 {object} object
 // @Failure 403
 // @router /filter_city [post]
-func (u *CountryController) FilterCity() {
+func (c *CountryController) FilterCity() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var search dto.CitySearch
-	if err := u.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Parsing Data Error")
+	if err := c.ParseForm(&search); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &search)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 	searchFields := map[string]string{
 		"city_name": search.SearchParam,
 	}
@@ -130,28 +153,32 @@ func (u *CountryController) FilterCity() {
 		otherFieldSCount = 2
 	}
 
-	result, pagination_data, _ := models.CityFilter(search.OpenPage, search.PageSize, search.CountryId, search.StateId, otherFieldSCount, "start", search.CountryName, search.StateName, searchFields)
+	result, pagination_data, err := models.CityFilter(search.OpenPage, search.PageSize, search.CountryId, search.StateId, otherFieldSCount, "start", search.CountryName, search.StateName, searchFields)
 	if result == nil && pagination_data["matchCount"] == 0 {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Search City Not Found")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search City Not Found")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 		return
 	}
 
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 
 	if result != nil {
-		section_message := "found"
-		section := "home_page_setting_success_message_section"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Not Found Data Please Try Again")
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 }
 
@@ -164,35 +191,44 @@ func (u *CountryController) FilterCity() {
 // @Success 200 {object} object
 // @Failure 403
 // @router /search_country [post]
-func (u *CountryController) FilterCountry() {
+func (c *CountryController) FilterCountry() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var bodyData dto.SearchRequest
-	if err := u.ParseForm(&bodyData); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&bodyData); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-	json.Unmarshal(u.Ctx.Input.RequestBody, &bodyData)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
-	result, pagination_data, _ := models.FilterCountries(search, bodyData.OpenPage, bodyData.PageSize)
+	result, pagination_data, err := models.FilterCountries(search, bodyData.OpenPage, bodyData.PageSize)
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
-		message := fmt.Sprintf("PAGE NUMBER %d IS NOT EXISTS , LAST PAGE NUMBER IS %d", current, last)
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, message)
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
 	if result != nil {
 		section_message := "read"
 		section := "success"
-		message := helpers.TranslateMessage(u.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, message, pagination_data)
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
 	}
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "searchnotfound"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // Get country
@@ -203,9 +239,14 @@ func (u *CountryController) FilterCountry() {
 // @Failure 403
 // @router /get_country [post]
 func (c *CountryController) GetCountry() {
+
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
 	var bodyData dto.GetCountryRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -213,12 +254,17 @@ func (c *CountryController) GetCountry() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
 
 	Data, err := models.GetCountry(bodyData.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+
 }

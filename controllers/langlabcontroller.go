@@ -18,36 +18,36 @@ type LangLableController struct {
 	beego.Controller
 }
 
-func (u *LangLableController) InsertLanguageLables() {
+func (c *LangLableController) InsertLanguageLables() {
 	var langLables dto.LanguageLableInsert
-	if err := u.ParseForm(&langLables); err != nil {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
+	if err := c.ParseForm(&langLables); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
 	}
 
-	json.Unmarshal(u.Ctx.Input.RequestBody, &langLables)
+	json.Unmarshal(c.Ctx.Input.RequestBody, &langLables)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&langLables); !isValid {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
 		return
 	}
 
 	exists_code := models.ExistsLanguageLable(langLables.LableCode)
 	if exists_code == 1 {
-		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, fmt.Sprintf(helpers.TranslateMessage(u.Ctx, "error", "langlbl"), langLables.LableCode))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "langlbl"), langLables.LableCode))
 		return
 	}
 	result, _ := models.InsertLanguageLabels(langLables)
 	if result != "" {
-		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, helpers.TranslateMessage(u.Ctx, "success", "langlbl"), "")
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "langlbl"), "")
 		return
 	}
 
-	helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "failedlanglbl"))
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "failedlanglbl"))
 }
 
-func (u *LangLableController) FetchAllAndWriteInINIFiles() bool {
+func (c *LangLableController) FetchAllAndWriteInINIFiles() bool {
 	langugeLables, _ := models.FetchAllLabels()
 	languageLangLables, _ := models.FetchAllDefaultlables()
 	langLangLables, done := languageLangLables.([]orm.Params)
