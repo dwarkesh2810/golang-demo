@@ -14,6 +14,7 @@ import (
 func Init() {
 	validation.AddCustomFunc("InMobile", indianMobile)
 	validation.AddCustomFunc("WithIn", RequiredTag)
+	validation.AddCustomFunc("ValidType", ExportFileType)
 }
 
 func ValidErr(err []*validation.Error) []string {
@@ -79,6 +80,20 @@ func RequiredTag(v *validation.Validation, obj interface{}, key string) {
 	ok = helpers.CheckIfExists(value, tags)
 	if !ok {
 		v.SetError(key, "please enter with in [logo, text, banner, html]")
+	}
+}
+
+func ExportFileType(v *validation.Validation, obj interface{}, key string) {
+	tags := []string{"csv", "xlsx", "pdf"}
+
+	value, ok := obj.(string)
+	if !ok {
+		return
+	}
+
+	ok = helpers.CheckIfExists(strings.ToLower(value), tags)
+	if !ok {
+		v.SetError(key, "please enter with in [csv, xlsx, pdf]")
 	}
 }
 
