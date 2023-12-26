@@ -3,9 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
+	"github.com/dwarkesh2810/golang-demo/conf"
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
@@ -143,4 +145,50 @@ func (c *LangLableController) FetchAllAndWriteInINIFiles() bool {
 	res, _ := helpers.ConvertToMapSlice(languageLangLables)
 	helpers.CreateINIFiles(res)
 	return true
+}
+
+// ReadIniFile
+// @Title After Login admin Can import language lable
+// @Description   after login it will work
+// @Param	getIniFile      formData      file	      true		"lable code"
+// @Param   Authorization   header        string        true        "Bearer YourAccessToken"
+// @Success 200 {object} object
+// @Failure 403
+// @router /import_language_lables [post]
+func (c *LangLableController) ReadIniFile() {
+
+	file, fileHeader, err := c.GetFile("getIniFile")
+	if err != nil {
+		c.Ctx.WriteString("Error uploading file")
+		return
+	}
+
+	languagCode := helpers.ExtractLanguageCode(fileHeader.Filename)
+
+	// ok := validations.ImportValidFileType(fileHeader.Filename)
+	// if !ok {
+	// 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidFile"))
+	// 	return
+	// }
+
+	uploadDir := conf.ConfigMaps["basepath"] + "FILES/INI/IMPORT"
+	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+		return
+	}
+	dataMap, err := helpers.ParseINIFile(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dataMapResult := helpers.ConvertToDataMap(dataMap)
+	result := models.ProcessMapData(languagCode, dataMapResult)
+	if result == 1 {
+
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "successfully imported ini file data in multilanguage lanble table", "")
+		return
+	}
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "INI FILE NOT IMPORT PLEASE TRY AGAIN")
+
 }

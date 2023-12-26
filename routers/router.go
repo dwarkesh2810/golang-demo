@@ -74,6 +74,8 @@ func init() {
 			beego.NSInclude(&controllers.LangLableController{}),
 			beego.NSRouter("/update_lang_lable", &controllers.LangLableController{}, "post:UpdateLanguageLables"),
 			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
+			beego.NSRouter("/import_language_lables", &controllers.LangLableController{}, "post:ReadIniFile"),
+
 			beego.NSRouter("/lang_lable_Insert", &controllers.LangLableController{}, "post:InsertLanguageLablesUsingApi"),
 		),
 	)

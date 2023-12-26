@@ -1041,3 +1041,75 @@ func ConvertIntoIniFormateCode(input string) string {
 	}
 	return strings.ToLower(parts[0]) + "-" + strings.ToUpper(parts[1])
 }
+
+func ParseINIFile(filePath string) (map[string]map[string]string, error) {
+	// Step 1: Parse INI file
+	config, err := ini.Load(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load INI file: %w", err)
+	}
+
+	// Step 2: Create a nested map
+	dataMap := make(map[string]map[string]string)
+
+	// Step 3: Populate the map
+	for _, section := range config.Sections() {
+		if section.Name() == "DEFAULT" {
+			continue // Skip the DEFAULT section
+		}
+
+		dataMap[section.Name()] = make(map[string]string)
+
+		for _, key := range section.Keys() {
+			dataMap[section.Name()][key.Name()] = key.String()
+		}
+	}
+
+	return dataMap, nil
+}
+
+func flattenMap(inputMap map[string]interface{}, prefix string) map[string]string {
+	result := make(map[string]string)
+
+	for key, value := range inputMap {
+		switch v := value.(type) {
+		case map[string]interface{}:
+			// Recursively call flattenMap for nested maps
+			nestedMap := flattenMap(v, fmt.Sprintf("%s%s.", prefix, key))
+			for nestedKey, nestedValue := range nestedMap {
+				result[nestedKey] = nestedValue
+			}
+		default:
+			// Convert non-map values to string and add to result map
+			result[fmt.Sprintf("%s%s", prefix, key)] = fmt.Sprintf("%v", v)
+		}
+	}
+
+	return result
+}
+
+func ConvertToDataMap(inputMap map[string]map[string]string) map[string]map[string]map[string]string {
+	dataMap := make(map[string]map[string]map[string]string)
+
+	for section, sectionMap := range inputMap {
+		sectionDataMap := make(map[string]map[string]string)
+
+		for k, v := range sectionMap {
+			sectionDataMap[k] = map[string]string{
+				"language_value": v,
+			}
+		}
+
+		// Add the inner map to the dataMap
+		dataMap[section] = sectionDataMap
+	}
+
+	return dataMap
+}
+
+func ExtractLanguageCode(fileName string) string {
+	languageCode := strings.TrimPrefix(fileName, "locale_")
+	languageCode = strings.TrimSuffix(languageCode, ".ini")
+
+	return languageCode
+}

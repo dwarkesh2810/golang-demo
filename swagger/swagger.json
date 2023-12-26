@@ -936,6 +936,42 @@
                 }
             }
         },
+        "/language_lable/import_language_lables": {
+            "post": {
+                "tags": [
+                    "language_lable"
+                ],
+                "description": "after login it will work\n\u003cbr\u003e",
+                "operationId": "LangLableController.After Login admin Can import language lable",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "getIniFile",
+                        "description": "lable code",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/language_lable/lang_lable_Insert": {
             "post": {
                 "tags": [
