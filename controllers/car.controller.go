@@ -38,7 +38,7 @@ func (c *CarController) AddNewCar() {
 	var cars dto.GetNewCarRequest
 	if err := c.ParseForm(&cars); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :- while parsing form/json data", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
@@ -60,7 +60,7 @@ func (c *CarController) AddNewCar() {
 	ok := validations.ValidImageType(fileHeader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
-		logger.InsertAuditLogs(c.Ctx, "Error :- Invalid image extention when register car", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "validation.ValidImage"), userId)
 		return
 	}
 
@@ -113,7 +113,7 @@ func (c *CarController) UpdateCar() {
 	userId := uint(claims["User_id"].(float64))
 	if err := c.ParseForm(&cars); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error : while parsing form/json data", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &cars)
@@ -131,13 +131,14 @@ func (c *CarController) UpdateCar() {
 	}
 	if data.CarName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 		return
 	}
 	file, fileheader, err := c.GetFile("file")
 	ok := validations.ValidImageType(fileheader.Filename)
 	if !ok {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
-		logger.InsertAuditLogs(c.Ctx, "Error : Invalid file type", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "validation.ValidImage"), userId)
 		return
 	}
 	if err != nil {
@@ -165,6 +166,7 @@ func (c *CarController) UpdateCar() {
 		res, err := models.UpdateCar(cars)
 		if err != nil {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 			return
 		}
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
@@ -176,6 +178,7 @@ func (c *CarController) UpdateCar() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "cartype"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
 
@@ -239,7 +242,7 @@ func (c *CarController) DeleteCar() {
 
 	if res.CarName == "" {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error : Invalid carId when getting data", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 		return
 	}
 
@@ -333,9 +336,10 @@ func (c *CarController) GetSingleCar() {
 	}
 	if Data.Id == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
-		logger.InsertAuditLogs(c.Ctx, "Error : Invalid id when getting car data", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+ logger.LogMessage(c.Ctx, "error.invalidid"), userId)
 		return
 	}
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
 }
 

@@ -190,7 +190,7 @@ type GetCountryRequest struct {
 }
 
 type LanguageLableInsertNew struct {
-	LableCodes    string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(3)"`
+	LableCodes    string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(2)"`
 	Sections      string `json:"section" form:"section" valid:"Required;MinSize(3)"`
 	ENGLangValues string `json:"ENGlang_value" form:"ENGlang_value" valid:"Required;MinSize(3)"`
 }

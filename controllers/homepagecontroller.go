@@ -281,13 +281,14 @@ func (c *HomeSettingController) DeleteSetting() {
 	}
 
 	result := models.HomePageSettingExistsDelete(home_settings)
-	if result != 0 {
+	if result == nil {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.delete"), userId)
 		return
 	}
 
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+result.Error(), userId)
 }
 
 // ExportFile
@@ -419,6 +420,7 @@ func (c *HomeSettingController) ImportFile() {
 		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
 		if result != nil || update_id != nil {
 			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
+			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.upload"), userId)
 			return
 		}
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))

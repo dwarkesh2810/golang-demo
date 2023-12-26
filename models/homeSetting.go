@@ -106,12 +106,12 @@ func DeleteSetting(page_setting_id int) int {
 
 }
 
-func HomePageSettingExistsDelete(u dto.HomeSeetingDelete) int {
+func HomePageSettingExistsDelete(u dto.HomeSeetingDelete) error {
 	page_setting_id := u.SettingId
 
 	page_setting_data, page_setting_type, err := FetchPageSettingByID(page_setting_id)
 	if err != nil {
-		return 0
+		return err
 	}
 
 	if strings.ToUpper(page_setting_type) == "LOGO" || strings.ToUpper(page_setting_type) == "BANNER" {
@@ -120,91 +120,7 @@ func HomePageSettingExistsDelete(u dto.HomeSeetingDelete) int {
 	}
 
 	DeleteSetting(page_setting_id)
-	return 1
-
-}
-
-func FetchSettingPagination(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
-	db := orm.NewOrm()
-	if current_page <= 0 {
-		current_page = 1
-	}
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-
-	offset := (current_page - 1) * pageSize
-
-	var homeResponse []orm.Params
-	_, err := db.Raw(`
-		SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
-		concat(umt.first_name,' ',umt.last_name) as created_by  
-		FROM home_pages_setting_table as hpst
-		LEFT JOIN users as umt ON umt.user_id = hpst.created_by
-		ORDER BY hpst.created_date DESC
-		LIMIT ? OFFSET ?
-	`, pageSize, offset).Values(&homeResponse)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pagination_data, pagination_err := helpers.Pagination(current_page, pageSize, "home_pages_setting_table", 0)
-	if pagination_err != nil {
-		return nil, pagination_data, nil
-	}
-	return homeResponse, pagination_data, nil
-}
-
-func FetchSetting() (interface{}, error) {
-	db := orm.NewOrm()
-	var homeResponse []struct {
-		Section     string    `json:"section"`
-		DataType    string    `json:"data_type"`
-		SettingData string    `json:"setting_data"`
-		CreatedDate time.Time `json:"created_date"`
-		UpdatedDate time.Time `json:"updated_date"`
-		CreatedBy   string    `json:"created_by"`
-	}
-	_, err := db.Raw(`SELECT hpst.section, hpst.data_type, hpst.setting_data,hpst.created_date, hpst.updated_date ,concat(umt.first_name,' ',umt.last_name) as created_by  FROM home_pages_setting_table as hpst LEFT JOIN users as umt ON umt.user_id = hpst.created_by ORDER BY hpst.created_date DESC`).QueryRows(&homeResponse)
-
-	if err != nil {
-		return nil, err
-	}
-	if len(homeResponse) == 0 {
-		return "Not Found Cars", nil
-	}
-	return homeResponse, nil
-}
-
-func UpdateSettings(c dto.HomeSeetingUpdate, file_path interface{}, user_id float64) (int64, error) {
-	db := orm.NewOrm()
-	page_setting_id := c.SettingId
-	homePageSetting, setting_data_type, err := FetchPageSettingByID(page_setting_id)
-	if err != nil {
-		return 0, err
-	}
-
-	if file_path == "" {
-		file_path = c.SettingData
-	}
-	setting_dataType := strings.ToUpper(setting_data_type)
-	if setting_dataType == "LOGO" || setting_dataType == "BANNER" {
-		file_name, file_directory := helpers.SplitFilePath(homePageSetting)
-		helpers.RemoveFile(file_name, file_directory)
-
-	}
-	homePageData := HomePagesSettingTable{PageSettingId: page_setting_id,
-		UpdatedBy:   int(user_id),
-		UpdatedDate: time.Now(),
-		DataType:    c.DataType,
-		Section:     c.Section,
-		SettingData: file_path.(string),
-	}
-	if num, err := db.Update(&homePageData, "updated_by", "updated_date", "data_type", "section", "setting_data"); err == nil {
-		return num, nil
-	}
-	return 1, nil
+	return nil
 
 }
 
