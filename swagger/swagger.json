@@ -6,7 +6,7 @@
         "version": "1.0.0",
         "termsOfService": "http://beego.me/",
         "contact": {
-            "email": "astaxie@gmail.com"
+            "email": "mailto:astaxie@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -521,70 +521,6 @@
                 }
             }
         },
-        "/homepage/create_lang_lable": {
-            "post": {
-                "tags": [
-                    "homepage"
-                ],
-                "description": "In this function after login it will work\n\u003cbr\u003e",
-                "operationId": "LangLableController.After Login admin Can create language lable",
-                "parameters": [
-                    {
-                        "in": "formData",
-                        "name": "lable_code",
-                        "description": "lable code",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "section",
-                        "description": "section like success or failed or errors",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "ENGlang_value",
-                        "description": "here you pass original message value in english",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "lang_ini_code",
-                        "description": "to use  for hindi [hi-IN],for gujarati [gu-IN]",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "otherlang_value",
-                        "description": "here you can pass ENGlanguage message  converted otherlanguage value",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/homepage/delete_settings": {
             "post": {
                 "tags": [
@@ -882,63 +818,6 @@
                 }
             }
         },
-        "/homepage/update_lang_lable": {
-            "post": {
-                "tags": [
-                    "homepage"
-                ],
-                "description": "function after login it will work\n\u003cbr\u003e",
-                "operationId": "LangLableController.After Login admin Can update language lable",
-                "parameters": [
-                    {
-                        "in": "formData",
-                        "name": "lable_code",
-                        "description": "lable code",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "ENGlang_value",
-                        "description": "here you pass original message value in english",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "lang_ini_code",
-                        "description": "to use  for hindi [hi-IN],for gujarati [gu-IN]",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "otherlang_value",
-                        "description": "here you can pass ENGlanguage message  converted otherlanguage value",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/homepage/update_settings": {
             "post": {
                 "tags": [
@@ -985,6 +864,170 @@
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/models.HomePagesSettingTable"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/language_lable/create_lang_lable": {
+            "post": {
+                "tags": [
+                    "language_lable"
+                ],
+                "description": "In this function after login it will work\n\u003cbr\u003e",
+                "operationId": "LangLableController.After Login admin Can create language lable",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "lable_code",
+                        "description": "lable code",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "section",
+                        "description": "section like success or failed or errors",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "ENGlang_value",
+                        "description": "here you pass original message value in english",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "lang_ini_code",
+                        "description": "to use  for hindi [hi-IN],for gujarati [gu-IN]",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "otherlang_value",
+                        "description": "here you can pass ENGlanguage message  converted otherlanguage value",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/language_lable/lang_lable_Insert": {
+            "post": {
+                "tags": [
+                    "language_lable"
+                ],
+                "description": "new langouge code\n\u003cbr\u003e",
+                "operationId": "LangLableController.Insert language lable",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "lable_code",
+                        "description": "lable code",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "section",
+                        "description": "section like success or failed or errors",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "ENGlang_value",
+                        "description": "here you pass original message value in english",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/language_lable/update_lang_lable": {
+            "post": {
+                "tags": [
+                    "language_lable"
+                ],
+                "description": "function after login it will work\n\u003cbr\u003e",
+                "operationId": "LangLableController.After Login admin Can update language lable",
+                "parameters": [
+                    {
+                        "in": "formData",
+                        "name": "lable_code",
+                        "description": "lable code",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "ENGlang_value",
+                        "description": "here you pass original message value in english",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "lang_ini_code",
+                        "description": "to use  for hindi [hi-IN],for gujarati [gu-IN]",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "otherlang_value",
+                        "description": "here you can pass ENGlanguage message  converted otherlanguage value",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/object"
                         }
                     },
                     "403": {

@@ -188,3 +188,9 @@ type GetStateRequest struct {
 type GetCountryRequest struct {
 	Id int `json:"country_id" form:"country_id" valid:"Required"`
 }
+
+type LanguageLableInsertNew struct {
+	LableCodes    string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(3)"`
+	Sections      string `json:"section" form:"section" valid:"Required;MinSize(3)"`
+	ENGLangValues string `json:"ENGlang_value" form:"ENGlang_value" valid:"Required;MinSize(3)"`
+}
