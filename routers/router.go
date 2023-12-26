@@ -1,7 +1,7 @@
 // @APIVersion 1.0.0
 // @Title beego Test API
 // @Description beego has a very cool tools to autogenerate documents for your API
-// @Contact astaxie@gmail.com
+// @Contact mailto:astaxie@gmail.com
 // @TermsOfServiceUrl http://beego.me/
 // @License Apache 2.0
 // @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
@@ -36,7 +36,7 @@ func init() {
 		beego.NSNamespace("/homepage",
 			beego.NSBefore(middleware.JWTMiddleware),
 			beego.NSInclude(&controllers.HomeSettingController{}),
-			beego.NSInclude(&controllers.LangLableController{}),
+
 			beego.NSRouter("/register_settings", &controllers.HomeSettingController{}, "post:RegisterSettings"),
 			beego.NSRouter("/update_settings", &controllers.HomeSettingController{}, "post:UpdateSettings"),
 			beego.NSRouter("/fetch_settings", &controllers.HomeSettingController{}, "post:FetchSettings"),
@@ -44,8 +44,6 @@ func init() {
 			beego.NSRouter("/export", &controllers.HomeSettingController{}, "post:ExportFile"),
 			beego.NSRouter("/delete_settings", &controllers.HomeSettingController{}, "post:DeleteSetting"),
 			beego.NSRouter("/import", &controllers.HomeSettingController{}, "post:ImportFile"),
-			beego.NSRouter("/update_lang_lable", &controllers.LangLableController{}, "post:UpdateLanguageLables"),
-			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
 		),
 		beego.NSNamespace("/car",
 			beego.NSInclude(&controllers.CarController{}),
@@ -71,6 +69,12 @@ func init() {
 			beego.NSRouter("/country_wise_state", &controllers.StateController{}, "post:CountryWiseState"),
 			beego.NSRouter("/search_state", &controllers.StateController{}, "post:FilterStates"),
 			beego.NSRouter("/get_state", &controllers.StateController{}, "post:GetState"),
+		),
+		beego.NSNamespace("/language_lable",
+			beego.NSInclude(&controllers.LangLableController{}),
+			beego.NSRouter("/update_lang_lable", &controllers.LangLableController{}, "post:UpdateLanguageLables"),
+			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
+			beego.NSRouter("/lang_lable_Insert", &controllers.LangLableController{}, "post:InsertLanguageLablesUsingApi"),
 		),
 	)
 	beego.AddNamespace(ns)

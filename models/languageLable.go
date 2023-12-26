@@ -1,7 +1,10 @@
 package models
 
 import (
+	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/client/httplib"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -119,6 +122,101 @@ func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
 	return 0, "", nil
 }
 
+// THIS IS FOR INSERT VALUE IN MULTIPLE LANGUAGE USING API
+
+func InsertUpdateLanugaeLablesApi(l dto.LanguageLableInsertNew) (string, error) {
+	db := orm.NewOrm()
+	res := EnglishLanguageLable{
+		LableCode:     l.LableCodes,
+		LanguageCode:  "en-US",
+		LanguageValue: l.ENGLangValues,
+		Section:       l.Sections,
+		CreatedDate:   time.Now(),
+	}
+	_, err := db.Insert(&res)
+	if err != nil {
+		return "", err
+	}
+	urlstr := UrlString(l.ENGLangValues)
+	err = InsertGujrati(urlstr, l.LableCodes, l.Sections)
+	if err != nil {
+		return "", err
+	}
+	err = InsertHindi(urlstr, l.LableCodes, l.Sections)
+	if err != nil {
+		return "", err
+	}
+	err = InsertMarathi(urlstr, l.LableCodes, l.Sections)
+	if err != nil {
+		return "", err
+	}
+	return res.LableCode, nil
+}
+
+func InsertGujrati(urlstr, lable, section string) error {
+	db := orm.NewOrm()
+	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=gu&dt=t&q=" + urlstr)
+	str, err := req.String()
+	if err != nil {
+		return err
+	}
+	strres := GetTranslatedata(str)
+	resMulti := MultiLanguageLable{
+		LableCode:     lable,
+		LanguageCode:  "gu-IN",
+		LanguageValue: strres,
+		Section:       section,
+		CreatedDate:   time.Now(),
+	}
+	_, err = db.Insert(&resMulti)
+	return err
+}
+
+func InsertHindi(urlstr, lable, section string) error {
+	db := orm.NewOrm()
+	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=" + urlstr)
+	str, err := req.String()
+	if err != nil {
+		return err
+	}
+	strres := GetTranslatedata(str)
+	resMulti := MultiLanguageLable{
+		LableCode:     lable,
+		LanguageCode:  "hi-IN",
+		LanguageValue: strres,
+		Section:       section,
+		CreatedDate:   time.Now(),
+	}
+	_, err = db.Insert(&resMulti)
+	return err
+}
+
+func InsertMarathi(urlstr, lable, section string) error {
+	db := orm.NewOrm()
+	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=mr&dt=t&q=" + urlstr)
+	str, err := req.String()
+	if err != nil {
+		return err
+	}
+	strres := GetTranslatedata(str)
+	resMulti := MultiLanguageLable{
+		LableCode:     lable,
+		LanguageCode:  "mr-IN",
+		LanguageValue: strres,
+		Section:       section,
+		CreatedDate:   time.Now(),
+	}
+	_, err = db.Insert(&resMulti)
+	return err
+}
+func GetTranslatedata(data string) string {
+	return strings.Split(data, `"`)[1]
+}
+func UrlString(s string) string {
+	return strings.ReplaceAll(s, " ", "%20")
+}
+
+// end
 func existsInMultilanguageLableTable(lable_code, iniCode string) int {
 	db := orm.NewOrm()
 	var lables MultiLanguageLable
@@ -137,6 +235,13 @@ func ExistsEngDefaultValues(lable_code string) int {
 		return 0
 	}
 	return 1
+}
+
+func IsLanguageLableExist(lable_code, section string) error {
+	db := orm.NewOrm()
+	var lables EnglishLanguageLable
+	err := db.Raw(`SELECT lang_id FROM english_language_lable WHERE lable_code = ? AND section = ?`, lable_code, section).QueryRow(&lables)
+	return err
 }
 
 func FetchAllLabels() ([]orm.Params, error) {

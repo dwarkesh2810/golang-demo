@@ -57,6 +57,43 @@ func (u *LangLableController) InsertLanguageLables() {
 	}
 }
 
+// InsertLanguageLables
+// @Title Insert language lable
+// @Description new langouge code
+// @Param	lable_code      formData      string	      true		"lable code"
+// @Param	section         formData      string	      true		"section like success or failed or errors"
+// @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
+// @Success 200 {object} object
+// @Failure 403
+// @router /lang_lable_Insert [post]
+func (c *LangLableController) InsertLanguageLablesUsingApi() {
+	var langLables dto.LanguageLableInsertNew
+	if err := c.ParseForm(&langLables); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		return
+	}
+
+	json.Unmarshal(c.Ctx.Input.RequestBody, &langLables)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&langLables); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		return
+	}
+	err := models.IsLanguageLableExist(langLables.LableCodes, langLables.Sections)
+	if err == nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Language Lable already used please insert new language lable and try again")
+		return
+	}
+	lableCodes, err := models.InsertUpdateLanugaeLablesApi(langLables)
+	if err == nil && lableCodes != "" {
+		langlable := fmt.Sprintf(`[ %s ] Successfully Created Language Lable`, lableCodes)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, lableCodes, helpers.TranslateMessage(c.Ctx, "success", langlable), "")
+		return
+	}
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
+}
+
 // UpdateLanguageLables
 // @Title After Login admin Can update language lable
 // @Description  function after login it will work
