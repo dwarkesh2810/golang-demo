@@ -19,9 +19,9 @@ func Init() {
 	orm.RegisterDriver(conf.ConfigMaps["dbdriver"], orm.DRPostgres)
 	orm.RegisterDataBase("default", conf.ConfigMaps["dbdriver"], conf.ConfigMaps["conn"])
 
-	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.LanguageLable), new(models.LanguageLableLang), new(models.EmailLogs), new(models.AuditLogs))
+	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.MultiLanguageLable), new(models.EnglishLanguageLable), new(models.EmailLogs), new(models.AuditLogs))
 
-	// orm.RunSyncdb("default",false,true)
+	// orm.RunSyncdb("default", false, true)
 
 	languageLablesFunc := controllers.LangLableController{}
 	languageLablesFunc.FetchAllAndWriteInINIFiles()
