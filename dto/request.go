@@ -62,10 +62,18 @@ type SearchRequest struct {
 }
 
 type LanguageLableInsert struct {
-	LableCode string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(3)"`
-	LangValue string `json:"lang_value" form:"lang_value" valid:"Required;MinSize(3)"`
-	Language  string `json:"language" form:"language" valid:"Required;MinSize(5)"`
-	Section   string `json:"section" form:"section" valid:"Required;MinSize(3)"`
+	LableCodes            string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(3)"`
+	Sections              string `json:"section" form:"section" valid:"Required;MinSize(3)"`
+	ENGLangValues         string `json:"ENGlang_value" form:"ENGlang_value" valid:"Required;MinSize(3)"`
+	OtherINILanguageCodes string `json:"lang_ini_code" form:"lang_ini_code" valid:"Required;MinSize(5);ValidIni"`
+	OtherLangValues       string `json:"otherlang_value" form:"otherlang_value" valid:"Required;MinSize(3)"`
+}
+
+type LanguageLableUpdate struct {
+	LableCodes            string `json:"lable_code" form:"lable_code" valid:"Required;MinSize(3)"`
+	ENGLangValues         string `json:"ENGlang_value" form:"ENGlang_value" valid:"Required;MinSize(3)"`
+	OtherINILanguageCodes string `json:"lang_ini_code" form:"lang_ini_code" valid:"Required;MinSize(5);ValidIni"`
+	OtherLangValues       string `json:"otherlang_value" form:"otherlang_value" valid:"Required;MinSize(3)"`
 }
 
 type HomeSeetingInsert struct {

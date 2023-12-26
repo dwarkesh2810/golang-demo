@@ -46,21 +46,24 @@ type HomePagesSettingTable struct {
 	UpdatedBy     int
 }
 
-type LanguageLableLang struct {
+type EnglishLanguageLable struct {
 	LangId        int `orm:"auto"`
 	LanguageCode  string
 	LanguageValue string
 	LableCode     string `orm:"unique"`
 	Section       string
+	CreatedDate   time.Time
+	UpdatedDate   time.Time `orm:"null;column(updated_date)"`
 }
 
-type LanguageLable struct {
+type MultiLanguageLable struct {
 	LableId       int `orm:"auto"`
 	LableCode     string
 	LanguageValue string
 	LanguageCode  string
-	LangId        int
 	Section       string
+	CreatedDate   time.Time
+	UpdatedDate   time.Time `orm:"null;column(updated_date)"`
 }
 
 type EmailLogs struct {

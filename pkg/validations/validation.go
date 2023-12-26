@@ -15,6 +15,7 @@ func Init() {
 	validation.AddCustomFunc("InMobile", indianMobile)
 	validation.AddCustomFunc("WithIn", RequiredTag)
 	validation.AddCustomFunc("ValidType", ExportFileType)
+	validation.AddCustomFunc("ValidIni", LanguageValidIniCodes)
 }
 
 func ValidErr(err []*validation.Error) []string {
@@ -107,4 +108,18 @@ func ImportValidFileType(file string) bool {
 	extensions := []string{"csv", "xlsx"}
 	ext := helpers.GetFileExtension(file)
 	return helpers.CheckIfExists(ext, extensions)
+}
+
+func LanguageValidIniCodes(v *validation.Validation, obj interface{}, key string) {
+	tags := []string{"EN-US", "EN-GB", "HI-IN", "BO-IN", "EN-IN", "PS-AF", "GU-IN", "KN-IN", "MR-IN", "NE-IN", "OR-IN", "TA-IN", "TE-IN", "UR-IN", "FR-FR", "RU-RU", "IG-NG"}
+
+	value, ok := obj.(string)
+	if !ok {
+		return
+	}
+
+	ok = helpers.CheckIfExists(strings.ToUpper(value), tags)
+	if !ok {
+		v.SetError(key, "please enter with in [EN-US, EN-GB, HI-IN, BO-IN, EN-IN, PS-AF, GU-IN, KN-IN, MR-IN, NE-IN, OR-IN, TA-IN, TE-IN, UR-IN, FR-FR, RU-RU, IG-NG]")
+	}
 }

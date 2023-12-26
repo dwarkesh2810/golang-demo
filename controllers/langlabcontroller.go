@@ -3,9 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
-	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dwarkesh2810/golang-demo/dto"
@@ -18,51 +16,94 @@ type LangLableController struct {
 	beego.Controller
 }
 
-func (c *LangLableController) InsertLanguageLables() {
+// InsertLanguageLables
+// @Title After Login admin Can create language lable
+// @Description In this function after login it will work
+// @Param	lable_code      formData      string	      true		"lable code"
+// @Param	section         formData      string	      true		"section like success or failed or errors"
+// @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
+// @Param	lang_ini_code   formData 	  string	      true		"to use  for hindi [hi-IN],for gujarati [gu-IN]"
+// @Param	otherlang_value formData 	  string	      true		"here you can pass ENGlanguage message  converted otherlanguage value"
+// @Param   Authorization   header        string        true        "Bearer YourAccessToken"
+// @Success 200 {object} object
+// @Failure 403
+// @router /create_lang_lable [post]
+func (u *LangLableController) InsertLanguageLables() {
 	var langLables dto.LanguageLableInsert
-	if err := c.ParseForm(&langLables); err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+	if err := u.ParseForm(&langLables); err != nil {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
-	json.Unmarshal(c.Ctx.Input.RequestBody, &langLables)
+	json.Unmarshal(u.Ctx.Input.RequestBody, &langLables)
 
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&langLables); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
 		return
 	}
 
-	exists_code := models.ExistsLanguageLable(langLables.LableCode)
-	if exists_code == 1 {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "langlbl"), langLables.LableCode))
+	result, lableCodes, errr := models.InsertUpdateLanugaeLables(langLables)
+
+	if result == 0 && errr == nil {
+		lable_codesMessage := fmt.Sprintf(`[ %s ] Lable Code Already Exists , If English Language Value is not available For  [--- %s ---] lableCode  it will Insert OR Update At Same lableCode `, langLables.LableCodes, langLables.LableCodes)
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "language", lable_codesMessage))
 		return
 	}
-	result, _ := models.InsertLanguageLabels(langLables)
-	if result != "" {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "langlbl"), "")
+	if result == 1 && errr == nil && lableCodes != "" {
+		langlable := fmt.Sprintf(`[ %s ] Successfully Created Language Lable`, lableCodes)
+		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, helpers.TranslateMessage(u.Ctx, "success", langlable), "")
+		return
+	}
+}
+
+// UpdateLanguageLables
+// @Title After Login admin Can update language lable
+// @Description  function after login it will work
+// @Param	lable_code      formData      string	      true		"lable code"
+// @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
+// @Param	lang_ini_code   formData 	  string	      true		"to use  for hindi [hi-IN],for gujarati [gu-IN]"
+// @Param	otherlang_value formData 	  string	      true		"here you can pass ENGlanguage message  converted otherlanguage value"
+// @Param   Authorization   header        string        true        "Bearer YourAccessToken"
+// @Success 200 {object} object
+// @Failure 403
+// @router /update_lang_lable [post]
+func (u *LangLableController) UpdateLanguageLables() {
+	var langLables dto.LanguageLableUpdate
+	if err := u.ParseForm(&langLables); err != nil {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "error", "parsing"))
 		return
 	}
 
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "failedlanglbl"))
+	json.Unmarshal(u.Ctx.Input.RequestBody, &langLables)
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&langLables); !isValid {
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, validations.ValidationErrorResponse(u.Controller, valid.Errors))
+		return
+	}
+
+	result, _, errr := models.UpdateLanguageLables(langLables)
+
+	if result == 0 && errr == nil {
+		lable_codesMessage := fmt.Sprintf(`[ %s ] Lable Code Not Exists`, langLables.LableCodes)
+		helpers.ApiFailedResponse(u.Ctx.ResponseWriter, helpers.TranslateMessage(u.Ctx, "language", lable_codesMessage))
+		return
+	}
+	if result == 1 && errr == nil {
+		langlable := fmt.Sprintf(`[ %s ] Successfully Updated Language Lable`, langLables.LableCodes)
+		helpers.ApiSuccessResponse(u.Ctx.ResponseWriter, result, helpers.TranslateMessage(u.Ctx, "success", langlable), "")
+		return
+	}
 }
 
 func (c *LangLableController) FetchAllAndWriteInINIFiles() bool {
 	langugeLables, _ := models.FetchAllLabels()
 	languageLangLables, _ := models.FetchAllDefaultlables()
-	langLangLables, done := languageLangLables.([]orm.Params)
-	if !done {
-		log.Fatal("Failed to convert 'results' to []orm.Params")
-		return false
-	}
-	langResult, _ := helpers.ConvertToMapSlice(langLangLables)
+
+	langResult, _ := helpers.ConvertToMapSlice(langugeLables)
 	helpers.CreateINIFiles(langResult)
-	ormParams, ok := langugeLables.([]orm.Params)
-	if !ok {
-		log.Fatal("Failed to convert 'results' to []orm.Params")
-		return false
-	}
-	res, _ := helpers.ConvertToMapSlice(ormParams)
+
+	res, _ := helpers.ConvertToMapSlice(languageLangLables)
 	helpers.CreateINIFiles(res)
 	return true
 }

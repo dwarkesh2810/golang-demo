@@ -21,7 +21,7 @@ import (
 func init() {
 	orm.RegisterDriver("postgres", orm.DRPostgres)
 	orm.RegisterDataBase("default", "postgres", "user=root password=1234 dbname=golang_demo host=192.168.1.176 sslmode=disable")
-	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.LanguageLable), new(models.LanguageLableLang), new(models.EmailLogs))
+	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.MultiLanguageLable), new(models.EnglishLanguageLable), new(models.EmailLogs))
 	// orm.RunSyncdb("default", false, true)
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))

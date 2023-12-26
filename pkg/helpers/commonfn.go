@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -1028,4 +1029,15 @@ func CapitalizeWords(s string) string {
 	}
 
 	return strings.Join(capitalizedWords, " ") // Join the capitalized words back into a string
+}
+
+/*VALID FORMAT CONVERTIONS FOR INI LANGUAGE CODE*/
+func ConvertIntoIniFormateCode(input string) string {
+	regex := regexp.MustCompile("[^a-zA-Z0-9]")
+	input = regex.ReplaceAllString(input, "-")
+	parts := strings.Split(input, "-")
+	if len(parts) != 2 {
+		return input
+	}
+	return strings.ToLower(parts[0]) + "-" + strings.ToUpper(parts[1])
 }
