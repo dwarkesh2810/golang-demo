@@ -15,6 +15,7 @@ func TestUserModels(t *testing.T) {
 			Email:       "rideshnath.siliconithub@gmail.com",
 			PhoneNumber: "1234567890",
 			Role:        "developer",
+			Country:     101,
 			Password:    "123456",
 		}
 		data, err := models.InsertNewUser(user)

@@ -1060,26 +1060,6 @@ func ParseINIFile(filePath string) (map[string]map[string]string, error) {
 	return dataMap, nil
 }
 
-func flattenMap(inputMap map[string]interface{}, prefix string) map[string]string {
-	result := make(map[string]string)
-
-	for key, value := range inputMap {
-		switch v := value.(type) {
-		case map[string]interface{}:
-			// Recursively call flattenMap for nested maps
-			nestedMap := flattenMap(v, fmt.Sprintf("%s%s.", prefix, key))
-			for nestedKey, nestedValue := range nestedMap {
-				result[nestedKey] = nestedValue
-			}
-		default:
-			// Convert non-map values to string and add to result map
-			result[fmt.Sprintf("%s%s", prefix, key)] = fmt.Sprintf("%v", v)
-		}
-	}
-
-	return result
-}
-
 func ConvertToDataMap(inputMap map[string]map[string]string) map[string]map[string]map[string]string {
 	dataMap := make(map[string]map[string]map[string]string)
 

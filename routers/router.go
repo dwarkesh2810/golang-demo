@@ -21,6 +21,7 @@ func init() {
 			beego.NSInclude(&controllers.UserController{}),
 			beego.NSRouter("/register", &controllers.UserController{}, "Post:RegisterNewUser"),
 			beego.NSRouter("/login", &controllers.UserController{}, "post:Login"),
+			beego.NSRouter("/metrics", &controllers.UserController{}, "get:Get"),
 			beego.NSNamespace("/secure",
 				beego.NSBefore(middleware.JWTMiddleware),
 				beego.NSRouter("/users", &controllers.UserController{}, "post:GetAllUsers"),
@@ -75,8 +76,8 @@ func init() {
 			beego.NSRouter("/update_lang_lable", &controllers.LangLableController{}, "post:UpdateLanguageLables"),
 			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
 			beego.NSRouter("/import_language_lables", &controllers.LangLableController{}, "post:ReadIniFile"),
-
 			beego.NSRouter("/lang_lable_Insert", &controllers.LangLableController{}, "post:InsertLanguageLablesUsingApi"),
+			beego.NSRouter("/lang_lable_UpdateAPI", &controllers.LangLableController{}, "post:UpdateLanguageLablesAPI"),
 		),
 	)
 	beego.AddNamespace(ns)

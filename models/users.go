@@ -153,7 +153,8 @@ func UpdateIsVerified(id int) error {
 func SearchUser(search string, page_size, open_page int) ([]orm.Params, map[string]interface{}, error) {
 	matchCountQuery := `SELECT user_id, first_name FROM users WHERE first_name LIKE '%` + search + `%' OR last_name LIKE '%` + search + `%' OR email LIKE '%` + search + `%' OR phone_number LIKE '%` + search + `%' OR role LIKE '%` + search + `%';`
 	totalRecordQuery := `SELECT COUNT(*) as totalRows FROM users`
-	mainRecordQuery := `SELECT user_id ,first_name ,last_name,email,phone_number,role FROM users WHERE first_name LIKE '%` + search + `%' OR last_name LIKE '%` + search + `%' OR email LIKE '%` + search + `%' OR phone_number LIKE '%` + search + `%' OR role LIKE '%` + search + `%' LIMIT ? OFFSET ?`
+	mainRecordQuery := `SELECT u.first_name , u.last_name, u.email, u.phone_number, c.country_name FROM users as u
+	left join countries as c On c.country_id = u.country_id WHERE u.first_name LIKE '%` + search + `%' OR u.last_name LIKE '%` + search + `%' OR u.email LIKE '%` + search + `%' OR u.phone_number LIKE '%` + search + `%' OR u.role LIKE '%` + search + `%' LIMIT ? OFFSET ?`
 	user, pagination, err := helpers.PaginationForSearch(open_page, page_size, totalRecordQuery, matchCountQuery, mainRecordQuery)
 	if err != nil {
 		return nil, nil, err
@@ -191,7 +192,7 @@ func VerifyEmail(email string, name string) (string, error) {
 			Body:    body,
 			Status:  "pending",
 		}
-		_, err := o.Insert(&sendemail)
+		_, err := o.Insert(&sendemail)	
 		if err != nil {
 			return "", err
 		}
@@ -224,9 +225,10 @@ func VerifyEmail(email string, name string) (string, error) {
 
 func FetchUsers(current_page, pageSize int) ([]orm.Params, map[string]interface{}, error) {
 	tableName := "users"
-	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number
+	query := `SELECT u.first_name , u.last_name, u.email, u.phone_number, c.country_name
 	FROM users as u
-	ORDER BY u.user_id
+	left join countries as c On c.country_id = u.country_id
+	ORDER BY u.user_id 
 	LIMIT ? OFFSET ?
 `
 	result_data, pagination, errs := helpers.FetchDataWithPaginations(current_page, pageSize, tableName, query)

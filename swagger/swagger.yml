@@ -660,11 +660,6 @@ paths:
           value
         required: true
         type: string
-      - in: header
-        name: Authorization
-        description: Bearer YourAccessToken
-        required: true
-        type: string
       responses:
         "200":
           description: ""
@@ -686,11 +681,6 @@ paths:
         description: lable code
         required: true
         type: file
-      - in: header
-        name: Authorization
-        description: Bearer YourAccessToken
-        required: true
-        type: string
       responses:
         "200":
           description: ""
@@ -706,6 +696,37 @@ paths:
         new langouge code
         <br>
       operationId: LangLableController.Insert language lable
+      parameters:
+      - in: formData
+        name: lable_code
+        description: lable code
+        required: true
+        type: string
+      - in: formData
+        name: section
+        description: section like success or failed or errors
+        required: true
+        type: string
+      - in: formData
+        name: ENGlang_value
+        description: here you pass original message value in english
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/object'
+        "403":
+          description: ""
+  /language_lable/lang_lable_UpdateAPI:
+    post:
+      tags:
+      - language_lable
+      description: |-
+        update lables
+        <br>
+      operationId: LangLableController.update language lable
       parameters:
       - in: formData
         name: lable_code
@@ -757,11 +778,6 @@ paths:
         name: otherlang_value
         description: here you can pass ENGlanguage message  converted otherlanguage
           value
-        required: true
-        type: string
-      - in: header
-        name: Authorization
-        description: Bearer YourAccessToken
         required: true
         type: string
       responses:
@@ -902,6 +918,21 @@ paths:
         name: Accept-Languages
         description: Bearer YourAccessToken
         type: string
+      responses:
+        "201":
+          description: ""
+          schema:
+            $ref: '#/definitions/object'
+        "403":
+          description: ""
+  /user/metrics:
+    get:
+      tags:
+      - user
+      description: |-
+        example
+        <br>
+      operationId: UserController.matrics
       responses:
         "201":
           description: ""
