@@ -2,7 +2,6 @@ package validations
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
@@ -54,7 +53,6 @@ func ValidationErrorResponse(c beego.Controller, err []*validation.Error) []stri
 		errs = append(errs, errResponse)
 	}
 
-	log.Print(errs)
 	return errs
 }
 

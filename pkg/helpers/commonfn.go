@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"math/rand"
 	"mime/multipart"
@@ -274,11 +273,8 @@ func isValidLanguage(lang string) bool {
 }
 func SetLanguage(ctx *context.Context, lang string) {
 	ctx.Input.SetData("lang", lang)
+	i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
 
-	err := i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
-	if err != nil {
-		log.Print(err)
-	}
 	ctx.SetCookie("lang", lang, 24*60*60, "/")
 
 	defaultLang = lang
@@ -321,10 +317,8 @@ func CreateINIFiles(data []map[string]string) error {
 			return err
 		}
 
-		for key, data := range item {
-			if key == "" {
-				log.Print(key, data)
-			}
+		for key := range item {
+			_ = key
 			section.NewKey(item["lable_code"], item["language_value"])
 		}
 
@@ -834,7 +828,6 @@ func FilterData(currentPage, pageSize int, query, tableName string, searchFields
 	query += `
         LIMIT ? OFFSET ?
     `
-	log.Print(query, append(generateSearchParameters(searchFields, applyPosition), pageSize, offset), "_______________________")
 	_, err := db.Raw(query, append(generateSearchParameters(searchFields, applyPosition), pageSize, offset)...).Values(&homeResponse)
 	if err != nil {
 		return nil, nil, 0, err
@@ -864,7 +857,6 @@ func generateWhereClause(fields map[string]string, applyPosition string, otherFi
 				condition = field + " ILIKE ?"
 			} else {
 				condition = field + " ILIKE ?"
-				log.Print(value)
 			}
 			conditions = append(conditions, condition)
 		}

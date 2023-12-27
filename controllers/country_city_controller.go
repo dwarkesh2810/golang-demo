@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
@@ -90,7 +89,6 @@ func (c *CountryController) FilterCountries() {
 	}
 
 	result, pagination_data, err := models.CountryFilter(search.OpenPage, search.PageSize, "start", searchFields)
-	log.Print(pagination_data)
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search Country Not Found")
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)

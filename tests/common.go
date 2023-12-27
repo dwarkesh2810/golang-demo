@@ -72,13 +72,13 @@ func LoginTokan() string {
 	var resultMap map[string]interface{}
 	err = json.Unmarshal([]byte(w.Body.Bytes()), &resultMap)
 	if err != nil {
-		log.Print(err.Error())
+		log.Fatal(err.Error())
 		return ""
 	}
 	Data := resultMap["result"]
 	dataMap, ok := Data.(map[string]interface{})
 	if !ok {
-		log.Print("Result is not a map[string]interface{}", resultMap["status"])
+		log.Fatal("Result is not a map[string]interface{}", resultMap["status"])
 		return ""
 	}
 	Tokan := dataMap["Tokan"].(string)

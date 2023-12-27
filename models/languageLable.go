@@ -272,7 +272,7 @@ func ProcessMapData(languageCodes string, dataMap map[string]map[string]map[stri
 		for labelCode, languageValue := range keys {
 			_, err := InsertUpdateLanugaeLabless(section, labelCode, languageValue["language_value"], languageCodes)
 			if err != nil {
-				log.Println("Failed to insert/update data into the database:", err)
+				log.Fatal("Failed to insert/update data into the database:", err)
 			}
 		}
 	}

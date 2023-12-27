@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"testing"
 
@@ -88,7 +87,6 @@ func TestUpdatecar(t *testing.T) {
 			t.Fatalf("Failed to create request: %v", err)
 		}
 		w := RunControllerRoute(endPoint, r, &car_ctrl, tokan, "put:UpdateCar")
-		log.Print(w.Code)
 		if w.Code != http.StatusOK {
 			t.Fatalf("Expected status code %d but got %d", http.StatusOK, w.Code)
 		}
@@ -107,7 +105,7 @@ func TestRemoveCar(t *testing.T) {
 		return
 	}
 	w := RunControllerRoute(endPoint, r, &car_ctrl, tokan, "post:DeleteCar")
-	if w.Code != http.StatusOK {	
+	if w.Code != http.StatusOK {
 		t.Fatalf("Expected status code %d but got %d", http.StatusOK, w.Code)
 	}
 	var resultMap map[string]interface{}
