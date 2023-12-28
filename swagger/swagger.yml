@@ -281,6 +281,11 @@ paths:
         name: search_param
         description: it filter in database and give match
         type: string
+      - in: header
+        name: Authorization
+        description: Bearer YourAccessToken
+        required: true
+        type: string
       responses:
         "200":
           description: ""
@@ -560,12 +565,12 @@ paths:
       operationId: HomeSettingController.After Login User Can Register Home Page settings
       parameters:
       - in: formData
-        name: setting_data
+        name: setting_datas
         description: body for file
         type: file
       - in: formData
         name: setting_data
-        description: body for file
+        description: body for string
         type: string
       - in: formData
         name: data_type

@@ -1034,17 +1034,14 @@ func ConvertIntoIniFormateCode(input string) string {
 	return strings.ToLower(parts[0]) + "-" + strings.ToUpper(parts[1])
 }
 
+/*READ INI FILE AND CONVERT SECTION AND KEY VALUE PAIRS IN MAP[STRING]MAP[STRING]STRING*/
 func ParseINIFile(filePath string) (map[string]map[string]string, error) {
-	// Step 1: Parse INI file
 	config, err := ini.Load(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load INI file: %w", err)
 	}
-
-	// Step 2: Create a nested map
 	dataMap := make(map[string]map[string]string)
 
-	// Step 3: Populate the map
 	for _, section := range config.Sections() {
 		if section.Name() == "DEFAULT" {
 			continue // Skip the DEFAULT section
@@ -1060,9 +1057,9 @@ func ParseINIFile(filePath string) (map[string]map[string]string, error) {
 	return dataMap, nil
 }
 
+/*CONVERT INTO MAP FOR PROCESSMAP DATA FUNCTIONS*/
 func ConvertToDataMap(inputMap map[string]map[string]string) map[string]map[string]map[string]string {
 	dataMap := make(map[string]map[string]map[string]string)
-
 	for section, sectionMap := range inputMap {
 		sectionDataMap := make(map[string]map[string]string)
 
@@ -1071,14 +1068,13 @@ func ConvertToDataMap(inputMap map[string]map[string]string) map[string]map[stri
 				"language_value": v,
 			}
 		}
-
-		// Add the inner map to the dataMap
 		dataMap[section] = sectionDataMap
 	}
 
 	return dataMap
 }
 
+/*EXTRACT INI LANGUAGE CODE FROM FILE EX.locale_mu-IN.ini [OUTPUT STRING mu-IN]*/
 func ExtractLanguageCode(fileName string) string {
 	languageCode := strings.TrimPrefix(fileName, "locale_")
 	languageCode = strings.TrimSuffix(languageCode, ".ini")
