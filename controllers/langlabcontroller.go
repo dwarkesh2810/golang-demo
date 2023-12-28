@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
@@ -26,6 +25,7 @@ type LangLableController struct {
 // @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
 // @Param	lang_ini_code   formData 	  string	      true		"to use  for hindi [hi-IN],for gujarati [gu-IN]"
 // @Param	otherlang_value formData 	  string	      true		"here you can pass ENGlanguage message  converted otherlanguage value"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /create_lang_lable [post]
@@ -64,6 +64,7 @@ func (c *LangLableController) InsertLanguageLables() {
 // @Param	lable_code      formData      string	      true		"lable code"
 // @Param	section         formData      string	      true		"section like success or failed or errors"
 // @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /lang_lable_Insert [post]
@@ -102,6 +103,7 @@ func (c *LangLableController) InsertLanguageLablesUsingApi() {
 // @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
 // @Param	lang_ini_code   formData 	  string	      true		"to use  for hindi [hi-IN],for gujarati [gu-IN]"
 // @Param	otherlang_value formData 	  string	      true		"here you can pass ENGlanguage message  converted otherlanguage value"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /update_lang_lable [post]
@@ -141,6 +143,7 @@ func (c *LangLableController) UpdateLanguageLables() {
 // @Param	lable_code      formData      string	      true		"lable code"
 // @Param	section         formData      string	      true		"section like success or failed or errors"
 // @Param	ENGlang_value   formData 	  string	      true		"here you pass original message value in english"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /lang_lable_UpdateAPI [post]
@@ -184,29 +187,22 @@ func (c *LangLableController) FetchAllAndWriteInINIFiles() bool {
 	return true
 }
 
-// ReadIniFile
-// @Title After Login admin Can import language lable
+// ImportLanguageLables
+// @Title After Login admin Can import English language lable
 // @Description   after login it will work
-// @Param	getIniFile      formData      file	      true		"lable code"
+// @Param	lables_ini_file      formData      file	      true		"select language lables ini file for import"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /import_language_lables [post]
-func (c *LangLableController) ReadIniFile() {
-
-	file, fileHeader, err := c.GetFile("getIniFile")
+func (c *LangLableController) ImportLanguageLables() {
+	file, fileHeader, err := c.GetFile("lables_ini_file")
 	if err != nil {
-		c.Ctx.WriteString("Error uploading file")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "FILE PARSING ERROR")
 		return
 	}
 
 	languagCode := helpers.ExtractLanguageCode(fileHeader.Filename)
-
-	// ok := validations.ImportValidFileType(fileHeader.Filename)
-	// if !ok {
-	// 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidFile"))
-	// 	return
-	// }
-
 	uploadDir := conf.ConfigMaps["basepath"] + "FILES/INI/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
@@ -215,16 +211,23 @@ func (c *LangLableController) ReadIniFile() {
 	}
 	dataMap, err := helpers.ParseINIFile(filePath)
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	dataMapResult := helpers.ConvertToDataMap(dataMap)
-	result := models.ProcessMapData(languagCode, dataMapResult)
-	if result == 1 {
-
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "successfully imported ini file data in multilanguage lanble table", "")
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err)
 		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "INI FILE NOT IMPORT PLEASE TRY AGAIN")
 
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
+	dataMapResult := helpers.ConvertToDataMap(dataMap)
+	result, errs := models.ImportINIFiles(languagCode, userId, dataMapResult)
+	if result != "" {
+		if result != "en-us" {
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "successfully imported ini file data in multilanguage lable table", "")
+			return
+		}
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", "successfully imported ini file data in EnglishLanguage lable table", "")
+		return
+	}
+	message := fmt.Sprintf("INI FILE NOT IMPORT DUE TO %s", errs)
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 }

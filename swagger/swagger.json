@@ -914,6 +914,13 @@
                         "description": "here you can pass ENGlanguage message  converted otherlanguage value",
                         "required": true,
                         "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -935,14 +942,21 @@
                     "language_lable"
                 ],
                 "description": "after login it will work\n\u003cbr\u003e",
-                "operationId": "LangLableController.After Login admin Can import language lable",
+                "operationId": "LangLableController.After Login admin Can import English language lable",
                 "parameters": [
                     {
                         "in": "formData",
-                        "name": "getIniFile",
-                        "description": "lable code",
+                        "name": "lables_ini_file",
+                        "description": "select language lables ini file for import",
                         "required": true,
                         "type": "file"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -986,6 +1000,13 @@
                         "description": "here you pass original message value in english",
                         "required": true,
                         "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -1027,6 +1048,13 @@
                         "in": "formData",
                         "name": "ENGlang_value",
                         "description": "here you pass original message value in english",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
                         "required": true,
                         "type": "string"
                     }
@@ -1077,6 +1105,13 @@
                         "in": "formData",
                         "name": "otherlang_value",
                         "description": "here you can pass ENGlanguage message  converted otherlanguage value",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
                         "required": true,
                         "type": "string"
                     }

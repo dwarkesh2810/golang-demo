@@ -52,6 +52,8 @@ type EnglishLanguageLable struct {
 	LanguageValue string
 	LableCode     string `orm:"unique"`
 	Section       string
+	CreatedBy     int
+	UpdatedBy     int
 	CreatedDate   time.Time
 	UpdatedDate   time.Time `orm:"null;column(updated_date)"`
 }
@@ -62,6 +64,8 @@ type MultiLanguageLable struct {
 	LanguageValue string
 	LanguageCode  string
 	Section       string
+	CreatedBy     int
+	UpdatedBy     int
 	CreatedDate   time.Time
 	UpdatedDate   time.Time `orm:"null;column(updated_date)"`
 }

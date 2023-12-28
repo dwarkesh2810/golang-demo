@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -101,10 +100,10 @@ func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
 				"LanguageValue": langDefualt.LanguageValue,
 				"UpdatedDate":   langDefualt.UpdatedDate,
 			}
-		
+
 			_, err := db.QueryTable(new(EnglishLanguageLable)).Filter("lable_code", l.LableCodes).Update(updateData)
 			if err != nil {
-				return 0,"", err
+				return 0, "", err
 			}
 		}
 
@@ -322,6 +321,7 @@ func UrlString(s string) string {
 }
 
 // end
+
 func existsInMultilanguageLableTable(lable_code, iniCode string) int {
 	db := orm.NewOrm()
 	var lables MultiLanguageLable
@@ -371,19 +371,31 @@ func FetchAllDefaultlables() ([]orm.Params, error) {
 	return labelsList, nil
 }
 
-func ProcessMapData(languageCodes string, dataMap map[string]map[string]map[string]string) int {
+func ImportINIFiles(languageCodes string, user_id uint, dataMap map[string]map[string]map[string]string) (string, error) {
+	if strings.ToUpper(languageCodes) == "EN-US" {
+		for section, keys := range dataMap {
+			for labelCode, languageValue := range keys {
+				_, err := insertUpdateEnglishLanugaeLable(section, labelCode, languageValue["language_value"], int(user_id))
+				if err != nil {
+					return "", err
+				}
+			}
+		}
+		return "en-us", nil
+	}
+
 	for section, keys := range dataMap {
 		for labelCode, languageValue := range keys {
-			_, err := InsertUpdateLanugaeLabless(section, labelCode, languageValue["language_value"], languageCodes)
+			_, err := insertUpdateMultiLanugaeLabless(section, labelCode, languageValue["language_value"], languageCodes, int(user_id))
 			if err != nil {
-				log.Fatal("Failed to insert/update data into the database:", err)
+				return "", err
 			}
 		}
 	}
-	return 1
+	return "multi", nil
 }
 
-func InsertUpdateLanugaeLabless(section, labelCodes, languageValue, languageCodes string) (int, error) {
+func insertUpdateMultiLanugaeLabless(section, labelCodes, languageValue, languageCodes string, user_id int) (int, error) {
 	db := orm.NewOrm()
 	langIniCode := helpers.ConvertIntoIniFormateCode(languageCodes)
 	existsMultiLang := existsInMultilanguageLableTable(labelCodes, langIniCode)
@@ -391,6 +403,7 @@ func InsertUpdateLanugaeLabless(section, labelCodes, languageValue, languageCode
 	if existsMultiLang > 0 {
 		multilanguageUpdate := MultiLanguageLable{
 			LanguageValue: languageValue,
+			UpdatedBy:     user_id,
 			UpdatedDate:   time.Now(),
 		}
 
@@ -411,9 +424,49 @@ func InsertUpdateLanugaeLabless(section, labelCodes, languageValue, languageCode
 		LanguageCode:  helpers.ConvertIntoIniFormateCode(languageCodes),
 		LanguageValue: languageValue,
 		Section:       section,
+		CreatedBy:     user_id,
 		CreatedDate:   time.Now(),
 	}
 	_, err := db.Insert(&resMulti)
+	if err != nil {
+		return 0, err
+	}
+
+	return 1, nil
+}
+
+func insertUpdateEnglishLanugaeLable(section, labelCodes, languageValue string, user_id int) (int, error) {
+	db := orm.NewOrm()
+	existsEnglish := ExistsEngDefaultValues(labelCodes)
+
+	if existsEnglish > 0 {
+		englishLangLables := EnglishLanguageLable{
+			LanguageValue: languageValue,
+			UpdatedBy:     user_id,
+			UpdatedDate:   time.Now(),
+		}
+		updateData := map[string]interface{}{
+			"LanguageValue": englishLangLables.LanguageValue,
+			"UpdatedDate":   englishLangLables.UpdatedDate,
+		}
+
+		_, errs := db.QueryTable(new(EnglishLanguageLable)).Filter("lable_code", labelCodes).Update(updateData)
+
+		if errs != nil {
+			return 0, errs
+		}
+		return 1, nil
+	}
+
+	englishRes := EnglishLanguageLable{
+		LableCode:     labelCodes,
+		LanguageCode:  "en-US",
+		LanguageValue: languageValue,
+		Section:       section,
+		CreatedBy:     user_id,
+		CreatedDate:   time.Now(),
+	}
+	_, err := db.Insert(&englishRes)
 	if err != nil {
 		return 0, err
 	}
