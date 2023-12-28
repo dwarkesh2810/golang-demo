@@ -95,6 +95,13 @@ func (c *HomeSettingController) RegisterSettings() {
 	tokenData := helpers.GetTokenClaims(c.Ctx)
 	userID := tokenData["User_id"]
 	result, err := models.RegisterSetting(settings, userID.(float64), filePath)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if result != 0 {
 		section_success_msg := "create"
 		section := "success"
@@ -102,10 +109,11 @@ func (c *HomeSettingController) RegisterSettings() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message_success, "")
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.create"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // UpdateSettings
@@ -183,15 +191,21 @@ func (c *HomeSettingController) UpdateSettings() {
 	tokenData := helpers.GetTokenClaims(c.Ctx)
 	userID := tokenData["User_id"]
 	result, err := models.UpdateSetting(settings, filePath, userID.(float64))
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
 
 	if result != 0 {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // FetchSettings
@@ -225,6 +239,12 @@ func (c *HomeSettingController) FetchSettings() {
 
 	result, pagination_data, err := models.FetchSettingPaginations(search.OpenPage, search.PageSize)
 
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -243,9 +263,11 @@ func (c *HomeSettingController) FetchSettings() {
 
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // @Title DeleteSetting
@@ -335,7 +357,14 @@ func (c *HomeSettingController) ExportFile() {
 		res_s, _ := helpers.TransformToKeyValuePairs(res_data)
 		header := helpers.ExtractKeys(res_s)
 
-		res_result, _ := helpers.CreateFile(res_s, header, "", "apps", create_file_type)
+		res_result, err := helpers.CreateFile(res_s, header, "", "apps", create_file_type)
+
+		if err != nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+			return
+		}
+
 		if res_result == "" {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
@@ -345,7 +374,6 @@ func (c *HomeSettingController) ExportFile() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.filecreate"), userId)
 		return
 	}
-
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
 	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
 }
@@ -397,14 +425,22 @@ func (c *HomeSettingController) ImportFile() {
 			return
 		}
 		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, float64(userId), filePath, allRows)
+
+		if err != nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+			return
+		}
+
 		if (len(result) > 0 && len(update_id) == 0) || (len(result) > 0 && len(update_id) > 0) || (len(result) == 0 && len(update_id) > 0) {
 			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
 			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.upload"), userId)
 			return
+		} else {
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+			return
 		}
-
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 	case strings.HasSuffix(filePath, ".csv"):
 
@@ -418,13 +454,22 @@ func (c *HomeSettingController) ImportFile() {
 		}
 
 		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
+
+		if err != nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+			return
+		}
+
 		if result != nil || update_id != nil {
 			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", helpers.TranslateMessage(c.Ctx, "success", "upload"), "")
 			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.upload"), userId)
 			return
+		} else {
+			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+			return
 		}
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 	default:
 
@@ -469,7 +514,14 @@ func (c *HomeSettingController) FiltersFetchSettings() {
 		"unique_code":  search.UniqueCode,
 	}
 	if search.Section != "" || search.SettingData != "" || search.DataType != "" || search.UniqueCode != "" {
-		result, pagination_data, _ := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
+		result, pagination_data, err := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
+
+		if err != nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+			return
+		}
+
 		if result == nil && pagination_data["matchCount"] == 0 {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
 			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), userId)
@@ -496,6 +548,4 @@ func (c *HomeSettingController) FiltersFetchSettings() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.search"), userId)
 }

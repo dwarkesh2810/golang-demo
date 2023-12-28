@@ -282,6 +282,13 @@ func (c *CarController) GetAllCars() {
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 	result, pagination_data, err := models.FetchCars(search.OpenPage, search.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -298,9 +305,11 @@ func (c *CarController) GetAllCars() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Get all car record by user : %v", userId), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-	logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 }
 
 // GetSingleCar ...
@@ -336,7 +345,7 @@ func (c *CarController) GetSingleCar() {
 	}
 	if Data.Id == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+ logger.LogMessage(c.Ctx, "error.invalidid"), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.invalidid"), userId)
 		return
 	}
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
@@ -370,6 +379,13 @@ func (c *CarController) FilterCars() {
 		return
 	}
 	result, pagination_data, err := models.Filtercar(bodyData.Search, bodyData.OpenPage, bodyData.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -385,7 +401,9 @@ func (c *CarController) FilterCars() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, message, userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 }

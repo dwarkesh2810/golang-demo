@@ -171,6 +171,11 @@ func (c *UserController) GetAllUsers() {
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 
 	result, pagination_data, err := models.FetchUsers(search.OpenPage, search.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+	}
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -187,9 +192,12 @@ func (c *UserController) GetAllUsers() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+
 }
 
 // VerifyEmailOTP ...
@@ -525,6 +533,12 @@ func (c *UserController) SearchUser() {
 		return
 	}
 	user, pagination_data, err := models.SearchUser(bodyData.Search, bodyData.PageSize, bodyData.OpenPage)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -541,7 +555,10 @@ func (c *UserController) SearchUser() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+
 }

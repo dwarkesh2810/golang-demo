@@ -40,6 +40,12 @@ func (c *CountryController) FetchCountries() {
 
 	result, pagination_data, err := models.FetchCountriesList(search.OpenPage, search.PageSize)
 
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -57,9 +63,11 @@ func (c *CountryController) FetchCountries() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // FilterCountries
@@ -91,6 +99,13 @@ func (c *CountryController) FilterCountries() {
 	}
 
 	result, pagination_data, err := models.CountryFilter(search.OpenPage, search.PageSize, "start", searchFields)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search Country Not Found")
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
@@ -113,10 +128,11 @@ func (c *CountryController) FilterCountries() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Not Found Data Please Try Again")
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // filter_city
@@ -155,6 +171,13 @@ func (c *CountryController) FilterCity() {
 	}
 
 	result, pagination_data, err := models.CityFilter(search.OpenPage, search.PageSize, search.CountryId, search.StateId, otherFieldSCount, "start", search.CountryName, search.StateName, searchFields)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search City Not Found")
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
@@ -177,9 +200,11 @@ func (c *CountryController) FilterCity() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Not Found Data Please Try Again")
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 
 }
 
@@ -212,6 +237,13 @@ func (c *CountryController) FilterCountry() {
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
 	result, pagination_data, err := models.FilterCountries(search, bodyData.OpenPage, bodyData.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -227,9 +259,11 @@ func (c *CountryController) FilterCountry() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 }
 
 // Get country

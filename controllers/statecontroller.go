@@ -35,7 +35,13 @@ func (c *StateController) FetchStates() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
-	result, pagination_data, _ := models.FetchStateList(search.OpenPage, search.PageSize)
+	result, pagination_data, err := models.FetchStateList(search.OpenPage, search.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -51,9 +57,12 @@ func (c *StateController) FetchStates() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
+
 }
 
 // Country Wise State
@@ -81,7 +90,14 @@ func (c *StateController) CountryWiseState() {
 		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
 		return
 	}
-	result, pagination_data, _ := models.CountryWiseState(search.OpenPage, search.PageSize, search.CountryId)
+	result, pagination_data, err := models.CountryWiseState(search.OpenPage, search.PageSize, search.CountryId)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -97,9 +113,11 @@ func (c *StateController) CountryWiseState() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 }
 
 // Filter State
@@ -135,7 +153,14 @@ func (c *StateController) FilterStates() {
 		return
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
-	result, pagination_data, _ := models.FilterStates(search, bodyData.OpenPage, bodyData.PageSize)
+	result, pagination_data, err := models.FilterStates(search, bodyData.OpenPage, bodyData.PageSize)
+
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
@@ -151,9 +176,11 @@ func (c *StateController) FilterStates() {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 		return
+	} else {
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		return
 	}
-	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
-	logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
 }
 
 // Get State ...
