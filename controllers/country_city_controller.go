@@ -68,13 +68,15 @@ func (c *CountryController) FetchCountries() {
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param search_param formData string false "it filter in database and give match"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /filter_country [post]
 func (c *CountryController) FilterCountries() {
 
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	// claims := helpers.GetTokenClaims(c.Ctx)
+	// userId := uint(claims["User_id"].(float64))
+	userId := uint(1)
 
 	var search dto.CountrySearch
 	if err := c.ParseForm(&search); err != nil {
@@ -132,8 +134,9 @@ func (c *CountryController) FilterCountries() {
 // @router /filter_city [post]
 func (c *CountryController) FilterCity() {
 
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	// claims := helpers.GetTokenClaims(c.Ctx)
+	// userId := uint(claims["User_id"].(float64))
+	userId := uint(1)
 
 	var search dto.CitySearch
 	if err := c.ParseForm(&search); err != nil {

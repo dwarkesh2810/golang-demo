@@ -25,8 +25,8 @@ type HomeSettingController struct {
 // RegisterSettings
 // @Title After Login User Can Register Home Page settings
 // @Description In this function after login can register Home page settings
-// @Param	setting_data   formData 	file	false		"body for file"
-// @Param	setting_data   formData 	string	false		"body for file"
+// @Param	setting_datas   formData 	file	false		"body for file"
+// @Param	setting_data   formData 	string	false		"body for string"
 // @Param	data_type   formData 	string	false		"body for html text or other "
 // @Param	section   formData 	string	false		"body for file"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
@@ -65,7 +65,7 @@ func (c *HomeSettingController) RegisterSettings() {
 	}
 
 	if data_types == "LOGO" || data_types == "BANNER" {
-		file, fileHeader, err := c.GetFile("setting_data")
+		file, fileHeader, err := c.GetFile("setting_datas")
 
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {

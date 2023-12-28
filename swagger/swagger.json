@@ -398,6 +398,13 @@
                         "name": "search_param",
                         "description": "it filter in database and give match",
                         "type": "string"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "Bearer YourAccessToken",
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -775,14 +782,14 @@
                 "parameters": [
                     {
                         "in": "formData",
-                        "name": "setting_data",
+                        "name": "setting_datas",
                         "description": "body for file",
                         "type": "file"
                     },
                     {
                         "in": "formData",
                         "name": "setting_data",
-                        "description": "body for file",
+                        "description": "body for string",
                         "type": "string"
                     },
                     {
