@@ -69,7 +69,9 @@ func (c *LangLableController) InsertLanguageLables() {
 // @Failure 403
 // @router /lang_lable_Insert [post]
 func (c *LangLableController) InsertLanguageLablesUsingApi() {
-	var langLables dto.LanguageLableInsertNew
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+	var langLables dto.LanguageLable
 	if err := c.ParseForm(&langLables); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
@@ -87,7 +89,7 @@ func (c *LangLableController) InsertLanguageLablesUsingApi() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Language Lable already used please insert new language lable and try again")
 		return
 	}
-	lableCodes, err := models.InsertUpdateLanugaeLablesApi(langLables)
+	lableCodes, err := models.InsertUpdateLanugaeLablesApi(langLables, int(userId))
 	if err == nil && lableCodes != "" {
 		langlable := fmt.Sprintf(`[ %s ] Successfully Created Language Lable`, lableCodes)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, lableCodes, helpers.TranslateMessage(c.Ctx, "success", langlable), "")
@@ -148,7 +150,9 @@ func (c *LangLableController) UpdateLanguageLables() {
 // @Failure 403
 // @router /lang_lable_UpdateAPI [post]
 func (c *LangLableController) UpdateLanguageLablesAPI() {
-	var langLables dto.LanguageLableInsertNew
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+	var langLables dto.LanguageLable
 	if err := c.ParseForm(&langLables); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
 		return
@@ -166,7 +170,7 @@ func (c *LangLableController) UpdateLanguageLablesAPI() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "language", lable_codesMessage))
 		return
 	}
-	result, err := models.UpdateLanguageLablesAPI(langLables)
+	result, err := models.UpdateLanguageLablesAPI(langLables, int(userId))
 	if err == nil {
 		langlable := fmt.Sprintf(`[ %s ] Successfully Updated Language Lable`, langLables.LableCodes)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", langlable), "")

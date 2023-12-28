@@ -20,8 +20,7 @@ func init() {
 // Run the migrations
 func (m *Englishlanguagelable_20231226_101842) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	m.SQL(`
-	CREATE TABLE IF NOT EXISTS "english_language_lable" (
+	m.SQL(`CREATE TABLE IF NOT EXISTS "english_language_lable" (
         "lang_id" serial NOT NULL PRIMARY KEY,
         "language_code" text NOT NULL DEFAULT '' ,
         "language_value" text NOT NULL DEFAULT '' ,

@@ -11,6 +11,7 @@ require (
 	github.com/go-ini/ini v1.67.0
 	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/lib/pq v1.10.5
+	github.com/prometheus/client_golang v1.15.1
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/tealeg/xlsx v1.0.5
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
@@ -30,7 +31,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.15.1 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect

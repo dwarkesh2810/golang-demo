@@ -130,13 +130,14 @@ func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
 
 // THIS IS FOR INSERT VALUE IN MULTIPLE LANGUAGE USING API
 
-func InsertUpdateLanugaeLablesApi(l dto.LanguageLableInsertNew) (string, error) {
+func InsertUpdateLanugaeLablesApi(l dto.LanguageLable, userID int) (string, error) {
 	db := orm.NewOrm()
 	res := EnglishLanguageLable{
 		LableCode:     l.LableCodes,
 		LanguageCode:  "en-US",
 		LanguageValue: l.ENGLangValues,
 		Section:       l.Sections,
+		CreatedBy:     userID,
 		CreatedDate:   time.Now(),
 	}
 	_, err := db.Insert(&res)
@@ -144,32 +145,34 @@ func InsertUpdateLanugaeLablesApi(l dto.LanguageLableInsertNew) (string, error) 
 		return "", err
 	}
 	urlstr := UrlString(l.ENGLangValues)
-	err = InsertGujrati(urlstr, l.LableCodes, l.Sections)
+	err = InsertGujrati(urlstr, l.LableCodes, l.Sections, userID)
 	if err != nil {
 		return "", err
 	}
-	err = InsertHindi(urlstr, l.LableCodes, l.Sections)
+	err = InsertHindi(urlstr, l.LableCodes, l.Sections, userID)
 	if err != nil {
 		return "", err
 	}
-	err = InsertMarathi(urlstr, l.LableCodes, l.Sections)
+	err = InsertMarathi(urlstr, l.LableCodes, l.Sections, userID)
 	if err != nil {
 		return "", err
 	}
 	return res.LableCode, nil
 }
 
-func UpdateLanguageLablesAPI(l dto.LanguageLableInsertNew) (string, error) {
+func UpdateLanguageLablesAPI(l dto.LanguageLable, userID int) (string, error) {
 	db := orm.NewOrm()
 	// orm.Debug = true
 	langDefualt := EnglishLanguageLable{
 		LableCode:     l.LableCodes,
 		LanguageValue: l.ENGLangValues,
+		UpdatedBy:     userID,
 		UpdatedDate:   time.Now(),
 	}
 	updateData := map[string]interface{}{
 		"LanguageValue": langDefualt.LanguageValue,
 		"UpdatedDate":   langDefualt.UpdatedDate,
+		"UpdatedBy":     langDefualt.UpdatedBy,
 	}
 
 	_, err := db.QueryTable(new(EnglishLanguageLable)).Filter("lable_code", l.LableCodes).Update(updateData)
@@ -178,22 +181,22 @@ func UpdateLanguageLablesAPI(l dto.LanguageLableInsertNew) (string, error) {
 	}
 	urlstr := UrlString(l.ENGLangValues)
 
-	err = UpdateGujrati(urlstr, l.LableCodes)
+	err = UpdateGujrati(urlstr, l.LableCodes, userID)
 	if err != nil {
 		return "", err
 	}
-	err = UpdateHindi(urlstr, l.LableCodes)
+	err = UpdateHindi(urlstr, l.LableCodes, userID)
 	if err != nil {
 		return "", err
 	}
-	err = UpdateMarathi(urlstr, l.LableCodes)
+	err = UpdateMarathi(urlstr, l.LableCodes, userID)
 	if err != nil {
 		return "", err
 	}
 	return langDefualt.LableCode, nil
 }
 
-func InsertGujrati(urlstr, lable, section string) error {
+func InsertGujrati(urlstr, lable, section string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=gu&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -206,13 +209,14 @@ func InsertGujrati(urlstr, lable, section string) error {
 		LanguageCode:  "gu-IN",
 		LanguageValue: strres,
 		Section:       section,
+		CreatedBy:     userID,
 		CreatedDate:   time.Now(),
 	}
 	_, err = db.Insert(&resMulti)
 	return err
 }
 
-func InsertHindi(urlstr, lable, section string) error {
+func InsertHindi(urlstr, lable, section string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -225,13 +229,14 @@ func InsertHindi(urlstr, lable, section string) error {
 		LanguageCode:  "hi-IN",
 		LanguageValue: strres,
 		Section:       section,
+		CreatedBy:     userID,
 		CreatedDate:   time.Now(),
 	}
 	_, err = db.Insert(&resMulti)
 	return err
 }
 
-func InsertMarathi(urlstr, lable, section string) error {
+func InsertMarathi(urlstr, lable, section string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=mr&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -244,12 +249,13 @@ func InsertMarathi(urlstr, lable, section string) error {
 		LanguageCode:  "mr-IN",
 		LanguageValue: strres,
 		Section:       section,
+		CreatedBy:     userID,
 		CreatedDate:   time.Now(),
 	}
 	_, err = db.Insert(&resMulti)
 	return err
 }
-func UpdateGujrati(urlstr, lable string) error {
+func UpdateGujrati(urlstr, lable string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=gu&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -260,17 +266,19 @@ func UpdateGujrati(urlstr, lable string) error {
 	multilanguageUpdate := MultiLanguageLable{
 		LanguageValue: strres,
 		UpdatedDate:   time.Now(),
+		UpdatedBy:     userID,
 	}
 
 	updateData := map[string]interface{}{
 		"LanguageValue": multilanguageUpdate.LanguageValue,
 		"UpdatedDate":   multilanguageUpdate.UpdatedDate,
+		"UpdatedBy":     multilanguageUpdate.UpdatedBy,
 	}
 
 	_, err = db.QueryTable(new(MultiLanguageLable)).Filter("language_code", "gu-IN").Filter("lable_code", lable).Update(updateData)
 	return err
 }
-func UpdateHindi(urlstr, lable string) error {
+func UpdateHindi(urlstr, lable string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -281,17 +289,19 @@ func UpdateHindi(urlstr, lable string) error {
 	multilanguageUpdate := MultiLanguageLable{
 		LanguageValue: strres,
 		UpdatedDate:   time.Now(),
+		UpdatedBy:     userID,
 	}
 
 	updateData := map[string]interface{}{
 		"LanguageValue": multilanguageUpdate.LanguageValue,
 		"UpdatedDate":   multilanguageUpdate.UpdatedDate,
+		"UpdatedBy":     multilanguageUpdate.UpdatedBy,
 	}
 
 	_, err = db.QueryTable(new(MultiLanguageLable)).Filter("language_code", "hi-IN").Filter("lable_code", lable).Update(updateData)
 	return err
 }
-func UpdateMarathi(urlstr, lable string) error {
+func UpdateMarathi(urlstr, lable string, userID int) error {
 	db := orm.NewOrm()
 	req := httplib.Get("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=mr&dt=t&q=" + urlstr)
 	str, err := req.String()
@@ -302,11 +312,13 @@ func UpdateMarathi(urlstr, lable string) error {
 	multilanguageUpdate := MultiLanguageLable{
 		LanguageValue: strres,
 		UpdatedDate:   time.Now(),
+		UpdatedBy:     userID,
 	}
 
 	updateData := map[string]interface{}{
 		"LanguageValue": multilanguageUpdate.LanguageValue,
 		"UpdatedDate":   multilanguageUpdate.UpdatedDate,
+		"UpdatedBy":     multilanguageUpdate.UpdatedBy,
 	}
 
 	_, err = db.QueryTable(new(MultiLanguageLable)).Filter("language_code", "mr-IN").Filter("lable_code", lable).Update(updateData)

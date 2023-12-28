@@ -137,6 +137,13 @@ func (c *UserController) RegisterNewUser() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.userexist"), 0)
 		return
 	}
+	userRole, err := helpers.UserRole(bodyData.Role)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "role"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
+		return
+	}
+	bodyData.Role = userRole
 	output, err := models.InsertNewUser(bodyData)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
@@ -295,6 +302,13 @@ func (c *UserController) UpdateUser() {
 			return
 		}
 	}
+	userRole, err := helpers.UserRole(bodyData.Role)
+	if err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "role"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
+		return
+	}
+	bodyData.Role = userRole
 	user, err := models.UpdateUser(bodyData)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))

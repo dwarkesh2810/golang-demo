@@ -20,7 +20,7 @@ func init() {
 // Run the migrations
 func (m *EmailLogs_20231218_140441) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
-	m.SQL(`CREATE TABLE "public"."email_logs" (
+	m.SQL(`CREATE TABLE IF NOT EXISTS "public"."email_logs" (
 		"LogId" bigserial NOT NULL,
 		"emailTo" text NOT NULL DEFAULT '',
 		"name" text NOT NULL DEFAULT '',

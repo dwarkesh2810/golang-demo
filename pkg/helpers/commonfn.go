@@ -798,13 +798,22 @@ func CheckIfExists(elemet string, data []string) bool {
 	return false
 }
 
-/*Function for checck car typy is valid or not*/
+/*Function for checck car type is valid or not*/
 func NewCarType(input string) (dto.CarType, error) {
 	switch input {
 	case "sedan", "hatchback", "SUV":
 		return dto.CarType(input), nil
 	default:
 		return "", errors.New("INVALID_CAR")
+	}
+}
+
+func UserRole(input string) (string, error) {
+	switch input {
+	case "user", "admin":
+		return input, nil
+	default:
+		return "", errors.New("invalid role plese select role user or admin")
 	}
 }
 

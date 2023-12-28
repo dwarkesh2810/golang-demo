@@ -21,7 +21,6 @@ func init() {
 			beego.NSInclude(&controllers.UserController{}),
 			beego.NSRouter("/register", &controllers.UserController{}, "Post:RegisterNewUser"),
 			beego.NSRouter("/login", &controllers.UserController{}, "post:Login"),
-			beego.NSRouter("/metrics", &controllers.UserController{}, "get:Get"),
 			beego.NSNamespace("/secure",
 				beego.NSBefore(middleware.JWTMiddleware),
 				beego.NSRouter("/users", &controllers.UserController{}, "post:GetAllUsers"),
@@ -37,7 +36,6 @@ func init() {
 		beego.NSNamespace("/homepage",
 			beego.NSBefore(middleware.JWTMiddleware),
 			beego.NSInclude(&controllers.HomeSettingController{}),
-
 			beego.NSRouter("/register_settings", &controllers.HomeSettingController{}, "post:RegisterSettings"),
 			beego.NSRouter("/update_settings", &controllers.HomeSettingController{}, "post:UpdateSettings"),
 			beego.NSRouter("/fetch_settings", &controllers.HomeSettingController{}, "post:FetchSettings"),
