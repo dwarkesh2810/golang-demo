@@ -57,9 +57,9 @@ func (c *HomeSettingController) RegisterSettings() {
 	}
 
 	data_types := strings.ToUpper(settings.DataType)
-	uploadDir := conf.ConfigMaps["basepath"] + "Home/files/images"
+	uploadDir := conf.Env.BaseUploadPath + "Home/files/images"
 	if data_types == "LOGO" {
-		uploadDir = conf.ConfigMaps["basepath"] + "Home/files/logo"
+		uploadDir = conf.Env.BaseUploadPath + "Home/files/logo"
 	} else if data_types != "BANNER" {
 		filePath = ""
 	}
@@ -156,10 +156,10 @@ func (c *HomeSettingController) UpdateSettings() {
 
 	data_types := strings.ToUpper(settings.DataType)
 
-	uploadDir := conf.ConfigMaps["basepath"] + "Home/files/images"
+	uploadDir := conf.Env.BaseUploadPath + "Home/files/images"
 
 	if data_types == "LOGO" {
-		uploadDir = conf.ConfigMaps["basepath"] + "Home/files/logo"
+		uploadDir = conf.Env.BaseUploadPath + "Home/files/logo"
 
 	} else if data_types != "BANNER" {
 		filePath = ""
@@ -405,7 +405,7 @@ func (c *HomeSettingController) ImportFile() {
 		return
 	}
 
-	uploadDir := conf.ConfigMaps["basepath"] + "FILES/IMPORT"
+	uploadDir := conf.Env.BaseUploadPath + "FILES/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))

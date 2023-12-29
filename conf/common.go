@@ -1,29 +1,15 @@
 package conf
 
-import (
-	"github.com/beego/beego/v2/core/config"
-)
+import "log"
 
-var Config config.Configer
-var ConfigMaps map[string]string
+var Env Config
 
-func loadConfig(ext, path string) error {
-	conf, err := config.NewConfig(ext, path)
+func LoadEnv(path string) error {
+	EnvConfig, err := LoadConfig(path, "app", "env")
 	if err != nil {
+		log.Fatal("failed to change ", err)
 		return err
 	}
-
-	Config = conf
-	return nil
-}
-
-func GetConfigMap() error {
-	loadConfig("ini", "conf/app.conf")
-	a, err := Config.GetSection("golang-demo")
-
-	if err != nil {
-		return err
-	}
-	ConfigMaps = a
+	Env = EnvConfig
 	return nil
 }

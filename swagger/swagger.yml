@@ -956,21 +956,6 @@ paths:
             $ref: '#/definitions/object'
         "403":
           description: ""
-  /user/metrics:
-    get:
-      tags:
-      - user
-      description: |-
-        example
-        <br>
-      operationId: UserController.matrics
-      responses:
-        "201":
-          description: ""
-          schema:
-            $ref: '#/definitions/object'
-        "403":
-          description: ""
   /user/register:
     post:
       tags:

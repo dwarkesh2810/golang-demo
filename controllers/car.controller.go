@@ -73,7 +73,7 @@ func (c *CarController) AddNewCar() {
 		return
 	}
 
-	uploadDir := conf.ConfigMaps["basepath"] + "Cars/images/"
+	uploadDir := conf.Env.BaseUploadPath + "Cars/images/"
 	filepaths, err := helpers.UploadFile(file, fileHeader, uploadDir)
 
 	if err != nil {
@@ -182,7 +182,7 @@ func (c *CarController) UpdateCar() {
 		return
 	}
 
-	uploadDir := conf.ConfigMaps["basepath"] + "Cars/images/"
+	uploadDir := conf.Env.BaseUploadPath + "Cars/images/"
 	filepaths, err := helpers.UploadFile(file, fileheader, uploadDir)
 
 	if err != nil {
