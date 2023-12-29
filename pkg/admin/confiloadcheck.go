@@ -21,6 +21,6 @@ func (lc *ConfigFileCheck) Check() error {
 }
 
 func (lc *ConfigFileCheck) isSuccess() bool {
-	err := conf.GetConfigMap()
+	err := conf.LoadEnv("..")
 	return !(err != nil)
 }

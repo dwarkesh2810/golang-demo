@@ -10,3 +10,6 @@ golang-demo
 26-dec-2023
 28-dec-2023
 28-dec-2023-2
+app.env
+
+*.ini

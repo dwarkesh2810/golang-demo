@@ -21,7 +21,7 @@ type UserController struct {
 	beego.Controller
 }
 
-var key = conf.ConfigMaps["JWT_SEC_KEY"]
+var key = conf.Env.JwtSecret
 var jwtKey = []byte(key)
 
 // Login ...

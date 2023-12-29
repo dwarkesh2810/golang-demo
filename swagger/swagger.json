@@ -1330,26 +1330,6 @@
                 }
             }
         },
-        "/user/metrics": {
-            "get": {
-                "tags": [
-                    "user"
-                ],
-                "description": "example\n\u003cbr\u003e",
-                "operationId": "UserController.matrics",
-                "responses": {
-                    "201": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/object"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/user/register": {
             "post": {
                 "tags": [

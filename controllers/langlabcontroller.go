@@ -207,7 +207,7 @@ func (c *LangLableController) ImportLanguageLables() {
 	}
 
 	languagCode := helpers.ExtractLanguageCode(fileHeader.Filename)
-	uploadDir := conf.ConfigMaps["basepath"] + "FILES/INI/IMPORT"
+	uploadDir := conf.Env.BaseUploadPath + "FILES/INI/IMPORT"
 	filePath, err := helpers.UploadFile(file, fileHeader, uploadDir)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))

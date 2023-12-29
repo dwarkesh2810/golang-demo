@@ -60,8 +60,8 @@ func VerifyHashedData(hashedString string, dataString string) error {
 
 // >>>>>>>>>>>>>Function to send mail <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
 func SendMailOTp(userEmail string, name string, subject string, body string) (bool, error) {
-	from := conf.ConfigMaps["email"]
-	password := conf.ConfigMaps["password"]
+	from := conf.Env.FromEmail
+	password := conf.Env.Password
 	to := []string{
 		userEmail,
 	}

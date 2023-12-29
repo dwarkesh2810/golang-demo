@@ -14,10 +14,9 @@ import (
 )
 
 func Init() {
-	conf.GetConfigMap()
-
-	orm.RegisterDriver(conf.ConfigMaps["dbdriver"], orm.DRPostgres)
-	orm.RegisterDataBase("default", conf.ConfigMaps["dbdriver"], conf.ConfigMaps["conn"])
+	conf.LoadEnv(".")
+	orm.RegisterDriver(conf.Env.DbDriver, orm.DRPostgres)
+	orm.RegisterDataBase("default", conf.Env.DbDriver, conf.Env.ConnString)
 
 	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.MultiLanguageLable), new(models.EnglishLanguageLable), new(models.EmailLogs), new(models.AuditLogs))
 
