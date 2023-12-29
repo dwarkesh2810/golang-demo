@@ -21,6 +21,22 @@ type Users struct {
 	UpdatedDate time.Time `orm:"null"`
 }
 
+type BackupUsers struct {
+	UserId         int
+	FirstName      string
+	LastName       string
+	Email          string
+	PhoneNumber    string
+	Password       string
+	Isverified     int
+	OtpCode        string
+	Role           string
+	CountryId      int
+	CreatedDate    time.Time
+	UpdatedDate    time.Time
+	DeleteFromUser time.Time
+}
+
 type Car struct {
 	Id          uint        `json:"car_id" orm:"pk;auto;column(id)"`
 	CarName     string      `orm:"column(car_name)"`
