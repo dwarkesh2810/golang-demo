@@ -18,7 +18,7 @@ func Init() {
 	orm.RegisterDriver(conf.Env.DbDriver, orm.DRPostgres)
 	orm.RegisterDataBase("default", conf.Env.DbDriver, conf.Env.ConnString)
 
-	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.MultiLanguageLable), new(models.EnglishLanguageLable), new(models.EmailLogs), new(models.AuditLogs))
+	orm.RegisterModel(new(models.Users), new(models.HomePagesSettingTable), new(models.Car), new(models.MultiLanguageLable), new(models.EnglishLanguageLable), new(models.EmailLogs), new(models.AuditLogs), new(models.BackupUsers))
 
 	// orm.RunSyncdb("default", false, true)
 
