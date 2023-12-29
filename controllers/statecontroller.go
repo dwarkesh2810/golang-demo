@@ -26,12 +26,11 @@ type StateController struct {
 // @Failure 403
 // @router /list_states [post]
 func (c *StateController) FetchStates() {
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	
 	var search dto.PaginationReq
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
@@ -39,7 +38,7 @@ func (c *StateController) FetchStates() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	if pagination_data["pageOpen_error"] == 1 {
@@ -47,22 +46,14 @@ func (c *StateController) FetchStates() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
-	if result != nil {
 		section_message := "read"
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
-
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // Country Wise State
@@ -75,26 +66,25 @@ func (c *StateController) FetchStates() {
 // @Failure 403
 // @router /country_wise_state [post]
 func (c *StateController) CountryWiseState() {
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	
 	var search dto.CountryWiseState
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&search); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 	result, pagination_data, err := models.CountryWiseState(search.OpenPage, search.PageSize, search.CountryId)
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
@@ -103,21 +93,14 @@ func (c *StateController) CountryWiseState() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // Filter State
@@ -130,12 +113,11 @@ func (c *StateController) CountryWiseState() {
 // @Failure 403
 // @router /search_state [post]
 func (c *StateController) FilterStates() {
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -143,13 +125,13 @@ func (c *StateController) FilterStates() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 
 	if len(bodyData.Search) < 2 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "search"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.search"), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.search"), 0)
 		return
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
@@ -157,7 +139,7 @@ func (c *StateController) FilterStates() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
@@ -166,21 +148,14 @@ func (c *StateController) FilterStates() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // Get State ...
@@ -191,12 +166,11 @@ func (c *StateController) FilterStates() {
 // @Failure 403
 // @router /get_state [post]
 func (c *StateController) GetState() {
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	
 	var bodyData dto.GetStateRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -204,16 +178,16 @@ func (c *StateController) GetState() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 
 	Data, err := models.GetState(bodyData.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
-	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 )
 
-func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
+func InsertUpdateLanugaeLables(l dto.LanguageLableInsert, userId int) (int, string, error) {
 	db := orm.NewOrm()
 	langIniCode := helpers.ConvertIntoIniFormateCode(l.OtherINILanguageCodes)
 	existsMultiLang := existsInMultilanguageLableTable(l.LableCodes, langIniCode)
@@ -22,6 +22,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 			langDefualt := EnglishLanguageLable{LableCode: l.LableCodes,
 				LanguageValue: l.ENGLangValues,
 				UpdatedDate:   time.Now(),
+				CreatedBy:     userId,
 			}
 			_, err := db.Update(&langDefualt, "language_value")
 			if err != nil {
@@ -35,6 +36,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 			LanguageValue: l.ENGLangValues,
 			Section:       l.Sections,
 			CreatedDate:   time.Now(),
+			CreatedBy:     userId,
 		}
 		_, err := db.Insert(&res)
 		if err != nil {
@@ -49,6 +51,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 		LanguageValue: l.OtherLangValues,
 		Section:       l.Sections,
 		CreatedDate:   time.Now(),
+		CreatedBy:     userId,
 	}
 	_, err := db.Insert(&resMulti)
 	if err != nil {
@@ -61,6 +64,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 		langDefualt := EnglishLanguageLable{LableCode: l.LableCodes,
 			LanguageValue: l.ENGLangValues,
 			UpdatedDate:   time.Now(),
+			CreatedBy:     userId,
 		}
 		_, err := db.Update(&langDefualt, "language_value")
 		if err != nil {
@@ -74,6 +78,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 		LanguageValue: l.ENGLangValues,
 		Section:       l.Sections,
 		CreatedDate:   time.Now(),
+		CreatedBy:     userId,
 	}
 	_, errs := db.Insert(&res)
 	if errs != nil {
@@ -83,7 +88,7 @@ func InsertUpdateLanugaeLables(l dto.LanguageLableInsert) (int, string, error) {
 
 }
 
-func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
+func UpdateLanguageLables(l dto.LanguageLableUpdate, userID int) (int, string, error) {
 	db := orm.NewOrm()
 	lableIniCode := helpers.ConvertIntoIniFormateCode(l.OtherINILanguageCodes)
 	existsMultiLang := existsInMultilanguageLableTable(l.LableCodes, lableIniCode)
@@ -95,10 +100,12 @@ func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
 				LableCode:     l.LableCodes,
 				LanguageValue: l.ENGLangValues,
 				UpdatedDate:   time.Now(),
+				UpdatedBy:     userID,
 			}
 			updateData := map[string]interface{}{
 				"LanguageValue": langDefualt.LanguageValue,
 				"UpdatedDate":   langDefualt.UpdatedDate,
+				"UpdatedBy":     langDefualt.UpdatedBy,
 			}
 
 			_, err := db.QueryTable(new(EnglishLanguageLable)).Filter("lable_code", l.LableCodes).Update(updateData)
@@ -110,11 +117,13 @@ func UpdateLanguageLables(l dto.LanguageLableUpdate) (int, string, error) {
 		multilanguageUpdate := MultiLanguageLable{
 			LanguageValue: l.OtherLangValues,
 			UpdatedDate:   time.Now(),
+			UpdatedBy:     userID,
 		}
 
 		updateData := map[string]interface{}{
 			"LanguageValue": multilanguageUpdate.LanguageValue,
 			"UpdatedDate":   multilanguageUpdate.UpdatedDate,
+			"UpdatedBy":     multilanguageUpdate.UpdatedBy,
 		}
 
 		_, errs := db.QueryTable(new(MultiLanguageLable)).Filter("language_code", lableIniCode).Filter("lable_code", l.LableCodes).Update(updateData)

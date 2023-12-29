@@ -101,19 +101,11 @@ func (c *HomeSettingController) RegisterSettings() {
 		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
-
-	if result != 0 {
-		section_success_msg := "create"
-		section := "success"
-		message_success := helpers.TranslateMessage(c.Ctx, section, section_success_msg)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message_success, "")
-		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.create"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_success_msg := "create"
+	section := "success"
+	message_success := helpers.TranslateMessage(c.Ctx, section, section_success_msg)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message_success, "")
+	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.create"), userId)
 }
 
 // UpdateSettings
@@ -196,16 +188,8 @@ func (c *HomeSettingController) UpdateSettings() {
 		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
-
-	if result != 0 {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, "")
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 }
 
 // FetchSettings
@@ -253,21 +237,13 @@ func (c *HomeSettingController) FetchSettings() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 }
 
 // @Title DeleteSetting

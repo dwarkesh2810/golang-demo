@@ -398,13 +398,6 @@
                         "name": "search_param",
                         "description": "it filter in database and give match",
                         "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
-                        "type": "string"
                     }
                 ],
                 "responses": {

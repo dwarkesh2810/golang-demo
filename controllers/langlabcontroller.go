@@ -30,6 +30,8 @@ type LangLableController struct {
 // @Failure 403
 // @router /create_lang_lable [post]
 func (c *LangLableController) InsertLanguageLables() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
 	var langLables dto.LanguageLableInsert
 	if err := c.ParseForm(&langLables); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -44,7 +46,7 @@ func (c *LangLableController) InsertLanguageLables() {
 		return
 	}
 
-	result, lableCodes, errr := models.InsertUpdateLanugaeLables(langLables)
+	result, lableCodes, errr := models.InsertUpdateLanugaeLables(langLables, int(userId))
 
 	if result == 0 && errr == nil {
 		lable_codesMessage := fmt.Sprintf(`[ %s ] Lable Code Already Exists , If English Language Value is not available For  [--- %s ---] lableCode  it will Insert OR Update At Same lableCode `, langLables.LableCodes, langLables.LableCodes)
@@ -110,6 +112,8 @@ func (c *LangLableController) InsertLanguageLablesUsingApi() {
 // @Failure 403
 // @router /update_lang_lable [post]
 func (c *LangLableController) UpdateLanguageLables() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
 	var langLables dto.LanguageLableUpdate
 	if err := c.ParseForm(&langLables); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -123,7 +127,7 @@ func (c *LangLableController) UpdateLanguageLables() {
 		return
 	}
 
-	result, _, errr := models.UpdateLanguageLables(langLables)
+	result, _, errr := models.UpdateLanguageLables(langLables, int(userId))
 
 	if result == 0 && errr == nil {
 		lable_codesMessage := fmt.Sprintf(`[ %s ] Lable Code Not Exists`, langLables.LableCodes)

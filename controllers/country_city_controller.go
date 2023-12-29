@@ -50,21 +50,13 @@ func (c *CountryController) FetchCountries() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
-	}
+	}	
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
-		return
-	}
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // FilterCountries
@@ -73,7 +65,6 @@ func (c *CountryController) FetchCountries() {
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param search_param formData string false "it filter in database and give match"
-// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
 // @router /filter_country [post]
@@ -117,19 +108,11 @@ func (c *CountryController) FilterCountries() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
-
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // filter_city
@@ -189,18 +172,11 @@ func (c *CountryController) FilterCity() {
 		return
 	}
 
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 
 }
 
@@ -214,10 +190,6 @@ func (c *CountryController) FilterCity() {
 // @Failure 403
 // @router /search_country [post]
 func (c *CountryController) FilterCountry() {
-
-	// claims := helpers.GetTokenClaims(c.Ctx)
-	// 0 := uint(claims["User_id"].(float64))
-
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -248,18 +220,11 @@ func (c *CountryController) FilterCountry() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 }
 
 // Get country

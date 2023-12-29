@@ -24,7 +24,7 @@ func (m *Englishlanguagelable_20231226_101842) Up() {
         "lang_id" serial NOT NULL PRIMARY KEY,
         "language_code" text NOT NULL DEFAULT '' ,
         "language_value" text NOT NULL DEFAULT '' ,
-        "lable_code" text NOT NULL DEFAULT ''  UNIQUE,
+        "lable_code" text NOT NULL DEFAULT '',
         "section" text NOT NULL DEFAULT '' ,
         "created_by" integer NOT NULL DEFAULT 0 ,
         "updated_by" integer NOT NULL DEFAULT 0 ,

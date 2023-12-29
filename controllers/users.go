@@ -178,19 +178,11 @@ func (c *UserController) GetAllUsers() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
-
-	if result != nil {
-		section_message := ""
-		section := ""
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := ""
+	section := ""
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 
 }
 
@@ -548,18 +540,10 @@ func (c *UserController) SearchUser() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
-
-	if user != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, user, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 
 }

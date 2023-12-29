@@ -66,7 +66,7 @@ type EnglishLanguageLable struct {
 	LangId        int `orm:"auto"`
 	LanguageCode  string
 	LanguageValue string
-	LableCode     string `orm:"unique"`
+	LableCode     string 
 	Section       string
 	CreatedBy     int
 	UpdatedBy     int

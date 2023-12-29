@@ -298,18 +298,11 @@ func (c *CarController) GetAllCars() {
 		return
 	}
 
-	if result != nil {
-		section_message := ""
-		section := ""
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Get all car record by user : %v", userId), userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := ""
+	section := ""
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Get all car record by user : %v", userId), userId)
 }
 
 // GetSingleCar ...
@@ -394,16 +387,9 @@ func (c *CarController) FilterCars() {
 		logger.InsertAuditLogs(c.Ctx, "Error : "+message, userId)
 		return
 	}
-	if result != nil {
-		section_message := "read"
-		section := "success"
-		message := helpers.TranslateMessage(c.Ctx, section, section_message)
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, message, userId)
-		return
-	} else {
-		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
-		return
-	}
+	section_message := "read"
+	section := "success"
+	message := helpers.TranslateMessage(c.Ctx, section, section_message)
+	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+	logger.InsertAuditLogs(c.Ctx, message, userId)
 }
