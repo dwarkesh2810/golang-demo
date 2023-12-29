@@ -15,7 +15,6 @@ import (
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
 	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type UserController struct {
@@ -24,18 +23,6 @@ type UserController struct {
 
 var key = conf.ConfigMaps["JWT_SEC_KEY"]
 var jwtKey = []byte(key)
-
-//  This is for promths
-
-// @Title matrics
-// @Description example
-// @Success 201 {object} object
-// @Failure 403
-// @router /metrics [get]
-func (c *UserController) Get() {
-	handler := promhttp.Handler()
-	handler.ServeHTTP(c.Ctx.ResponseWriter, c.Ctx.Request)
-}
 
 // Login ...
 // @Title login User
