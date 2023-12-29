@@ -27,13 +27,10 @@ type CountryController struct {
 // @router /list_countries [post]
 func (c *CountryController) FetchCountries() {
 
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
-
 	var search dto.PaginationReq
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
@@ -42,7 +39,7 @@ func (c *CountryController) FetchCountries() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
@@ -51,7 +48,7 @@ func (c *CountryController) FetchCountries() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
 
@@ -61,11 +58,11 @@ func (c *CountryController) FetchCountries() {
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 		return
 	} else {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
 		return
 	}
 }
@@ -83,13 +80,13 @@ func (c *CountryController) FetchCountries() {
 func (c *CountryController) FilterCountries() {
 
 	// claims := helpers.GetTokenClaims(c.Ctx)
-	// userId := uint(claims["User_id"].(float64))
-	userId := uint(1)
+	// 0 := uint(claims["User_id"].(float64))
+	// 0 := uint(1)
 
 	var search dto.CountrySearch
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 
@@ -102,13 +99,13 @@ func (c *CountryController) FilterCountries() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search Country Not Found")
-		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), 0)
 		return
 	}
 
@@ -117,7 +114,7 @@ func (c *CountryController) FilterCountries() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
 
@@ -126,11 +123,11 @@ func (c *CountryController) FilterCountries() {
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 		return
 	} else {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
 		return
 	}
 }
@@ -151,13 +148,12 @@ func (c *CountryController) FilterCountries() {
 func (c *CountryController) FilterCity() {
 
 	// claims := helpers.GetTokenClaims(c.Ctx)
-	// userId := uint(claims["User_id"].(float64))
-	userId := uint(1)
+	// 0 := uint(claims["User_id"].(float64))
 
 	var search dto.CitySearch
 	if err := c.ParseForm(&search); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Parsing Data Error")
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
@@ -174,13 +170,13 @@ func (c *CountryController) FilterCity() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
 	if result == nil && pagination_data["matchCount"] == 0 {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "Search City Not Found")
-		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), 0)
 		return
 	}
 
@@ -189,7 +185,7 @@ func (c *CountryController) FilterCity() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
 
@@ -198,11 +194,11 @@ func (c *CountryController) FilterCity() {
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 		return
 	} else {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
 		return
 	}
 
@@ -219,20 +215,20 @@ func (c *CountryController) FilterCity() {
 // @router /search_country [post]
 func (c *CountryController) FilterCountry() {
 
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
+	// claims := helpers.GetTokenClaims(c.Ctx)
+	// 0 := uint(claims["User_id"].(float64))
 
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
@@ -240,7 +236,7 @@ func (c *CountryController) FilterCountry() {
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
 		return
 	}
 
@@ -249,7 +245,7 @@ func (c *CountryController) FilterCountry() {
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
 	}
 	if result != nil {
@@ -257,11 +253,11 @@ func (c *CountryController) FilterCountry() {
 		section := "success"
 		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 		return
 	} else {
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, helpers.TranslateMessage(c.Ctx, "success", "data"), nil)
-		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), userId)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.data"), 0)
 		return
 	}
 }
@@ -275,13 +271,10 @@ func (c *CountryController) FilterCountry() {
 // @router /get_country [post]
 func (c *CountryController) GetCountry() {
 
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
-
 	var bodyData dto.GetCountryRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
@@ -289,17 +282,17 @@ func (c *CountryController) GetCountry() {
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&bodyData); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
 		return
 	}
 
 	Data, err := models.GetCountry(bodyData.Id)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, err.Error())
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, Data, helpers.TranslateMessage(c.Ctx, "success", "read"), "")
-	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
 
 }
