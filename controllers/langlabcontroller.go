@@ -152,7 +152,7 @@ func (c *LangLableController) UpdateLanguageLables() {
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
-// @router /lang_lable_UpdateAPI [post]
+// @router /lang_lable_UpdateAPI [put]
 func (c *LangLableController) UpdateLanguageLablesAPI() {
 	claims := helpers.GetTokenClaims(c.Ctx)
 	userId := uint(claims["User_id"].(float64))

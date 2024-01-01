@@ -40,7 +40,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -76,7 +76,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -176,7 +176,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -291,7 +291,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -1071,7 +1071,7 @@
             }
         },
         "/language_lable/lang_lable_UpdateAPI": {
-            "post": {
+            "put": {
                 "tags": [
                     "language_lable"
                 ],
@@ -1359,7 +1359,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/object"
@@ -1471,7 +1471,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -1514,7 +1514,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/models.Users"
@@ -1550,7 +1550,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -1607,7 +1607,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"
@@ -1650,7 +1650,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/models.Users"
@@ -1736,7 +1736,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
                             "type": "string"

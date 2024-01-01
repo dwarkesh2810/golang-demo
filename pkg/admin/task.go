@@ -72,3 +72,10 @@ func SendPendingEmail(c context.Context) error {
 	}
 	return nil
 }
+
+func DeleteAuditLogs(c context.Context) error {
+	o := orm.NewOrm()
+	query := `CALL delete_old_records_procedure();`
+	_, err := o.Raw(query).Exec()
+	return err
+}

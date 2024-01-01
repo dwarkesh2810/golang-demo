@@ -66,12 +66,12 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 	if num == 0 {
 		return "user", errors.New("DATABASE_ERROR")
 	}
-	return "otpsent", nil
+	return "otp sent successfully", nil
 }
 func GetUserDetails(id interface{}) (Users, error) {
 	o := orm.NewOrm()
 	var user Users
-	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "first_name", "last_name", "email", "phone_number", "password")
+	num, err := o.QueryTable(new(Users)).Filter("user_id", id).All(&user, "user_id", "first_name", "last_name", "email", "phone_number", "password")
 	if err != nil {
 		return user, err
 	}
@@ -192,7 +192,7 @@ func VerifyEmail(email string, name string) (string, error) {
 			Body:    body,
 			Status:  "pending",
 		}
-		_, err := o.Insert(&sendemail)	
+		_, err := o.Insert(&sendemail)
 		if err != nil {
 			return "", err
 		}

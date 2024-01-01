@@ -21,19 +21,19 @@ func init() {
 func (m *BackupUsersTable_20231229_170704) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
 	m.SQL(`CREATE TABLE IF NOT EXISTS "backup_users" (
-		"user_id" integer NOT NULL DEFAULT 0 ,
-		"first_name" text NOT NULL DEFAULT '' ,
-		"last_name" text NOT NULL DEFAULT '' ,
-		"email" text NOT NULL DEFAULT '' ,
-		"phone_number" text NOT NULL DEFAULT '' ,
-		"password" text NOT NULL DEFAULT '' ,
-		"isverified" integer NOT NULL DEFAULT 0 ,
-		"otp_code" text NOT NULL DEFAULT '' ,
-		"role" text NOT NULL DEFAULT '' ,
-		"country_id" integer NOT NULL DEFAULT 0 ,
-		"created_date" timestamp with time zone NOT NULL,
-		"updated_date" timestamp with time zone NOT NULL,
-		"delete_from_user" timestamp with time zone NOT NULL
+		"user_id" integer  DEFAULT 0 ,
+		"first_name" text  DEFAULT '' ,
+		"last_name" text  DEFAULT '' ,
+		"email" text  DEFAULT '' ,
+		"phone_number" text  DEFAULT '' ,
+		"password" text  DEFAULT '' ,
+		"isverified" integer  DEFAULT 0 ,
+		"otp_code" text  DEFAULT '' ,
+		"role" text  DEFAULT '' ,
+		"country_id" integer  DEFAULT 0 ,
+		"created_date" timestamp with time zone ,
+		"updated_date" timestamp with time zone ,
+		"delete_from_user" timestamp with time zone 
 	);`)
 }
 

@@ -76,7 +76,7 @@ func init() {
 			beego.NSRouter("/create_lang_lable", &controllers.LangLableController{}, "post:InsertLanguageLables"),
 			beego.NSRouter("/import_language_lables", &controllers.LangLableController{}, "post:ImportLanguageLables"),
 			beego.NSRouter("/lang_lable_Insert", &controllers.LangLableController{}, "post:InsertLanguageLablesUsingApi"),
-			beego.NSRouter("/lang_lable_UpdateAPI", &controllers.LangLableController{}, "post:UpdateLanguageLablesAPI"),
+			beego.NSRouter("/lang_lable_UpdateAPI", &controllers.LangLableController{}, "put:UpdateLanguageLablesAPI"),
 		),
 	)
 	beego.AddNamespace(ns)

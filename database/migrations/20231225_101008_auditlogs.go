@@ -21,7 +21,7 @@ func init() {
 func (m *Auditlogs_20231225_101008) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
 	m.SQL(`CREATE TABLE IF NOT EXISTS "audit_logs" (
-        "LogId" serial NOT NULL PRIMARY KEY,
+        "log_id" serial NOT NULL PRIMARY KEY,
         "user_id" bigint CHECK("user_id" >= 0) NOT NULL DEFAULT 0 ,
         "action" text NOT NULL DEFAULT '' ,
         "user_ip" text NOT NULL DEFAULT '' ,

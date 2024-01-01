@@ -66,7 +66,7 @@ type EnglishLanguageLable struct {
 	LangId        int `orm:"auto"`
 	LanguageCode  string
 	LanguageValue string
-	LableCode     string 
+	LableCode     string
 	Section       string
 	CreatedBy     int
 	UpdatedBy     int
@@ -96,7 +96,7 @@ type EmailLogs struct {
 }
 
 type AuditLogs struct {
-	LogsId      uint `orm:"pk;auto;column(LogId)"`
+	LogId       uint `orm:"pk;auto"`
 	UserId      uint
 	Action      string
 	UserIp      string

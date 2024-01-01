@@ -28,4 +28,5 @@ func Init() {
 	validations.Init()
 	logger.Init()
 	ad.CreateTask("EmailLog", "0 */5 * * * *", ad.SendPendingEmail)
+	ad.CreateTask("DeleteLogs", "1 * 11 * * *", ad.DeleteAuditLogs)
 }

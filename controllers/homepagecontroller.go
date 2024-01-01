@@ -244,9 +244,7 @@ func (c *HomeSettingController) FetchSettings() {
 	section_message := "read"
 	section := "success"
 	message := helpers.TranslateMessage(c.Ctx, section, section_message)
-
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
 }
 
@@ -263,11 +261,6 @@ func (c *HomeSettingController) DeleteSetting() {
 
 	claims := helpers.GetTokenClaims(c.Ctx)
 	userId := uint(claims["User_id"].(float64))
-
-	section_message := "delete"
-	section := "success"
-	message := helpers.TranslateMessage(c.Ctx, section, section_message)
-
 	var home_settings dto.HomeSeetingDelete
 	if err := c.ParseForm(&home_settings); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -285,6 +278,9 @@ func (c *HomeSettingController) DeleteSetting() {
 
 	result := models.HomePageSettingExistsDelete(home_settings)
 	if result == nil {
+		section_message := "delete"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
 		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, "", message, "")
 		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.delete"), userId)
 		return

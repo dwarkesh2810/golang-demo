@@ -21,7 +21,7 @@ func init() {
 func (m *AfterDeleteUserTrigger_20231229_170814) Up() {
 	// use m.SQL("CREATE TABLE ...") to make schema update
 
-	m.SQL(`CREATE TRIGGER after_delete_users_trigger
+	m.SQL(`CREATE OR REPLACE TRIGGER after_delete_users_trigger
 AFTER DELETE ON users
 FOR EACH ROW
 EXECUTE FUNCTION after_delete_user();`)
