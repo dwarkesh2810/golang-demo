@@ -25,12 +25,13 @@ type HomeSettingController struct {
 // RegisterSettings
 // @Title After Login User Can Register Home Page settings
 // @Description In this function after login can register Home page settings
-// @Param	setting_datas   formData 	file	false		"body for file"
+// @Param	setting_data_file   formData 	file	false		"body for file"
 // @Param	setting_data   formData 	string	false		"body for string"
 // @Param	data_type   formData 	string	false		"body for html text or other "
 // @Param	section   formData 	string	false		"body for file"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Success 200 {object} models.HomePagesSettingTable
+// @Param lang query string false "use en-US or hi-IN"
+// @Success 201 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /register_settings [post]
 func (c *HomeSettingController) RegisterSettings() {
@@ -65,7 +66,7 @@ func (c *HomeSettingController) RegisterSettings() {
 	}
 
 	if data_types == "LOGO" || data_types == "BANNER" {
-		file, fileHeader, err := c.GetFile("setting_datas")
+		file, fileHeader, err := c.GetFile("setting_data_file")
 
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
@@ -111,11 +112,13 @@ func (c *HomeSettingController) RegisterSettings() {
 // UpdateSettings
 // @Title After Login User Can Update Home Page settings
 // @Description In this function after login user  can update Home page settings
-// @Param	setting_data   formData 	file	false		"body for file"
-// @Param	data_type   formData 	string	false		"body for file"
-// @Param	section   formData 	string	false		"body for file"
-// @Param	setting_id   formData 	int		false		"body for file"
+// @Param	setting_data_file   formData 	file	false		"body for file if you want to update file you only select file .don't pass setting_data"
+// @Param	data_type   formData 	string	false		"body for data type"
+// @Param	setting_data   formData 	string	false		"body for setting_data if you want to update setting_data than don't pass file "
+// @Param	section   formData 	string	false		"body for section"
+// @Param	setting_id   formData 	int		false		"body for setting_id"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /update_settings [post]
@@ -158,7 +161,7 @@ func (c *HomeSettingController) UpdateSettings() {
 	}
 
 	if data_types == "LOGO" || data_types == "BANNER" {
-		file, fileHeader, err := c.GetFile("setting_data")
+		file, fileHeader, err := c.GetFile("setting_data_file")
 
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
@@ -198,6 +201,7 @@ func (c *HomeSettingController) UpdateSettings() {
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /fetch_settings [post]
@@ -251,6 +255,7 @@ func (c *HomeSettingController) FetchSettings() {
 // @Param setting_id formData int true "User can delete setting after login by setting_id"
 // @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {string} string
 // @Failure 403
 // @router /delete_settings [post]
@@ -296,6 +301,7 @@ func (c *HomeSettingController) DeleteSetting() {
 // @Param starting_from  formData int true "you want data from row first or id 1 to 20 so you can pass starting_from as 1"
 // @Param limit  formData int true "How Much you want to export data Ex.10"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /export [post]
@@ -359,6 +365,7 @@ func (c *HomeSettingController) ExportFile() {
 // @Description In this function after login user  can Import File in Home page settings
 // @Param import_type  formData file true "Here only select file within [XLSX,CSV]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /import [post]
@@ -429,7 +436,7 @@ func (c *HomeSettingController) ImportFile() {
 			return
 		}
 
-		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, 100, filePath, allRows)
+		result, update_id, err := models.RegisterSettingBatchsss(dto.HomeSeetingInsert{}, float64(userId), filePath, allRows)
 
 		if err != nil {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
@@ -466,6 +473,7 @@ func (c *HomeSettingController) ImportFile() {
 // @Param section formData string false "it filter in database and give match"
 // @Param apply_position formData string false "if you apply_position pass start than it will match record with starting of a string or if you  apply_position not pass it will search in perticular/allcolumns  all string"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US or hi-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /filter_hpst [post]

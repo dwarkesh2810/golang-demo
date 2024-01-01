@@ -301,7 +301,7 @@ paths:
         type: integer
         format: int64
       responses:
-        "201":
+        "200":
           description: ""
           schema:
             type: string
@@ -390,6 +390,10 @@ paths:
         description: Bearer YourAccessToken
         required: true
         type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
       responses:
         "200":
           description: '{string} string'
@@ -428,6 +432,10 @@ paths:
         description: Bearer YourAccessToken
         required: true
         type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
       responses:
         "200":
           description: ""
@@ -460,6 +468,10 @@ paths:
         name: Authorization
         description: Bearer YourAccessToken
         required: true
+        type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
         type: string
       responses:
         "200":
@@ -516,6 +528,10 @@ paths:
         description: Bearer YourAccessToken
         required: true
         type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
       responses:
         "200":
           description: ""
@@ -543,6 +559,10 @@ paths:
         description: Bearer YourAccessToken
         required: true
         type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
       responses:
         "200":
           description: ""
@@ -560,7 +580,7 @@ paths:
       operationId: HomeSettingController.After Login User Can Register Home Page settings
       parameters:
       - in: formData
-        name: setting_datas
+        name: setting_data_file
         description: body for file
         type: file
       - in: formData
@@ -580,8 +600,12 @@ paths:
         description: Bearer YourAccessToken
         required: true
         type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
+        type: string
       responses:
-        "200":
+        "201":
           description: ""
           schema:
             $ref: '#/definitions/models.HomePagesSettingTable'
@@ -597,26 +621,36 @@ paths:
       operationId: HomeSettingController.After Login User Can Update Home Page settings
       parameters:
       - in: formData
-        name: setting_data
-        description: body for file
+        name: setting_data_file
+        description: body for file if you want to update file you only select file
+          .don't pass setting_data
         type: file
       - in: formData
         name: data_type
-        description: body for file
+        description: body for data type
+        type: string
+      - in: formData
+        name: setting_data
+        description: body for setting_data if you want to update setting_data than
+          don't pass file
         type: string
       - in: formData
         name: section
-        description: body for file
+        description: body for section
         type: string
       - in: formData
         name: setting_id
-        description: body for file
+        description: body for setting_id
         type: integer
         format: int64
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
         required: true
+        type: string
+      - in: query
+        name: lang
+        description: use en-US or hi-IN
         type: string
       responses:
         "200":

@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -48,6 +49,8 @@ func UpdateUniqueCode(user_id int) (int64, error) {
 	home_page_setting := HomePagesSettingTable{PageSettingId: user_id}
 	if db.Read(&home_page_setting) == nil {
 		home_page_setting.UniqueCode = unique_codes
+		log.Print(unique_codes, "+++++++++++++++++++++++++++")
+
 		if num, err := db.Update(&home_page_setting); err == nil {
 			return num, nil
 		}
@@ -209,10 +212,10 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				Section:     section,
 				DataType:    row["data_type"].(string),
 				SettingData: row["setting_data"].(string),
+				UniqueCode:  "",
 				CreatedBy:   int(user_id),
 				UpdatedBy:   0,
 				CreatedDate: time.Now(),
-				UpdatedDate: time.Now(),
 			}
 
 			_, err := tx.Insert(&newRecord)
@@ -220,9 +223,8 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				tx.Rollback()
 				return nil, nil, err
 			}
-
-			insertIDs = append(insertIDs, newRecord.PageSettingId)
 			UpdateUniqueCode(newRecord.PageSettingId)
+			insertIDs = append(insertIDs, newRecord.PageSettingId)
 
 			continue
 		}
@@ -267,7 +269,6 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				CreatedBy:     int(user_id),
 				UpdatedBy:     0,
 				CreatedDate:   time.Now(),
-				UpdatedDate:   time.Now(),
 			}
 
 			_, err := tx.Insert(&newRecords)
@@ -275,7 +276,6 @@ func RegisterSettingBatchsss(c dto.HomeSeetingInsert, user_id float64, filePath 
 				tx.Rollback()
 				return nil, nil, err
 			}
-
 			insertIDs = append(insertIDs, newRecords.PageSettingId)
 			UpdateUniqueCode(newRecords.PageSettingId)
 		}

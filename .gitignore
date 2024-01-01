@@ -5,12 +5,13 @@ logs/
 logs
 
 golang-demo
-22-dec-2023
-25-dec-2023
-26-dec-2023
-28-dec-2023
-28-dec-2023-2
-29-dec-2023
+1-jan-2024
 app.env
 
 *.ini
+*.jpg
+*.png
+*.jpeg
+*.pdf
+*.xlsx
+*.csv

@@ -50,7 +50,7 @@ func (c *CountryController) FetchCountries() {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
 		return
-	}	
+	}
 	section_message := "read"
 	section := "success"
 	message := helpers.TranslateMessage(c.Ctx, section, section_message)
@@ -231,7 +231,7 @@ func (c *CountryController) FilterCountry() {
 // @Title get country
 // @Desciption Get country
 // @Param country_id formData int true "get perticuler states using country_id"
-// @Success 201 {object} string
+// @Success 200 {object} string
 // @Failure 403
 // @router /get_country [post]
 func (c *CountryController) GetCountry() {
