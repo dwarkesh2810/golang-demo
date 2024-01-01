@@ -86,7 +86,7 @@ type HomeSeetingInsert struct {
 type HomeSeetingUpdate struct {
 	Section     string `json:"section" form:"section" valid:"Required;MinSize(3)"`
 	DataType    string `json:"data_type" form:"data_type" valid:"Required; WithIn"`
-	SettingData string `json:"setting_data" form:"setting_data" valid:"Required"`
+	SettingData string `json:"setting_data" form:"setting_data" `
 	SettingId   int    `json:"setting_id" form:"setting_id" valid:"Required"`
 	LangKey     string `json:"lang_key" form:"lang_key"`
 }
