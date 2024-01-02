@@ -37,12 +37,6 @@
                         "description": "Bearer YourAccessToken",
                         "required": true,
                         "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
-                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -78,12 +72,6 @@
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     }
                 ],
@@ -148,12 +136,6 @@
                         "description": "Bearer YourAccessToken",
                         "required": true,
                         "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
-                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -190,12 +172,6 @@
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     }
                 ],
@@ -246,12 +222,6 @@
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     }
                 ],
@@ -317,12 +287,6 @@
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
                         "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     }
                 ],

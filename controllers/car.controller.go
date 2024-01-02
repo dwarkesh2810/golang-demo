@@ -29,7 +29,6 @@ type CarController struct {
 // @Param type formData string true "accepted type 'sedan','SUV','hatchback'"
 // @Param file formData file true "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 201 {object} string
 // @Failure 403
 // @router /create [post]
@@ -102,7 +101,6 @@ func (c *CarController) AddNewCar() {
 // @Param type formData string false "accepted type 'sedan','SUV','hatchback'"
 // @Param file formData file false "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
 // @router /update [PUT]
@@ -147,7 +145,7 @@ func (c *CarController) UpdateCar() {
 		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), userId)
 		return
 	}
-	file, fileheader, err := c.GetFile("file")
+	file, fileheader, err := c.GetFile("file")	
 	if err != nil {
 		cars.UpdatedBy = int(userId)
 		cars.CarImage = data.CarImage
@@ -198,7 +196,6 @@ func (c *CarController) UpdateCar() {
 // @Desciption delete car
 // @Param body body dto.GetcarRequest true "delete car"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
 // @router /delete [delete]
@@ -254,7 +251,6 @@ func (c *CarController) DeleteCar() {
 // @Desciption Get all car
 // @Param body body dto.PaginationReq false "Insert New User"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
 // @router /cars [post]
@@ -297,7 +293,6 @@ func (c *CarController) GetAllCars() {
 // @Desciption Get all car
 // @Param body body dto.GetcarRequest true "get perticuler car"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
 // @router / [post]
@@ -340,7 +335,6 @@ func (c *CarController) GetSingleCar() {
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} object
 // @Failure 403
 // @router /search_car [post]
