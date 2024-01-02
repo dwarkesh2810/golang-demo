@@ -88,18 +88,19 @@ func Pagination(current_page, pageSize int, tableName string, totalMatchCount in
 	}
 
 	var totalRows int
-	if totalMatchCount > 0 {
-		totalRows = totalMatchCount
-	}
 
-	if totalMatchCount == 0 && tableName != "" {
-		err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
-		if err != nil {
-			return nil, err
-		}
+	// if totalMatchCount == 0 && tableName != "" {
+	err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
+	if err != nil {
+		return nil, err
 	}
+	// }
 
-	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
+	// if totalMatchCount > 0 {
+	// 	totalRows = totalMatchCount
+	// }
+
+	totalPages := int(math.Ceil(float64(totalMatchCount) / float64(pageSize)))
 	lastPageNumber := totalPages
 	if lastPageNumber == 0 {
 		lastPageNumber = 1
@@ -123,7 +124,9 @@ func Pagination(current_page, pageSize int, tableName string, totalMatchCount in
 		"TotalRows":     totalRows,
 		"TotalPages":    totalPages,
 		"LastPage":      lastPageNumber,
+		"MatchCount":    totalMatchCount,
 	}
+
 	if current_page > lastPageNumber {
 		pagination_data["pageOpen_error"] = 1
 		pagination_data["current_page"] = current_page
