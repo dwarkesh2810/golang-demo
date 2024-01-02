@@ -114,6 +114,9 @@ func FilterCountries(search string, open_page, page_size int) ([]orm.Params, map
 	if err != nil {
 		return nil, nil, err
 	}
+	if search == "" {
+		pagination["matchCount"] = 0
+	}
 	return states, pagination, nil
 }
 

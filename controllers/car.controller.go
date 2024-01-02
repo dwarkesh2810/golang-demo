@@ -28,6 +28,7 @@ type CarController struct {
 // @Param model formData string true "Car Model"
 // @Param type formData string true "accepted type 'sedan','SUV','hatchback'"
 // @Param file formData file true "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 201 {object} string
 // @Failure 403
@@ -100,6 +101,7 @@ func (c *CarController) AddNewCar() {
 // @Param model formData string false "Car Model"
 // @Param type formData string false "accepted type 'sedan','SUV','hatchback'"
 // @Param file formData file false "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} string
 // @Failure 403
@@ -145,7 +147,7 @@ func (c *CarController) UpdateCar() {
 		logger.InsertAuditLogs(c.Ctx, "Error :- "+err.Error(), userId)
 		return
 	}
-	file, fileheader, err := c.GetFile("file")	
+	file, fileheader, err := c.GetFile("file")
 	if err != nil {
 		cars.UpdatedBy = int(userId)
 		cars.CarImage = data.CarImage
@@ -195,6 +197,7 @@ func (c *CarController) UpdateCar() {
 // @Title remove car
 // @Desciption delete car
 // @Param body body dto.GetcarRequest true "delete car"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} string
 // @Failure 403
@@ -250,6 +253,7 @@ func (c *CarController) DeleteCar() {
 // @Title get cars
 // @Desciption Get all car
 // @Param body body dto.PaginationReq false "Insert New User"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} string
 // @Failure 403
@@ -292,6 +296,7 @@ func (c *CarController) GetAllCars() {
 // @Title get car
 // @Desciption Get all car
 // @Param body body dto.GetcarRequest true "get perticuler car"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} string
 // @Failure 403
@@ -331,9 +336,10 @@ func (c *CarController) GetSingleCar() {
 // Filter Car
 // @Title Filter car
 // @Description Fetch Filter car
-// @Param search formData string true "Search car"
+// @Param search formData string false "Search car"
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
@@ -348,17 +354,23 @@ func (c *CarController) FilterCars() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&bodyData); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
-		return
+	if bodyData.Search != "" {
+		if len(bodyData.Search) < 3 {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.serchfield"), userId)
+			return
+		}
 	}
 	result, pagination_data, err := models.Filtercar(bodyData.Search, bodyData.OpenPage, bodyData.PageSize)
 
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
 		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
+	}
+	if len(result) == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), 0)
 		return
 	}
 

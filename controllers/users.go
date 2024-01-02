@@ -28,7 +28,7 @@ var jwtKey = []byte(key)
 // @Title login User
 // @Desciption login
 // @Param body body dto.UserLoginRequest true "login User"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Accept-Languages   header  string  false  "Bearer YourAccessToken"
 // @Success 200 {object} object
 // @Failure 403
@@ -97,7 +97,7 @@ func (c *UserController) Login() {
 // RegisterNewUser ...
 // @Title Insert New User
 // @Desciption new users
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param body body dto.NewUserRequest true "Insert New User"
 // @Success 201 {object} models.Users
 // @Failure 403
@@ -152,7 +152,7 @@ func (c *UserController) RegisterNewUser() {
 // GetAll ...
 // @Title Get All
 // @Description get Users
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param body body dto.PaginationReq false "Insert New User"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.Users
@@ -185,8 +185,8 @@ func (c *UserController) GetAllUsers() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
 		return
 	}
-	section_message := ""
-	section := ""
+	section_message := "read"
+	section := "success"
 	message := helpers.TranslateMessage(c.Ctx, section, section_message)
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
@@ -197,11 +197,10 @@ func (c *UserController) GetAllUsers() {
 // @Title verify otp for email
 // @Desciption otp verification for eamil
 // @Param body body dto.VerifyEmailOTPRequest true "otp verification for email"
-// @Param lang query string false "use en-US or hi-IN"
-// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
-// @router /secure/verify_email_otp [post]
+// @router /verify_email_otp [post]
 func (c *UserController) VerifyEmailOTP() {
 	var bodyData dto.VerifyEmailOTPRequest
 
@@ -224,6 +223,11 @@ func (c *UserController) VerifyEmailOTP() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
 		return
 	}
+	if data.Email == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidUser"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.otp"), uint(data.UserId))
+		return
+	}
 	if data.OtpCode != bodyData.Otp {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "otp"))
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.otp"), uint(data.UserId))
@@ -243,7 +247,7 @@ func (c *UserController) VerifyEmailOTP() {
 // @Title update User
 // @Desciption update users
 // @Param body body dto.UpdateUserRequest true "update New User"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.Users
 // @Failure 403
@@ -301,6 +305,19 @@ func (c *UserController) UpdateUser() {
 			return
 		}
 	}
+	if bodyData.PhoneNumber != data.PhoneNumber {
+		res, _ := models.GetUserByEmail(bodyData.PhoneNumber)
+		if res.PhoneNumber == bodyData.PhoneNumber {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "userexist"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.userexist"), userId)
+			return
+		}
+		if data.Email == "" {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.invalidid"), userId)
+			return
+		}
+	}
 	userRole, err := helpers.UserRole(bodyData.Role)
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "role"))
@@ -315,7 +332,7 @@ func (c *UserController) UpdateUser() {
 		return
 	}
 
-	userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId}
+	userDetails := dto.UserDetailsResponse{Id: user.UserId, FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Country: user.CountryId, Date: helpers.GetFormatedDate(user.UpdatedDate, "dd-mm-yyyy")}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, userDetails, helpers.TranslateMessage(c.Ctx, "success", "update"), "")
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 }
@@ -324,7 +341,7 @@ func (c *UserController) UpdateUser() {
 // @Title Reset password
 // @Desciption Reset password
 // @Param body body dto.ResetUserPassword true "reset password"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} models.Users
 // @Failure 403
@@ -376,7 +393,7 @@ func (c *UserController) ResetPassword() {
 // @Title delete user
 // @Description delete user
 // @Param id path int true "user id to delete recode"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {string} string
 // @Failure 403
@@ -399,6 +416,11 @@ func (c *UserController) DeleteUser() {
 		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
 		return
 	}
+	if data == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidid"))
+		logger.InsertAuditLogs(c.Ctx, "Error : Please enter valid userid", userId)
+		return
+	}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "delete"), "")
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.delete"), userId)
 }
@@ -407,10 +429,10 @@ func (c *UserController) DeleteUser() {
 // @Title forgot password
 // @Desciption forgot password
 // @Param body body dto.SendOtpData true "forgot password this is send otp on mobile and email"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
-// @router /secure/forgot_pass [post]
+// @router /forgot_pass [post]
 func (c *UserController) ForgotPassword() {
 
 	var bodyData dto.SendOtpData
@@ -434,7 +456,7 @@ func (c *UserController) ForgotPassword() {
 		return
 	}
 	if output.Email == "" {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidUser"))
 		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.login"), uint(output.UserId))
 		return
 	}
@@ -452,10 +474,10 @@ func (c *UserController) ForgotPassword() {
 // @Title verify otp
 // @Desciption otp verification for forgot password
 // @Param body body dto.ResetUserPasswordOtp true "otp verification for forgot password"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} string
 // @Failure 403
-// @router /secure/reset_pass_otp [post]
+// @router /reset_pass_otp [post]
 func (c *UserController) VerifyOtpResetpassword() {
 	var bodyData dto.ResetUserPasswordOtp
 	if err := c.ParseForm(&bodyData); err != nil {
@@ -478,7 +500,7 @@ func (c *UserController) VerifyOtpResetpassword() {
 		return
 	}
 	if output.Email == "" {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "login"))
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "invalidUser"))
 		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.login"), 0)
 		return
 	}
@@ -512,10 +534,10 @@ func (c *UserController) VerifyOtpResetpassword() {
 // SearchUser ...
 // @Title Search User
 // @Desciption SearchUser
-// @Param search formData strings true "enter search"
+// @Param search formData string false "enter search"
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
 // @Success 200 {object} string
 // @Failure 403
@@ -524,7 +546,6 @@ func (c *UserController) SearchUser() {
 
 	claims := helpers.GetTokenClaims(c.Ctx)
 	userId := uint(claims["User_id"].(float64))
-
 	var bodyData dto.SearchRequest
 	if err := c.ParseForm(&bodyData); err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
@@ -532,32 +553,30 @@ func (c *UserController) SearchUser() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
-
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&bodyData); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+"Validation error", userId)
-		return
-	}
-	if len(bodyData.Search) < 3 {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.serchfield"), userId)
-		return
+	if bodyData.Search != "" {
+		if len(bodyData.Search) < 3 {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.serchfield"), userId)
+			return
+		}
 	}
 	user, pagination_data, err := models.SearchUser(bodyData.Search, bodyData.PageSize, bodyData.OpenPage)
-
 	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
 		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-
 	if pagination_data["pageOpen_error"] == 1 {
 		current := pagination_data["current_page"]
 		last := pagination_data["last_page"]
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		return
+	}
+	if len(user) == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), userId)
 		return
 	}
 	section_message := "read"

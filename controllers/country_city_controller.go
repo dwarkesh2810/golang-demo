@@ -183,7 +183,7 @@ func (c *CountryController) FilterCity() {
 // Filter Countries
 // @Title Fetch Data Country
 // @Description Fetch Data Country
-// @Param search formData string true "Search Country"
+// @Param search formData string false "Search Country"
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Success 200 {object} object
@@ -197,11 +197,12 @@ func (c *CountryController) FilterCountry() {
 		return
 	}
 	json.Unmarshal(c.Ctx.Input.RequestBody, &bodyData)
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&bodyData); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", 0)
-		return
+	if bodyData.Search != "" {
+		if len(bodyData.Search) < 3 {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "serchfield"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+logger.LogMessage(c.Ctx, "error.serchfield"), 0)
+			return
+		}
 	}
 	search := helpers.CapitalizeWords(bodyData.Search)
 	result, pagination_data, err := models.FilterCountries(search, bodyData.OpenPage, bodyData.PageSize)
@@ -218,6 +219,11 @@ func (c *CountryController) FilterCountry() {
 		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
 		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
+		return
+	}
+	if len(result) == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), 0)
 		return
 	}
 	section_message := "read"

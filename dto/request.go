@@ -19,7 +19,7 @@ type NewUserRequest struct {
 	FirstName   string `json:"first_name" valid:"MaxSize(255);MinSize(3);Required"`
 	LastName    string `json:"last_name" valid:"MaxSize(255);MinSize(3);Required"`
 	Email       string `json:"email" valid:"MaxSize(255);Required;Email"`
-	Country     int    `json:"country_id" valid:"Required"`
+	Country     int    `json:"country_id" valid:"Required;Range(1, 250)"`
 	Role        string `json:"role" valid:"MaxSize(255);Required"`
 	PhoneNumber string `json:"phone_number" valid:"Required;InMobile"`
 	Password    string `json:"password" valid:"MaxSize(25);MinSize(6);Required"`
@@ -31,7 +31,7 @@ type UpdateUserRequest struct {
 	LastName    string `json:"last_name" valid:"MaxSize(255);MinSize(3);Required"`
 	Email       string `json:"email" valid:"MaxSize(255);Required;Email"`
 	PhoneNumber string `json:"phone_number"  valid:"InMobile;Required"`
-	Country     int    `json:"country_id" valid:"Required"`
+	Country     int    `json:"country_id" valid:"Required;Range(1, 250)"`
 	Role        string `json:"role" valid:"MaxSize(255);Required"`
 }
 
@@ -56,7 +56,7 @@ type ResetUserPasswordOtp struct {
 }
 
 type SearchRequest struct {
-	Search   string `json:"search" form:"search" valid:"Required;MinSize(3)"`
+	Search   string `json:"search" form:"search"`
 	PageSize int    `json:"page_size" form:"page_size"`
 	OpenPage int    `json:"open_page" form:"open_page"`
 }

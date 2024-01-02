@@ -1,7 +1,6 @@
 package models
 
 import (
-	"errors"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -52,7 +51,7 @@ func InsertNewUser(Data dto.NewUserRequest) (Users, error) {
 		return user, err
 	}
 	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
+		return user, nil
 	}
 	return user, nil
 }
@@ -64,7 +63,7 @@ func UpadteOtpForEmail(id int, otp string) (string, error) {
 		return "num", err
 	}
 	if num == 0 {
-		return "user", errors.New("DATABASE_ERROR")
+		return "user", nil
 	}
 	return "otp sent successfully", nil
 }
@@ -76,7 +75,7 @@ func GetUserDetails(id interface{}) (Users, error) {
 		return user, err
 	}
 	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
+		return user, nil
 	}
 	return user, nil
 }
@@ -92,12 +91,9 @@ func UpdateUser(Data dto.UpdateUserRequest) (Users, error) {
 		PhoneNumber: Data.PhoneNumber,
 	}
 	o := orm.NewOrm()
-	num, err := o.Update(&user, "user_id", "first_name", "last_name", "country_id", "email", "role", "updated_date", "phone_number")
+	_, err := o.Update(&user, "user_id", "first_name", "last_name", "country_id", "email", "role", "updated_date", "phone_number")
 	if err != nil {
 		return user, err
-	}
-	if num == 0 {
-		return user, errors.New("DATABASE_ERROR")
 	}
 	return user, nil
 }
@@ -111,9 +107,9 @@ func ResetPassword(Password string, id int) (interface{}, error) {
 	var user = Users{UserId: id, Password: pass}
 	num, err := o.Update(&user, "password")
 	if err != nil {
-		return num, errors.New("DATABASE_ERROR")
+		return num, err
 	}
-	return "PASSWORD_RESET", nil
+	return "Password Reset successfully", nil
 }
 func DeleteUser(id int) (string, error) {
 	o := orm.NewOrm()
@@ -123,7 +119,7 @@ func DeleteUser(id int) (string, error) {
 		return "", err
 	}
 	if num == 0 {
-		return "", errors.New("DATABASE_ERROR")
+		return "", nil
 	}
 	return "User deleted success", nil
 }
@@ -140,12 +136,9 @@ func GetEmailOTP(username string, otp string) (Users, error) {
 func UpdateIsVerified(id int) error {
 	o := orm.NewOrm()
 	var user = Users{UserId: id, Isverified: 1, UpdatedDate: time.Now()}
-	num, err := o.Update(&user, "isverified", "updated_date")
+	_, err := o.Update(&user, "isverified", "updated_date")
 	if err != nil {
 		return err
-	}
-	if num == 0 {
-		return errors.New("DATABASE_ERROR")
 	}
 	return nil
 }
@@ -158,6 +151,9 @@ func SearchUser(search string, page_size, open_page int) ([]orm.Params, map[stri
 	user, pagination, err := helpers.PaginationForSearch(open_page, page_size, totalRecordQuery, matchCountQuery, mainRecordQuery)
 	if err != nil {
 		return nil, nil, err
+	}
+	if search == "" {
+		pagination["matchCount"] = 0
 	}
 	return user, pagination, nil
 }

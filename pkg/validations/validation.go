@@ -39,11 +39,14 @@ func ValidationErrorResponse(c beego.Controller, err []*validation.Error) []stri
 	for i := range Tags {
 		var errResponse string
 		switch Tags[i] {
-		case "Min", "Max", "Range", "MinSize", "MaxSize", "Length", "Match", "NotMatch":
+		case "Min", "Max", "MinSize", "MaxSize", "Length", "Match", "NotMatch":
 			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", Tags[i]), err[i].Field, err[i].LimitValue)
 
 		case "Required", "Alpha", "Numeric", "AlphaNumeric", "Email", "IP", "AlphaDash":
 			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", Tags[i]), err[i].Field)
+		case "Range":
+			data := err[i].LimitValue.([]int)
+			errResponse = fmt.Sprintf("%s : "+helpers.TranslateMessage(c.Ctx, "validation", Tags[i]), err[i].Field, data[0], data[1])
 
 		default:
 			fields := err[i].Key

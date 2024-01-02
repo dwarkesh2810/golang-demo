@@ -24,6 +24,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.GetcarRequest'
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -47,6 +51,10 @@ paths:
         description: Insert New User
         schema:
           $ref: '#/definitions/dto.PaginationReq'
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -90,6 +98,10 @@ paths:
         description: File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]
         required: true
         type: file
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -114,6 +126,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.GetcarRequest'
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -138,7 +154,6 @@ paths:
       - in: formData
         name: search
         description: Search car
-        required: true
         type: string
       - in: formData
         name: open_page
@@ -151,6 +166,10 @@ paths:
           10 records
         type: integer
         format: int64
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -194,6 +213,10 @@ paths:
         name: file
         description: File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]
         type: file
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
       - in: header
         name: Authorization
         description: Bearer YourAccessToken
@@ -346,7 +369,6 @@ paths:
       - in: formData
         name: search
         description: Search Country
-        required: true
         type: string
       - in: formData
         name: open_page
@@ -938,7 +960,6 @@ paths:
       - in: formData
         name: search
         description: Search State
-        required: true
         type: string
       - in: formData
         name: open_page
@@ -958,6 +979,29 @@ paths:
             $ref: '#/definitions/object'
         "403":
           description: ""
+  /user/forgot_pass:
+    post:
+      tags:
+      - user
+      operationId: UserController.forgot password
+      parameters:
+      - in: body
+        name: body
+        description: forgot password this is send otp on mobile and email
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendOtpData'
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: string
+        "403":
+          description: ""
   /user/login:
     post:
       tags:
@@ -972,7 +1016,7 @@ paths:
           $ref: '#/definitions/dto.UserLoginRequest'
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: header
         name: Accept-Languages
@@ -993,7 +1037,7 @@ paths:
       parameters:
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: body
         name: body
@@ -1006,6 +1050,29 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/models.Users'
+        "403":
+          description: ""
+  /user/reset_pass_otp:
+    post:
+      tags:
+      - user
+      operationId: UserController.verify otp
+      parameters:
+      - in: body
+        name: body
+        description: otp verification for forgot password
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetUserPasswordOtp'
+      - in: query
+        name: lang
+        description: use en-US, hi-IN, gu-IN, mr-IN
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            type: string
         "403":
           description: ""
   /user/secure/delete/{id}:
@@ -1025,7 +1092,7 @@ paths:
         format: int64
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: header
         name: Authorization
@@ -1035,29 +1102,6 @@ paths:
       responses:
         "200":
           description: '{string} string'
-        "403":
-          description: ""
-  /user/secure/forgot_pass:
-    post:
-      tags:
-      - user
-      operationId: UserController.forgot password
-      parameters:
-      - in: body
-        name: body
-        description: forgot password this is send otp on mobile and email
-        required: true
-        schema:
-          $ref: '#/definitions/dto.SendOtpData'
-      - in: query
-        name: lang
-        description: use en-US or hi-IN
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            type: string
         "403":
           description: ""
   /user/secure/reset_pass:
@@ -1074,7 +1118,7 @@ paths:
           $ref: '#/definitions/dto.ResetUserPassword'
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: header
         name: Authorization
@@ -1088,29 +1132,6 @@ paths:
             $ref: '#/definitions/models.Users'
         "403":
           description: ""
-  /user/secure/reset_pass_otp:
-    post:
-      tags:
-      - user
-      operationId: UserController.verify otp
-      parameters:
-      - in: body
-        name: body
-        description: otp verification for forgot password
-        required: true
-        schema:
-          $ref: '#/definitions/dto.ResetUserPasswordOtp'
-      - in: query
-        name: lang
-        description: use en-US or hi-IN
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            type: string
-        "403":
-          description: ""
   /user/secure/search:
     post:
       tags:
@@ -1120,9 +1141,7 @@ paths:
       - in: formData
         name: search
         description: enter search
-        required: true
-        schema:
-          $ref: '#/definitions/strings'
+        type: string
       - in: formData
         name: open_page
         description: if you want to open specific page than give page number
@@ -1136,7 +1155,7 @@ paths:
         format: int64
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: header
         name: Authorization
@@ -1164,7 +1183,7 @@ paths:
           $ref: '#/definitions/dto.UpdateUserRequest'
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: header
         name: Authorization
@@ -1189,7 +1208,7 @@ paths:
       parameters:
       - in: query
         name: lang
-        description: use en-US or hi-IN
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       - in: body
         name: body
@@ -1208,7 +1227,7 @@ paths:
             $ref: '#/definitions/models.Users'
         "403":
           description: ""
-  /user/secure/verify_email_otp:
+  /user/verify_email_otp:
     post:
       tags:
       - user
@@ -1222,12 +1241,7 @@ paths:
           $ref: '#/definitions/dto.VerifyEmailOTPRequest'
       - in: query
         name: lang
-        description: use en-US or hi-IN
-        type: string
-      - in: header
-        name: Authorization
-        description: Bearer YourAccessToken
-        required: true
+        description: use en-US, hi-IN, gu-IN, mr-IN
         type: string
       responses:
         "200":
@@ -1397,7 +1411,4 @@ definitions:
         format: int64
   object:
     title: object
-    type: object
-  strings:
-    title: strings
     type: object

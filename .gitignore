@@ -3,6 +3,8 @@ conf/app.conf
 
 logs/
 logs
+swagger
+swagger/
 
 golang-demo
 1-jan-2024

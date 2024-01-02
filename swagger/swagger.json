@@ -32,6 +32,12 @@
                         }
                     },
                     {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
+                    },
+                    {
                         "in": "header",
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
@@ -66,6 +72,12 @@
                         "schema": {
                             "$ref": "#/definitions/dto.PaginationReq"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
                     },
                     {
                         "in": "header",
@@ -131,6 +143,12 @@
                         "type": "file"
                     },
                     {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
+                    },
+                    {
                         "in": "header",
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
@@ -168,6 +186,12 @@
                         }
                     },
                     {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
+                    },
+                    {
                         "in": "header",
                         "name": "Authorization",
                         "description": "Bearer YourAccessToken",
@@ -200,7 +224,6 @@
                         "in": "formData",
                         "name": "search",
                         "description": "Search car",
-                        "required": true,
                         "type": "string"
                     },
                     {
@@ -216,6 +239,12 @@
                         "description": "how much data you want to show at a time default it will give 10 records",
                         "type": "integer",
                         "format": "int64"
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
                     },
                     {
                         "in": "header",
@@ -281,6 +310,12 @@
                         "name": "file",
                         "description": "File to be uploaded, Acepted Extension [jpeg, jpg, png, svg]",
                         "type": "file"
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
                     },
                     {
                         "in": "header",
@@ -490,7 +525,6 @@
                         "in": "formData",
                         "name": "search",
                         "description": "Search Country",
-                        "required": true,
                         "type": "string"
                     },
                     {
@@ -1298,7 +1332,6 @@
                         "in": "formData",
                         "name": "search",
                         "description": "Search State",
-                        "required": true,
                         "type": "string"
                     },
                     {
@@ -1329,6 +1362,42 @@
                 }
             }
         },
+        "/user/forgot_pass": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.forgot password",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "forgot password this is send otp on mobile and email",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.SendOtpData"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/user/login": {
             "post": {
                 "tags": [
@@ -1348,7 +1417,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1381,7 +1450,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1399,6 +1468,42 @@
                         "description": "",
                         "schema": {
                             "$ref": "#/definitions/models.Users"
+                        }
+                    },
+                    "403": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/user/reset_pass_otp": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "operationId": "UserController.verify otp",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "otp verification for forgot password",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetUserPasswordOtp"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "lang",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "403": {
@@ -1426,7 +1531,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1440,42 +1545,6 @@
                 "responses": {
                     "200": {
                         "description": "{string} string"
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/user/secure/forgot_pass": {
-            "post": {
-                "tags": [
-                    "user"
-                ],
-                "operationId": "UserController.forgot password",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "forgot password this is send otp on mobile and email",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.SendOtpData"
-                        }
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US or hi-IN",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "type": "string"
-                        }
                     },
                     "403": {
                         "description": ""
@@ -1502,7 +1571,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1526,42 +1595,6 @@
                 }
             }
         },
-        "/user/secure/reset_pass_otp": {
-            "post": {
-                "tags": [
-                    "user"
-                ],
-                "operationId": "UserController.verify otp",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "otp verification for forgot password",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.ResetUserPasswordOtp"
-                        }
-                    },
-                    {
-                        "in": "query",
-                        "name": "lang",
-                        "description": "use en-US or hi-IN",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/user/secure/search": {
             "post": {
                 "tags": [
@@ -1573,10 +1606,7 @@
                         "in": "formData",
                         "name": "search",
                         "description": "enter search",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/strings"
-                        }
+                        "type": "string"
                     },
                     {
                         "in": "formData",
@@ -1595,7 +1625,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1638,7 +1668,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1673,7 +1703,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     },
                     {
@@ -1705,7 +1735,7 @@
                 }
             }
         },
-        "/user/secure/verify_email_otp": {
+        "/user/verify_email_otp": {
             "post": {
                 "tags": [
                     "user"
@@ -1724,14 +1754,7 @@
                     {
                         "in": "query",
                         "name": "lang",
-                        "description": "use en-US or hi-IN",
-                        "type": "string"
-                    },
-                    {
-                        "in": "header",
-                        "name": "Authorization",
-                        "description": "Bearer YourAccessToken",
-                        "required": true,
+                        "description": "use en-US, hi-IN, gu-IN, mr-IN",
                         "type": "string"
                     }
                 ],
@@ -1981,10 +2004,6 @@
         },
         "object": {
             "title": "object",
-            "type": "object"
-        },
-        "strings": {
-            "title": "strings",
             "type": "object"
         }
     }

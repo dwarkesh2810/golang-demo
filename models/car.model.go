@@ -94,5 +94,8 @@ func Filtercar(search string, open_page, page_size int) ([]orm.Params, map[strin
 	if err != nil {
 		return nil, nil, err
 	}
+	if search == "" {
+		pagination["matchCount"] = 0
+	}
 	return states, pagination, nil
 }
