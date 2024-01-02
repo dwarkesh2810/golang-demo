@@ -152,7 +152,7 @@ func TestForgotPassword(t *testing.T) {
 	t.Run("Send otp", func(t *testing.T) {
 		endPoint := "/v1/user/secure/forgot_pass"
 		var jsonStr = []byte(`{
-			"username" : "rideshnath.siliconithub@gmail.com"
+			"username" : "dwarkeshbpatel@gmail.com"
 		}`)
 		tokan := LoginTokan()
 		r, err := http.NewRequest("POST", endPoint, bytes.NewBuffer(jsonStr))
@@ -191,7 +191,7 @@ func TestSerchUser(t *testing.T) {
 	t.Run("Search users", func(t *testing.T) {
 		endPoint := "/v1/user/secure/search"
 		var jsonStr = []byte(`{
-			"search" : "d"
+			"search" : "rid"
 		}`)
 		tokan := LoginTokan()
 		r, err := http.NewRequest("POST", endPoint, bytes.NewBuffer(jsonStr))
