@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -43,14 +42,10 @@ func RegisterSetting(c dto.HomeSeetingInsert, user_id float64, file_path interfa
 
 func UpdateUniqueCode(user_id int) (int64, error) {
 	db := orm.NewOrm()
-
 	unique_codes := helpers.UniqueCode(user_id, "homePageModule")
-
 	home_page_setting := HomePagesSettingTable{PageSettingId: user_id}
 	if db.Read(&home_page_setting) == nil {
 		home_page_setting.UniqueCode = unique_codes
-		log.Print(unique_codes, "+++++++++++++++++++++++++++")
-
 		if num, err := db.Update(&home_page_setting); err == nil {
 			return num, nil
 		}
@@ -313,10 +308,13 @@ func FilterWithPaginationFetchSettings(currentPage, pageSize int, applyPositions
 	tableName := "home_pages_setting_table"
 
 	query := `
-        SELECT hpst.section, hpst.data_type, hpst.setting_data, hpst.created_date, hpst.updated_date,
-        concat(umt.first_name,' ',umt.last_name) as created_by  
+        SELECT hpst.section, hpst.data_type, hpst.setting_data,umt.user_id as createdby_user_id,umts.user_id as updatedby_user_id,hpst.page_setting_id as setting_id, hpst.created_date, hpst.updated_date,
+        concat(umt.first_name,' ',umt.last_name) as created_by ,concat(umts.first_name,' ',umts.last_name) as updated_by 
         FROM home_pages_setting_table as hpst
         LEFT JOIN users as umt ON umt.user_id = hpst.created_by
+		LEFT JOIN users as umts ON umts.user_id = hpst.updated_by
+
+
     `
 	countQuery := `
         SELECT COUNT(*) as count
@@ -336,7 +334,7 @@ func FilterWithPaginationFetchSettings(currentPage, pageSize int, applyPositions
 
 	pagination["matchCount"] = 0
 	if count > 0 {
-		pagination["matchCount"] = count
+		pagination["matchCount"] = pagination["TotalMatches"]
 	}
 
 	return filterResult, pagination, nil

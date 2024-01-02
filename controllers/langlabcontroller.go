@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
@@ -10,6 +11,7 @@ import (
 	"github.com/dwarkesh2810/golang-demo/dto"
 	"github.com/dwarkesh2810/golang-demo/models"
 	"github.com/dwarkesh2810/golang-demo/pkg/helpers"
+	"github.com/dwarkesh2810/golang-demo/pkg/logger"
 	"github.com/dwarkesh2810/golang-demo/pkg/validations"
 )
 
@@ -238,4 +240,74 @@ func (c *LangLableController) ImportLanguageLables() {
 	}
 	message := fmt.Sprintf("INI FILE NOT IMPORT DUE TO %s", errs)
 	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+}
+
+// ExportFileLables
+// @Title After Login User Can Export File for language lables
+// @Description In this function after login user can be export language lables i
+// @Param file_type  formData string true "Here only select file within [XLSX,CSV,PDF]"
+// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
+// @Success 200 {object} object
+// @Failure 403
+// @router /export_language_lables [post]
+func (c *LangLableController) ExportFileLables() {
+	claims := helpers.GetTokenClaims(c.Ctx)
+	userId := uint(claims["User_id"].(float64))
+
+	var fileTypes dto.LanguageLablesFileType
+	if err := c.ParseForm(&fileTypes); err != nil {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
+		return
+	}
+
+	json.Unmarshal(c.Ctx.Input.RequestBody, &fileTypes)
+
+	valid := validation.Validation{}
+	if isValid, _ := valid.Valid(&fileTypes); !isValid {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
+		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
+		return
+	}
+
+	create_file_type := strings.ToUpper(fileTypes.FileType)
+
+	if create_file_type == "" {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "type"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.type"), userId)
+		return
+	}
+
+	if create_file_type == "XLSX" || create_file_type == "PDF" || create_file_type == "CSV" {
+		res_data, _ := models.ExportLanguageLables()
+		res_s, _ := helpers.TransformToKeyValuePairs(res_data)
+		header := helpers.ExtractKeys(res_s)
+		uploadedPath := conf.Env.BaseUploadPath + "LANGUAGE/FILES/XLSX"
+		if create_file_type == "PDF" || create_file_type == "CSV" {
+			uploadedPath = conf.Env.BaseUploadPath + "LANGUAGE/FILES/PDF"
+			if create_file_type == "CSV" {
+				uploadedPath = conf.Env.BaseUploadPath + "LANGUAGE/FILES/PDF"
+			}
+		}
+
+		res_result, err := helpers.CreateFile(res_s, header, uploadedPath, "lang", create_file_type)
+
+		if err != nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+			return
+		}
+
+		if res_result == "" {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
+			return
+		}
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, res_result, helpers.TranslateMessage(c.Ctx, "success", "filecreate"), "")
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "success.filecreate"), userId)
+		return
+	}
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "create"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.create"), userId)
 }
