@@ -88,7 +88,7 @@ func (c *UserController) Login() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.accesstoken"), uint(userData.UserId))
 		return
 	}
-	data := map[string]interface{}{"User_Data": token.Claims, "Tokan": tokenString}
+	data := map[string]interface{}{"User_Email": userData.Email, "User_Id": userData.UserId, "Expire_time": helpers.GetFormatedDate(expirationTime, ""), "Tokan": tokenString}
 	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, data, helpers.TranslateMessage(c.Ctx, "success", "login"), "")
 
 	logger.InsertAuditLogs(c.Ctx, fmt.Sprintf("Login by user : %d", userData.UserId), uint(userData.UserId))

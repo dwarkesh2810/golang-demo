@@ -1,8 +1,10 @@
-# Golang Demo 
+# Golang Demo
+
 # Beego Demo
 
 **app.conf File Need To Add As Shown below**
 app.conf file is located at conf/app.conf
+
 ```
 appname = golang-demo
 httpport = 8080
@@ -25,8 +27,10 @@ EnableAdmin = true
 AdminAddr = 0.0.0.0
 AdminPort = 8000
 ```
+
 **App.env FIle Need To Add As Shown below**
-Make sure change the variables value as you required 
+Make sure change the variables value as you required
+
 ```
 dbdriver = dbdriver
 dbusername = dbuser

@@ -240,7 +240,9 @@ func GetFormatedDate(date time.Time, formate string) string {
 		day, month := inputTime.Day(), inputTime.Month()
 		formatedDate = fmt.Sprintf("%02d-%02d", day, month)
 	default:
-		formatedDate = "not formated"
+		inputTime := date
+		day, month, year, hour, minute, second := inputTime.Day(), inputTime.Month(), inputTime.Year(), inputTime.Hour(), inputTime.Minute(), inputTime.Second()
+		formatedDate = fmt.Sprintf("%02d-%02d-%d  %d:%d:%d",day, month, year, hour, minute, second)
 	}
 	return formatedDate
 }
