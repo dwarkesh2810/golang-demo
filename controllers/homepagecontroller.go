@@ -30,7 +30,7 @@ type HomeSettingController struct {
 // @Param	data_type   formData 	string	false		"body for html text or other "
 // @Param	section   formData 	string	false		"body for file"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 201 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /register_settings [post]
@@ -47,9 +47,7 @@ func (c *HomeSettingController) RegisterSettings() {
 		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
 		return
 	}
-
 	json.Unmarshal(c.Ctx.Input.RequestBody, &settings)
-
 	valid := validation.Validation{}
 	if isValid, _ := valid.Valid(&settings); !isValid {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
@@ -67,7 +65,11 @@ func (c *HomeSettingController) RegisterSettings() {
 
 	if data_types == "LOGO" || data_types == "BANNER" {
 		file, fileHeader, err := c.GetFile("setting_data_file")
+		if file == nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "failedtoread"))
+			return
 
+		}
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
@@ -118,12 +120,11 @@ func (c *HomeSettingController) RegisterSettings() {
 // @Param	section   formData 	string	false		"body for section"
 // @Param	setting_id   formData 	int		false		"body for setting_id"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /update_settings [post]
 func (c *HomeSettingController) UpdateSettings() {
-
 	claims := helpers.GetTokenClaims(c.Ctx)
 	userId := uint(claims["User_id"].(float64))
 
@@ -162,7 +163,10 @@ func (c *HomeSettingController) UpdateSettings() {
 
 	if data_types == "LOGO" || data_types == "BANNER" {
 		file, fileHeader, err := c.GetFile("setting_data_file")
-
+		if file == nil {
+			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "failedtoread"))
+			return
+		}
 		ok := validations.ValidImageType(fileHeader.Filename)
 		if !ok {
 			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "validation", "ValidImage"))
@@ -195,65 +199,11 @@ func (c *HomeSettingController) UpdateSettings() {
 	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.update"), userId)
 }
 
-// FetchSettings
-// @Title After Login User Can Fetch Data Home Page settings
-// @Description In this function after login user  can Fetch Data Home page settings
-// @Param open_page formData int false "if you want to open specific page than give page number"
-// @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
-// @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
-// @Success 200 {object} models.HomePagesSettingTable
-// @Failure 403
-// @router /fetch_settings [post]
-func (c *HomeSettingController) FetchSettings() {
-
-	claims := helpers.GetTokenClaims(c.Ctx)
-	userId := uint(claims["User_id"].(float64))
-
-	var search dto.HomeSeetingSearch
-	if err := c.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), userId)
-		return
-	}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
-
-	valid := validation.Validation{}
-	if isValid, _ := valid.Valid(&search); !isValid {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, validations.ValidationErrorResponse(c.Controller, valid.Errors))
-		logger.InsertAuditLogs(c.Ctx, "Error : Validation error", userId)
-		return
-	}
-
-	result, pagination_data, err := models.FetchSettingPaginations(search.OpenPage, search.PageSize)
-
-	if err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
-		return
-	}
-
-	if pagination_data["pageOpen_error"] == 1 {
-		current := pagination_data["current_page"]
-		last := pagination_data["last_page"]
-		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
-		return
-	}
-	section_message := "read"
-	section := "success"
-	message := helpers.TranslateMessage(c.Ctx, section, section_message)
-	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-}
-
 // @Title DeleteSetting
 // @Description delete Setting From Database by setting_id
 // @Param setting_id formData int true "User can delete setting after login by setting_id"
-// @Param lang query string false "use en-US or hi-IN"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {string} string
 // @Failure 403
 // @router /delete_settings [post]
@@ -292,12 +242,12 @@ func (c *HomeSettingController) DeleteSetting() {
 
 // ExportFile
 // @Title After Login User Can Export File in Home Page settings
-// @Description In this function after login user  can Export File in Home page settings
+// @Description In this function after login user the listed home page setting data   can be  Export into File from Home page settings
 // @Param file_type  formData string true "Here only select file within [XLSX,CSV,PDF]"
 // @Param starting_from  formData int true "you want data from row first or id 1 to 20 so you can pass starting_from as 1"
 // @Param limit  formData int true "How Much you want to export data Ex.10"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /export [post]
@@ -361,7 +311,7 @@ func (c *HomeSettingController) ExportFile() {
 // @Description In this function after login user  can Import File in Home page settings
 // @Param import_type  formData file true "Here only select file within [XLSX,CSV]"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /import [post]
@@ -460,7 +410,7 @@ func (c *HomeSettingController) ImportFile() {
 
 // FiltersFetchSettings
 // @Title After Login User Can Filter Data Home Page settings
-// @Description In this function after login user  can FilterData with pagination and Check Count Of Match Data from  Home page settings
+// @Description In this function after login user ,it give listing by default with paginations and you can FilterData with pagination and Check Count Of Match Data from  Home page settings.You can pass multiple params for searching
 // @Param open_page formData int false "if you want to open specific page than give page number"
 // @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
 // @Param setting_data formData string false "it filter in database and give match"
@@ -469,7 +419,7 @@ func (c *HomeSettingController) ImportFile() {
 // @Param section formData string false "it filter in database and give match"
 // @Param apply_position formData string false "if you apply_position pass start than it will match record with starting of a string or if you  apply_position not pass it will search in perticular/allcolumns  all string"
 // @Param   Authorization   header  string  true  "Bearer YourAccessToken"
-// @Param lang query string false "use en-US or hi-IN"
+// @Param lang query string false "use en-US, hi-IN, gu-IN, mr-IN"
 // @Success 200 {object} models.HomePagesSettingTable
 // @Failure 403
 // @router /filter_hpst [post]
@@ -493,39 +443,40 @@ func (c *HomeSettingController) FiltersFetchSettings() {
 		"data_type":    search.DataType,
 		"unique_code":  search.UniqueCode,
 	}
-	if search.Section != "" || search.SettingData != "" || search.DataType != "" || search.UniqueCode != "" {
-		result, pagination_data, err := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
+	result, pagination_data, err := models.FilterWithPaginationFetchSettings(search.OpenPage, search.PageSize, search.ApplySearchPosition, searchFields)
 
-		if err != nil {
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-			logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
-			return
-		}
-
-		if result == nil && pagination_data["matchCount"] == 0 {
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
-			logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), userId)
-			return
-		}
-
-		if pagination_data["pageOpen_error"] == 1 {
-			current := pagination_data["current_page"]
-			last := pagination_data["last_page"]
-			message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
-			helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-			logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
-			return
-		}
-
-		if result != nil {
-			section_message := "read"
-			section := "success"
-			message := helpers.TranslateMessage(c.Ctx, section, section_message)
-			helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-			logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
-			return
-		}
+	if err != nil {
 		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
+		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), userId)
+		return
 	}
+
+	if result == nil && pagination_data["matchCount"] == 0 {
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "searchnotfound"))
+		logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.searchnotfound"), userId)
+		return
+	}
+
+	if pagination_data["pageOpen_error"] == 1 {
+		current := pagination_data["current_page"]
+		last := pagination_data["last_page"]
+		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
+		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
+		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), userId)
+		return
+	}
+
+	if result != nil {
+		section_message := "read"
+		section := "success"
+		message := helpers.TranslateMessage(c.Ctx, section, section_message)
+		helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
+		logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), userId)
+		return
+	}
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "datanotfound"))
+	logger.InsertAuditLogs(c.Ctx, "Error :"+logger.LogMessage(c.Ctx, "error.datanotfound"), userId)
+
+	helpers.ApiFailedResponse(c.Ctx.ResponseWriter, "PLEASE SELECT ATLEAST ONE FIELD")
+
 }

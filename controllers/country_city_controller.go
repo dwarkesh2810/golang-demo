@@ -17,48 +17,6 @@ type CountryController struct {
 	beego.Controller
 }
 
-// FetchCountries
-// @Title After Login User Can Fetch Data Country
-// @Description In this function after login user  can Fetch Data Country
-// @Param open_page formData int false "if you want to open specific page than give page number"
-// @Param page_size formData int false "how much data you want to show at a time default it will give 10 records"
-// @Success 200 {object} object
-// @Failure 403
-// @router /list_countries [post]
-func (c *CountryController) FetchCountries() {
-
-	var search dto.PaginationReq
-	if err := c.ParseForm(&search); err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "parsing"))
-		logger.InsertAuditLogs(c.Ctx, "Error :"+err.Error(), 0)
-		return
-	}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &search)
-
-	result, pagination_data, err := models.FetchCountriesList(search.OpenPage, search.PageSize)
-
-	if err != nil {
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, helpers.TranslateMessage(c.Ctx, "error", "db"))
-		logger.InsertAuditLogs(c.Ctx, "Error : "+err.Error(), 0)
-		return
-	}
-
-	if pagination_data["pageOpen_error"] == 1 {
-		current := pagination_data["current_page"]
-		last := pagination_data["last_page"]
-		message := fmt.Sprintf(helpers.TranslateMessage(c.Ctx, "error", "page"), current, last)
-		helpers.ApiFailedResponse(c.Ctx.ResponseWriter, message)
-		logger.InsertAuditLogs(c.Ctx, "Error :"+fmt.Sprintf(logger.LogMessage(c.Ctx, "error.page"), current, last), 0)
-		return
-	}
-	section_message := "read"
-	section := "success"
-	message := helpers.TranslateMessage(c.Ctx, section, section_message)
-
-	helpers.ApiSuccessResponse(c.Ctx.ResponseWriter, result, message, pagination_data)
-	logger.InsertAuditLogs(c.Ctx, logger.LogMessage(c.Ctx, "success.read"), 0)
-}
-
 // FilterCountries
 // @Title Filter Countries
 // @Description it give country_name and country_id

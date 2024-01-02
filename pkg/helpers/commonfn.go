@@ -88,18 +88,21 @@ func Pagination(current_page, pageSize int, tableName string, totalMatchCount in
 	}
 
 	var totalRows int
+
+	err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
+	if err != nil {
+		return nil, err
+	}
+
+	totalMatched := 0
 	if totalMatchCount > 0 {
-		totalRows = totalMatchCount
+		totalMatched = totalMatchCount
 	}
 
-	if totalMatchCount == 0 && tableName != "" {
-		err := db.Raw(`SELECT COUNT(*) as totalRows FROM ` + tableName).QueryRow(&totalRows)
-		if err != nil {
-			return nil, err
-		}
+	totalPages := int(math.Ceil(float64(totalMatchCount) / float64(pageSize)))
+	if totalMatchCount == 0 {
+		totalPages = int(math.Ceil(float64(totalRows) / float64(pageSize)))
 	}
-
-	totalPages := int(math.Ceil(float64(totalRows) / float64(pageSize)))
 	lastPageNumber := totalPages
 	if lastPageNumber == 0 {
 		lastPageNumber = 1
@@ -123,7 +126,9 @@ func Pagination(current_page, pageSize int, tableName string, totalMatchCount in
 		"TotalRows":     totalRows,
 		"TotalPages":    totalPages,
 		"LastPage":      lastPageNumber,
+		"TotalMatches":  totalMatched,
 	}
+
 	if current_page > lastPageNumber {
 		pagination_data["pageOpen_error"] = 1
 		pagination_data["current_page"] = current_page
@@ -739,7 +744,6 @@ func TransformToKeyValuePairs(data interface{}) ([]map[string]interface{}, error
 	}
 
 	result := make([]map[string]interface{}, value.Len())
-
 	for i := 0; i < value.Len(); i++ {
 		item := value.Index(i)
 		fields := make(map[string]interface{})
@@ -841,10 +845,20 @@ func FilterData(currentPage, pageSize int, query, tableName string, searchFields
 	if err != nil {
 		return nil, nil, 0, err
 	}
-	var totalMatchData int
-	err = db.Raw(countQuery, generateSearchParameters(searchFields, applyPosition)...).QueryRow(&totalMatchData)
-	if err != nil {
-		return nil, nil, 0, err
+
+	totalMatchData := 0
+	countEmptyFields := 0
+	for _, value := range searchFields {
+		if value == "" {
+			countEmptyFields += 1
+		}
+	}
+
+	if len(searchFields) > countEmptyFields {
+		err = db.Raw(countQuery, generateSearchParameters(searchFields, applyPosition)...).QueryRow(&totalMatchData)
+		if err != nil {
+			return nil, nil, 0, err
+		}
 	}
 
 	paginationData, paginationErr := Pagination(currentPage, pageSize, tableName, totalMatchData)
@@ -853,10 +867,11 @@ func FilterData(currentPage, pageSize int, query, tableName string, searchFields
 	}
 	return homeResponse, paginationData, totalMatchData, nil
 }
-
 func generateWhereClause(fields map[string]string, applyPosition string, otherFieldCount int) string {
 	var conditions []string
 	applyPosition = strings.ToUpper(applyPosition)
+	fieldsCount := 0
+
 	for field, value := range fields {
 		if value != "" {
 			condition := ""
@@ -868,6 +883,7 @@ func generateWhereClause(fields map[string]string, applyPosition string, otherFi
 				condition = field + " ILIKE ?"
 			}
 			conditions = append(conditions, condition)
+			fieldsCount = len(fields)
 		}
 	}
 	var otherFileds int = 0
@@ -878,11 +894,15 @@ func generateWhereClause(fields map[string]string, applyPosition string, otherFi
 		whereClause := " AND " + strings.Join(conditions, " OR ")
 		return whereClause
 	}
-
+	if len(conditions) > 0 && fieldsCount > 0 {
+		whereClause := " WHERE " + strings.Join(conditions, " AND ")
+		return whereClause
+	}
 	if len(conditions) > 0 {
 		whereClause := " WHERE " + strings.Join(conditions, " OR ")
 		return whereClause
 	}
+
 	return ""
 }
 
@@ -1055,9 +1075,7 @@ func ParseINIFile(filePath string) (map[string]map[string]string, error) {
 		if section.Name() == "DEFAULT" {
 			continue // Skip the DEFAULT section
 		}
-
 		dataMap[section.Name()] = make(map[string]string)
-
 		for _, key := range section.Keys() {
 			dataMap[section.Name()][key.Name()] = key.String()
 		}

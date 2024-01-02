@@ -122,6 +122,12 @@ type FileType struct {
 	SratingFrom int    `json:"starting_from" form:"starting_from"`
 }
 
+type LanguageLablesFileType struct {
+	FileType    string `json:"file_type" form:"file_type" valid:"Required; ValidType"`
+	Limit       int    `json:"limit" form:"limit"`
+	SratingFrom int    `json:"starting_from" form:"starting_from"`
+}
+
 type PaginationReq struct {
 	PageSize int `json:"page_size" form:"page_size"`
 	OpenPage int `json:"open_page" form:"open_page"`

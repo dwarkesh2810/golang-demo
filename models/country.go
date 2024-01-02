@@ -44,7 +44,7 @@ func CountryFilter(currentPage, pageSize int, applyPositions string, searchField
 	}
 	pagination["matchCount"] = 0
 	if count > 0 {
-		pagination["matchCount"] = count
+		pagination["matchCount"] = pagination["TotalMaches"]
 	}
 	return filterResult, pagination, nil
 }
@@ -100,7 +100,7 @@ func CityFilter(currentPage, pageSize, country_id, state_id, other_field_count i
 
 	pagination["matchCount"] = 0
 	if count > 0 {
-		pagination["matchCount"] = count
+		pagination["matchCount"] = pagination["TotalMaches"]
 	}
 
 	return filterResult, pagination, nil
