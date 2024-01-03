@@ -38,12 +38,12 @@ func CountryFilter(currentPage, pageSize int, applyPositions string, searchField
 		applyPosition = applyPositions
 	}
 	var otherFieldSCount int = 0
-	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery, otherFieldSCount)
+	filterResult, pagination, _, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery, otherFieldSCount)
 	if errs != nil {
 		return nil, nil, errs
 	}
 	pagination["matchCount"] = 0
-	if count > 0 {
+	if pagination["TotalMaches"] != nil {
 		pagination["matchCount"] = pagination["TotalMaches"]
 	}
 	return filterResult, pagination, nil
@@ -92,14 +92,14 @@ func CityFilter(currentPage, pageSize, country_id, state_id, other_field_count i
 		applyPosition = applyPositions
 	}
 
-	filterResult, pagination, count, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery, other_field_count)
+	filterResult, pagination, _, errs := helpers.FilterData(currentPage, pageSize, query, tableName, searchFields, applyPosition, countQuery, other_field_count)
 
 	if errs != nil {
 		return nil, nil, errs
 	}
 
 	pagination["matchCount"] = 0
-	if count > 0 {
+	if pagination["TotalMaches"] != nil {
 		pagination["matchCount"] = pagination["TotalMaches"]
 	}
 

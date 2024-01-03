@@ -7,7 +7,7 @@ swagger
 swagger/
 
 golang-demo
-2-jan-2024-2
+3-jan-2024
 app.env
 
 *.ini
@@ -16,4 +16,4 @@ app.env
 *.jpeg
 *.pdf
 *.xlsx
-*.csv
+*.csvs
