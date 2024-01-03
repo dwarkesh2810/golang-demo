@@ -242,7 +242,7 @@ func GetFormatedDate(date time.Time, formate string) string {
 	default:
 		inputTime := date
 		day, month, year, hour, minute, second := inputTime.Day(), inputTime.Month(), inputTime.Year(), inputTime.Hour(), inputTime.Minute(), inputTime.Second()
-		formatedDate = fmt.Sprintf("%02d-%02d-%d  %d:%d:%d",day, month, year, hour, minute, second)
+		formatedDate = fmt.Sprintf("%02d-%02d-%d  %d:%d:%d", day, month, year, hour, minute, second)
 	}
 	return formatedDate
 }
@@ -263,13 +263,13 @@ func Init() {
 }
 func GetLanguageFromMultipleSources(ctx *context.Context) string {
 	if lang := ctx.Input.Query("lang"); lang != "" && isValidLanguage(lang) {
-		return lang
+		return convertIniFormat(lang)
 	}
 	if lang := ctx.Input.Header("lang"); lang != "" && isValidLanguage(lang) {
-		return lang
+		return convertIniFormat(lang)
 	}
 	if lang := ctx.Input.Cookie("lang"); lang != "" && isValidLanguage(lang) {
-		return lang
+		return convertIniFormat(lang)
 	}
 	return "en-US"
 }
@@ -281,24 +281,24 @@ func isValidLanguage(lang string) bool {
 func SetLanguage(ctx *context.Context, lang string) {
 	ctx.Input.SetData("lang", lang)
 	i18n.SetMessageWithDesc(lang, "conf/language/locale_"+lang+".ini", "conf/language/locale_"+lang+".ini")
-
 	ctx.SetCookie("lang", lang, 24*60*60, "/")
-
 	defaultLang = lang
 }
 func Translate(ctx *context.Context, key string) string {
 	langKey := GetLanguageFromMultipleSources(ctx)
-	langTrans := strings.Split(langKey, "-")
+	return i18n.Tr(langKey, key)
+}
+
+func convertIniFormat(lang string) string {
+	langTrans := strings.Split(lang, "-")
 	langTrans[0] = strings.ToLower(langTrans[0])
 	if len(langTrans) > 1 {
 		langTrans[1] = strings.ToUpper(langTrans[1])
 	}
-	langKey = strings.Join(langTrans, "-")
-	SetLanguage(ctx, langKey)
-	return i18n.Tr(defaultLang, key)
+	return strings.Join(langTrans, "-")
 }
-func TranslateMessage(ctx *context.Context, section, sectionMessage string) string {
 
+func TranslateMessage(ctx *context.Context, section, sectionMessage string) string {
 	translationKey := fmt.Sprintf("%s.%s", section, sectionMessage)
 	return Translate(ctx, translationKey)
 }
